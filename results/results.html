@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Chapters - Results</title>
+  <link rel="stylesheet" href="results.css">
+  <script src="../vendor/browser-polyfill.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-section">
+        <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="#4A90E2">
+          <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+        </svg>
+        <h1 class="title">Chapter Generation Results</h1>
+      </div>
+      <div class="header-actions">
+        <button id="backBtn" class="btn-secondary">Back to Video</button>
+      </div>
+    </header>
+
+    <!-- Video Info -->
+    <section class="video-info" id="videoInfo">
+      <div class="video-metadata">
+        <h2 class="video-title" id="videoTitle">Loading...</h2>
+        <p class="video-author" id="videoAuthor"></p>
+        <p class="generation-time" id="generationTime"></p>
+      </div>
+    </section>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="chapters">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+        </svg>
+        Chapters
+      </button>
+      <button class="tab-btn" data-tab="subtitles">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4M4,12H6V14H4V12M4,8H6V10H4V8M8,12H18V14H8V12M8,8H18V10H8V8Z"/>
+        </svg>
+        Subtitles
+      </button>
+    </nav>
+
+    <!-- Tab Content -->
+    <main class="tab-content">
+      <!-- Chapters Tab -->
+      <div class="tab-pane active" id="chaptersTab">
+        <div class="content-header">
+          <h3>Generated Chapters</h3>
+          <div class="content-actions">
+            <button id="copyChaptersBtn" class="btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        
+        <div class="content-body">
+          <div class="content-display">
+            <textarea id="chaptersContent" class="content-textarea" readonly placeholder="No chapters generated yet..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subtitles Tab -->
+      <div class="tab-pane" id="subtitlesTab">
+        <div class="content-header">
+          <h3>Video Subtitles</h3>
+          <div class="content-actions">
+            <div class="subtitle-info" id="subtitleInfo"></div>
+            <button id="copySubtitlesBtn" class="btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        
+        <div class="content-body">
+          <div class="content-display">
+            <textarea id="subtitlesContent" class="content-textarea" readonly placeholder="No subtitles available..."></textarea>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-info">
+        <span class="status-text" id="statusText">Ready</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading results...</div>
+    </div>
+  </div>
+
+  <!-- Notification Container -->
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <script src="results.js"></script>
+</body>
+</html> 

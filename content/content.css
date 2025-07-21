@@ -1,0 +1,122 @@
+/* Video Chapters Generator - Content Script Styles */
+
+.video-chapters-btn {
+  opacity: 0.8 !important;
+  transition: opacity 0.2s ease, background-color 0.2s ease !important;
+  margin-right: 8px !important;
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 8px !important;
+  border-radius: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.video-chapters-btn:hover {
+  opacity: 1 !important;
+  background-color: rgba(255,255,255,0.1) !important;
+}
+
+.video-chapters-btn:focus {
+  outline: 2px solid #4A90E2 !important;
+  outline-offset: 2px !important;
+}
+
+.video-chapters-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  fill: white !important;
+  transition: fill 0.2s ease !important;
+}
+
+.video-chapters-btn:hover svg {
+  fill: #4A90E2 !important;
+}
+
+/* Notification styles */
+.video-chapters-notification {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  padding: 12px 20px !important;
+  border-radius: 4px !important;
+  z-index: 10000 !important;
+  font-family: 'Roboto', Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  animation: slideIn 0.3s ease-out !important;
+  color: white !important;
+  max-width: 300px !important;
+  word-wrap: break-word !important;
+}
+
+.video-chapters-notification.info {
+  background: #4A90E2 !important;
+}
+
+.video-chapters-notification.error {
+  background: #f44336 !important;
+}
+
+.video-chapters-notification.warning {
+  background: #ff9800 !important;
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+  from { 
+    transform: translateX(100%) !important; 
+    opacity: 0 !important; 
+  }
+  to { 
+    transform: translateX(0) !important; 
+    opacity: 1 !important; 
+  }
+}
+
+@keyframes slideOut {
+  from { 
+    transform: translateX(0) !important; 
+    opacity: 1 !important; 
+  }
+  to { 
+    transform: translateX(100%) !important; 
+    opacity: 0 !important; 
+  }
+}
+
+/* Dark theme compatibility */
+.dark .video-chapters-btn svg {
+  fill: #ffffff !important;
+}
+
+.dark .video-chapters-btn:hover svg {
+  fill: #4A90E2 !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .video-chapters-btn {
+    border: 2px solid white !important;
+  }
+  
+  .video-chapters-btn:hover {
+    background-color: rgba(255,255,255,0.2) !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .video-chapters-btn {
+    transition: none !important;
+  }
+  
+  .video-chapters-notification {
+    animation: none !important;
+  }
+} 
