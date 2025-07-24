@@ -336,8 +336,9 @@ body {
   border-radius: var(--border-radius);
   width: 90%;
   max-width: 600px;
-  max-height: 80%;
-  overflow: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: var(--shadow);
 }
 
@@ -347,6 +348,7 @@ body {
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -381,6 +383,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  flex-shrink: 0;
 }
 
 .limit-input {
@@ -393,8 +396,9 @@ body {
 
 .modal-body {
   padding: 20px;
-  max-height: 400px;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .history-list {
