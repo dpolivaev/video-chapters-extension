@@ -46,19 +46,21 @@
 
     <!-- Settings Section -->
     <section class="settings-section">
-      <div class="setting-group">
-        <label for="apiKeyInput">Gemini API Key:</label>
+      <div class="setting-group" id="apiKeyGroup">
+        <label for="dynamicApiKeyInput" id="apiKeyLabel">API Key:</label>
         <div class="input-group">
-          <input type="password" id="apiKeyInput" class="api-key-input" placeholder="Enter your API key">
-          <button id="clearApiKeyBtn" class="btn-secondary">Clear</button>
+          <input type="password" id="dynamicApiKeyInput" class="api-key-input" placeholder="Enter your API key">
+          <button id="clearDynamicApiKeyBtn" class="btn-secondary">Clear</button>
+        </div>
+        <div class="api-key-info" id="apiKeyInfo">
+          <small>No API key required for this model</small>
         </div>
       </div>
       
       <div class="setting-group">
         <label for="modelSelect">Model:</label>
         <select id="modelSelect" class="model-select">
-          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+          <!-- Options will be populated dynamically -->
         </select>
       </div>
     </section>

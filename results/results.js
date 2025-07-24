@@ -49,6 +49,12 @@ class ResultsManager {
       this.switchTab('chapters');
       this.updateDisplay();
       this.hideProgress();
+    } else if (this.status === 'error') {
+      this.setupEventListeners();
+      this.setupTabSwitching();
+      this.initializeGeminiAPI();
+      await this.loadResults();
+      this.handleGenerationError();
     } else {
       this.switchTab('subtitles');
       this.showProgress('Generating chapters...', 30);
@@ -89,7 +95,7 @@ class ResultsManager {
   }
 
   async pollForCompletion() {
-    if (this.status === 'done') return;
+    if (this.status === 'done' || this.status === 'error') return;
     let elapsed = 0;
     const poll = async () => {
       const status = await this.getGenerationStatus();
@@ -99,6 +105,11 @@ class ResultsManager {
         this.updateDisplay();
         if (!this.userSwitchedTab) this.switchTab('chapters');
         this.hideProgress();
+      } else if (status === 'error') {
+        this.status = 'error';
+        this.hideProgress();
+        await this.loadResults(); // Load results to get error details
+        this.handleGenerationError();
       } else {
         elapsed += 2;
         if (elapsed >= 300) {
@@ -116,6 +127,41 @@ class ResultsManager {
     this.progressTimeout = setTimeout(() => {
       this.showProgress('Generation timed out. Please try again.', 100);
     }, 5 * 60 * 1000);
+  }
+
+  /**
+   * Handle generation error
+   */
+  async handleGenerationError() {
+    let errorMessage = 'Chapter generation failed.';
+    let suggestion = 'Please try again.';
+    
+    // Get detailed error information if available
+    if (this.results && this.results.error) {
+      errorMessage = this.results.error;
+      
+      if (this.results.errorType && this.results.errorType.suggestion) {
+        suggestion = this.results.errorType.suggestion;
+      }
+    }
+    
+    // Show error notification
+    this.showNotification(`${errorMessage} ${suggestion}`, 'error');
+    
+    // Update status text
+    document.getElementById('statusText').textContent = 'Generation failed';
+    
+    // Show error in chapters tab
+    const chaptersContent = document.getElementById('chaptersContent');
+    if (chaptersContent) {
+      chaptersContent.value = `Error: ${errorMessage}\n\nSuggestion: ${suggestion}\n\nPlease try again or switch to a different model.`;
+      chaptersContent.classList.add('error-content');
+    }
+    
+    // Switch to chapters tab to show the error
+    if (!this.userSwitchedTab) {
+      this.switchTab('chapters');
+    }
   }
 
   /**

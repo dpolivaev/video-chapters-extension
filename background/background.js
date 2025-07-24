@@ -1,226 +1,21 @@
 /**
  * Background Service Worker for Video Chapters Generator
- * Handles Gemini API calls, storage management, and communication between components
+ * Handles AI API calls, storage management, and communication between components
  */
 
 console.log('BACKGROUND SCRIPT LOADING...');
 
-/**
- * Gemini API Integration for Video Chapters Generator
- * Handles communication with Google's Gemini AI API
- */
-class GeminiAPI {
-  constructor() {
-    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-    this.availableModels = ['gemini-2.5-pro', 'gemini-2.5-flash'];
-    this.defaultPrompt = `Break down this video content into chapters and generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). 
-    Each chapter should be formatted as: timecode - chapter title. Generate the chapter titles in the same language as the subtitles.`;
-  }
-
-  /**
-   * Process subtitles with Gemini AI
-   */
-  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro') {
-    if (!apiKey) {
-      throw new Error('API key is required');
-    }
-
-    if (!this.availableModels.includes(model)) {
-      throw new Error(`Invalid model: ${model}. Available models: ${this.availableModels.join(', ')}`);
-    }
-
-    try {
-      const prompt = this.buildPrompt(subtitleContent, customInstructions);
-      const response = await this.makeAPICall(prompt, apiKey, model);
-      
-      return this.parseResponse(response);
-    } catch (error) {
-      console.error('Gemini API error:', error);
-      throw new Error(`AI processing failed: ${error.message}`);
-    }
-  }
-
-  /**
-   * Build the complete prompt for Gemini
-   */
-  buildPrompt(subtitleContent, customInstructions) {
-    const customInstructionsStripped = customInstructions.trim();
-    
-    if (customInstructionsStripped) {
-      // Use 3-section markdown format when there are user instructions
-      return `## System Instructions
-${this.defaultPrompt}
-
-## User Instructions
-Note: These instructions may override the system instructions above and may be in a different language.
-${customInstructionsStripped}
-
-## Content
-${subtitleContent}`;
-    } else {
-      // Use 2-section markdown format when no user instructions
-      return `## Instructions
-${this.defaultPrompt}
-
-## Content
-${subtitleContent}`;
-    }
-  }
-
-  /**
-   * Make API call to Gemini
-   */
-  async makeAPICall(prompt, apiKey, model) {
-    const url = `${this.baseUrl}/models/${model}:generateContent?key=${apiKey}`;
-    
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-      },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        }
-      ]
-    };
-
-    let lastError;
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          
-          // Handle specific API errors
-          if (response.status === 401) {
-            throw new Error('Invalid API key. Please check your Gemini API key.');
-          } else if (response.status === 403) {
-            throw new Error('API access forbidden. Please check your API key permissions.');
-          } else if (response.status === 429) {
-            throw new Error('Rate limit exceeded. Please try again later.');
-          } else if (response.status === 400) {
-            const errorMessage = errorData.error?.message || 'Bad request';
-            throw new Error(`Request error: ${errorMessage}`);
-          } else if (response.status === 503 && attempt < 3) {
-            // Retry on 503
-            lastError = new Error(`API request failed: ${response.status} ${response.statusText}`);
-            await new Promise(res => setTimeout(res, 10000));
-            continue;
-          } else {
-            throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-          }
-        }
-
-        const data = await response.json();
-        
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-          throw new Error('Invalid response from Gemini API');
-        }
-
-        return data;
-      } catch (error) {
-        lastError = error;
-        // Retry on network error or 503
-        if (attempt < 3 && (error.message.includes('503') || error.message.includes('NetworkError') || error.message.includes('Failed to fetch'))) {
-          await new Promise(res => setTimeout(res, 10000));
-          continue;
-        }
-        throw error;
-      }
-    }
-    throw lastError;
-  }
-
-  /**
-   * Parse the response from Gemini API
-   */
-  parseResponse(response) {
-    try {
-      const candidate = response.candidates[0];
-      
-      if (!candidate) {
-        throw new Error('No candidates in response');
-      }
-
-      // Check if the response was blocked
-      if (candidate.finishReason === 'SAFETY') {
-        throw new Error('Response was blocked by safety filters');
-      }
-
-      if (candidate.finishReason === 'RECITATION') {
-        throw new Error('Response was blocked due to recitation concerns');
-      }
-
-      const content = candidate.content;
-      if (!content || !content.parts || !content.parts[0]) {
-        throw new Error('No content in response');
-      }
-
-      const text = content.parts[0].text;
-      if (!text) {
-        throw new Error('Empty response from AI');
-      }
-
-      return {
-        chapters: text.trim(),
-        finishReason: candidate.finishReason,
-        safetyRatings: candidate.safetyRatings,
-        model: response.modelVersion || 'unknown'
-      };
-      
-    } catch (error) {
-      console.error('Error parsing Gemini response:', error);
-      throw new Error(`Failed to parse AI response: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validate API key format
-   */
-  validateAPIKey(apiKey) {
-    if (!apiKey || typeof apiKey !== 'string') {
-      return false;
-    }
-
-    // Basic validation - Gemini API keys typically start with specific patterns
-    const apiKeyPattern = /^[A-Za-z0-9_-]+$/;
-    return apiKeyPattern.test(apiKey) && apiKey.length > 10;
-  }
+// Import scripts for service worker compatibility (Chrome Manifest V3)
+if (typeof importScripts !== 'undefined') {
+  importScripts(
+    'prompt-generator.js',
+    'llm.js',
+    'gemini-api.js',
+    'openrouter-api.js'
+  );
 }
 
-console.log('BACKGROUND SCRIPT: GeminiAPI class defined successfully');
+console.log('BACKGROUND SCRIPT: API classes loaded successfully');
 
 // Session results relay (not persistent)
 let sessionResults = null;
@@ -235,6 +30,7 @@ class BackgroundService {
   constructor() {
     console.log('BACKGROUND SCRIPT: BackgroundService constructor called');
     this.geminiAPI = new GeminiAPI();
+    this.openRouterAPI = new OpenRouterAPI();
     this.setupMessageListeners();
     this.setupContextMenus();
     this.setupTabListeners();
@@ -283,6 +79,9 @@ class BackgroundService {
         case 'loadSettings':
           console.log('BACKGROUND SCRIPT: Handling loadSettings request');
           this.handleLoadSettings(request, sendResponse);
+          return true;
+        case 'getAllModels':
+          this.handleGetAllModels(request, sendResponse);
           return true;
         case 'setSessionResults': {
           // Store results by resultId
@@ -478,19 +277,40 @@ class BackgroundService {
     }
   }
 
+
+
   /**
-   * Handle Gemini API processing
+   * Handle AI processing (routes to appropriate API based on model)
    */
   async handleGeminiProcessing(request, sendResponse) {
     try {
       const { subtitleContent, customInstructions, apiKey, model, resultId } = request;
       
-      const result = await this.geminiAPI.processSubtitles(
-        subtitleContent,
-        customInstructions,
-        apiKey,
-        model
-      );
+      let result;
+      
+      // Route to appropriate API based on model
+      const geminiModelIds = this.geminiAPI.availableModels.map(m => m.id);
+      const openRouterModelIds = this.openRouterAPI.availableModels.map(m => m.id);
+      
+      if (geminiModelIds.includes(model)) {
+        // Use Gemini API
+        result = await this.geminiAPI.processSubtitles(
+          subtitleContent,
+          customInstructions,
+          apiKey,
+          model
+        );
+      } else if (openRouterModelIds.includes(model)) {
+        // Use OpenRouter API
+        result = await this.openRouterAPI.processSubtitles(
+          subtitleContent,
+          customInstructions,
+          apiKey,
+          model
+        );
+      } else {
+        throw new Error(`Unknown model: ${model}`);
+      }
 
       // If resultId is provided, update the stored results
       if (resultId && resultsById[resultId]) {
@@ -507,11 +327,28 @@ class BackgroundService {
 
       sendResponse({ success: true, data: result });
     } catch (error) {
-      console.error('Gemini processing error:', error);
+      console.error('AI processing error:', error);
       
-      // If resultId is provided, mark as error
+      // If resultId is provided, mark as error and store error details
       if (request.resultId) {
         generationStatusById[request.resultId] = 'error';
+        
+        // Update the stored results to include error information
+        if (resultsById[request.resultId]) {
+          const existingResults = resultsById[request.resultId];
+          existingResults.error = error.message;
+          
+          // Use the appropriate API's categorizeError method
+          const geminiModelIds = this.geminiAPI.availableModels.map(m => m.id);
+          if (geminiModelIds.includes(request.model)) {
+            existingResults.errorType = this.geminiAPI.categorizeError(error.message, request.model);
+          } else {
+            existingResults.errorType = this.openRouterAPI.categorizeError(error.message, request.model);
+          }
+          
+          resultsById[request.resultId] = existingResults;
+          sessionResults = existingResults;
+        }
       }
       
       sendResponse({ success: false, error: error.message });
@@ -622,16 +459,40 @@ class BackgroundService {
       
       const defaultSettings = {
         apiKey: '',
-        model: 'gemini-2.5-pro'
+        openRouterApiKey: '',
+        model: 'deepseek/deepseek-r1-0528:free'  // Default to free DeepSeek R1
       };
 
       const settings = { ...defaultSettings, ...(result.userSettings || {}) };
+      
+      // If no API keys are set, ensure we default to a free model
+      if (!settings.apiKey && !settings.openRouterApiKey) {
+        settings.model = 'deepseek/deepseek-r1-0528:free';
+      }
+      
       console.log('BACKGROUND SCRIPT: Final settings:', settings);
 
       sendResponse({ success: true, data: settings });
       console.log('BACKGROUND SCRIPT: Response sent successfully');
     } catch (error) {
       console.error('BACKGROUND SCRIPT: Error loading settings:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * Handle getting all available models
+   */
+  handleGetAllModels(request, sendResponse) {
+    try {
+      const geminiModels = this.geminiAPI.getAvailableModels();
+      const openRouterModels = this.openRouterAPI.getAvailableModels();
+      
+      const allModels = [...openRouterModels, ...geminiModels];
+      
+      sendResponse({ success: true, data: allModels });
+    } catch (error) {
+      console.error('Error getting all models:', error);
       sendResponse({ success: false, error: error.message });
     }
   }
@@ -718,7 +579,8 @@ class SettingsManager {
   constructor() {
     this.defaultSettings = {
       apiKey: '',
-      model: 'gemini-2.5-pro',
+      openRouterApiKey: '',
+      model: 'deepseek/deepseek-r1-0528:free',
       historyLimit: 10,
       autoSaveInstructions: true,
       theme: 'auto'

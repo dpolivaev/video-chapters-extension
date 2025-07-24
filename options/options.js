@@ -5,8 +5,8 @@ if (typeof browser === 'undefined') {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async function() {
-  // Load saved API key
-  await loadApiKey();
+  // Load saved API keys
+  await loadApiKeys();
   
   // Fetch and display version and build info
   await loadVersionInfo();
@@ -15,20 +15,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   setupEventListeners();
 });
 
-// Load saved API key from storage
-async function loadApiKey() {
+// Load saved API keys from storage
+async function loadApiKeys() {
   try {
     const result = await browser.storage.sync.get('userSettings');
     const settings = result.userSettings || {};
-    const apiKey = settings.apiKey || '';
-    document.getElementById('apiKey').value = apiKey;
+    
+    document.getElementById('apiKey').value = settings.apiKey || '';
+    document.getElementById('openRouterApiKey').value = settings.openRouterApiKey || '';
   } catch (error) {
-    console.error('Error loading API key:', error);
+    console.error('Error loading API keys:', error);
     showStatus('Error loading settings!', 'error');
   }
 }
 
-// Save API key to storage
+// Save Gemini API key to storage
 async function saveApiKey() {
   try {
     const apiKey = document.getElementById('apiKey').value;
@@ -37,14 +38,34 @@ async function saveApiKey() {
     const result = await browser.storage.sync.get('userSettings');
     const existingSettings = result.userSettings || {};
     
-    // Update only the apiKey
+    // Update only the Gemini apiKey
     const updatedSettings = { ...existingSettings, apiKey };
     
     await browser.storage.sync.set({ userSettings: updatedSettings });
-    showStatus('API Key saved!', 'success');
+    showStatus('Gemini API Key saved!', 'success');
   } catch (error) {
-    console.error('Error saving API key:', error);
-    showStatus('Error saving API key!', 'error');
+    console.error('Error saving Gemini API key:', error);
+    showStatus('Error saving Gemini API key!', 'error');
+  }
+}
+
+// Save OpenRouter API key to storage
+async function saveOpenRouterApiKey() {
+  try {
+    const openRouterApiKey = document.getElementById('openRouterApiKey').value;
+    
+    // Get existing settings to preserve other values
+    const result = await browser.storage.sync.get('userSettings');
+    const existingSettings = result.userSettings || {};
+    
+    // Update only the OpenRouter apiKey
+    const updatedSettings = { ...existingSettings, openRouterApiKey };
+    
+    await browser.storage.sync.set({ userSettings: updatedSettings });
+    showStatus('OpenRouter API Key saved!', 'success');
+  } catch (error) {
+    console.error('Error saving OpenRouter API key:', error);
+    showStatus('Error saving OpenRouter API key!', 'error');
   }
 }
 
@@ -101,12 +122,26 @@ function setupEventListeners() {
     saveButton.addEventListener('click', saveApiKey);
   }
   
-  // Save on Enter key in API key field
+  const saveOpenRouterButton = document.getElementById('saveOpenRouter');
+  if (saveOpenRouterButton) {
+    saveOpenRouterButton.addEventListener('click', saveOpenRouterApiKey);
+  }
+  
+  // Save on Enter key in API key fields
   const apiKeyInput = document.getElementById('apiKey');
   if (apiKeyInput) {
     apiKeyInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         saveApiKey();
+      }
+    });
+  }
+  
+  const openRouterApiKeyInput = document.getElementById('openRouterApiKey');
+  if (openRouterApiKeyInput) {
+    openRouterApiKeyInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        saveOpenRouterApiKey();
       }
     });
   }

@@ -13,7 +13,13 @@
     "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
-    "scripts": ["background/background.js"],
+    "scripts": [
+      "background/prompt-generator.js",
+      "background/llm.js", 
+      "background/gemini-api.js",
+      "background/openrouter-api.js",
+      "background/background.js"
+    ],
     "persistent": true
   },
   "content_scripts": [

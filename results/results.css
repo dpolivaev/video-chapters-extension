@@ -285,6 +285,12 @@ body {
   font-style: italic;
 }
 
+.content-textarea.error-content {
+  background: rgba(244, 67, 54, 0.05);
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
 /* Chapter Preview */
 .chapter-preview {
   background: var(--background-light);

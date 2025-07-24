@@ -42,7 +42,7 @@ class PopupManager {
       this.setupEventListeners();
       console.log('PopupManager: Step 3 complete');
       console.log('PopupManager: Step 4 - updateUI');
-      this.updateUI();
+      await this.updateUI();
       console.log('PopupManager: Step 4 complete');
       // Hide the debugStatus bar after successful initialization
       // const debugStatus = document.getElementById('debugStatus');
@@ -74,8 +74,8 @@ class PopupManager {
     });
 
     // Clear API key button
-    document.getElementById('clearApiKeyBtn').addEventListener('click', () => {
-      this.clearApiKey();
+    document.getElementById('clearDynamicApiKeyBtn').addEventListener('click', () => {
+      this.clearDynamicApiKey();
     });
 
     // Settings button
@@ -89,11 +89,12 @@ class PopupManager {
     });
 
     // Input change listeners
-    document.getElementById('apiKeyInput').addEventListener('input', () => {
+    document.getElementById('dynamicApiKeyInput').addEventListener('input', () => {
       this.onSettingsChange();
     });
 
     document.getElementById('modelSelect').addEventListener('change', () => {
+      this.updateApiKeyField();
       this.onSettingsChange();
     });
 
@@ -144,7 +145,7 @@ class PopupManager {
   /**
    * Apply settings to UI elements
    */
-  applySettingsToUI() {
+  async applySettingsToUI() {
     console.log('PopupManager: applySettingsToUI called');
     console.log('PopupManager: Current settings:', this.settings);
     
@@ -153,25 +154,165 @@ class PopupManager {
       return;
     }
 
-    const apiKeyInput = document.getElementById('apiKeyInput');
     const modelSelect = document.getElementById('modelSelect');
     
-    console.log('PopupManager: Setting API key input value:', this.settings.apiKey ? 'present' : 'empty');
     console.log('PopupManager: Setting model select value:', this.settings.model);
     
-    apiKeyInput.value = this.settings.apiKey || '';
-    modelSelect.value = this.settings.model || 'gemini-2.5-pro';
+    // Load models and set selected model
+    await this.loadModels();
+    modelSelect.value = this.settings.model || 'deepseek/deepseek-r1-0528:free';
+    
+    // Update the API key field based on selected model
+    this.updateApiKeyField();
     
     // Restore custom instructions
     this.restoreCustomInstructions();
     
-    // Update generate button state based on API key
+    // Update generate button state based on API keys
     console.log('PopupManager: Updating generate button state from applySettingsToUI');
     this.updateGenerateButtonState();
     // Update video meta line if currentVideo is present
     if (this.currentVideo) {
       this.displayVideoInfo();
     }
+  }
+
+  /**
+   * Load available models from background
+   */
+  async loadModels() {
+    try {
+      const response = await browser.runtime.sendMessage({ action: 'getAllModels' });
+      
+      if (response && response.success) {
+        const modelSelect = document.getElementById('modelSelect');
+        modelSelect.innerHTML = ''; // Clear existing options
+        
+        const models = response.data;
+        
+        // Group models by provider
+        const providers = {};
+        models.forEach(model => {
+          if (!providers[model.provider]) {
+            providers[model.provider] = [];
+          }
+          providers[model.provider].push(model);
+        });
+        
+        // Add OpenRouter models first (prioritize free models)
+        if (providers.OpenRouter) {
+          const openRouterGroup = document.createElement('optgroup');
+          openRouterGroup.label = 'OpenRouter';
+          
+          // Sort to put free models first
+          providers.OpenRouter.sort((a, b) => {
+            if (a.isFree && !b.isFree) return -1;
+            if (!a.isFree && b.isFree) return 1;
+            return a.name.localeCompare(b.name);
+          });
+          
+          providers.OpenRouter.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            option.title = model.description;
+            openRouterGroup.appendChild(option);
+          });
+          
+          modelSelect.appendChild(openRouterGroup);
+        }
+        
+        // Add Gemini models
+        if (providers.Gemini) {
+          const geminiGroup = document.createElement('optgroup');
+          geminiGroup.label = 'Gemini';
+          
+          providers.Gemini.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            option.title = model.description;
+            geminiGroup.appendChild(option);
+          });
+          
+          modelSelect.appendChild(geminiGroup);
+        }
+        
+        console.log('PopupManager: Models loaded successfully:', models.length);
+      } else {
+        console.error('PopupManager: Failed to load models:', response);
+        // Fallback to basic options
+        this.loadFallbackModels();
+      }
+    } catch (error) {
+      console.error('PopupManager: Error loading models:', error);
+      // Fallback to basic options
+      this.loadFallbackModels();
+    }
+  }
+
+  /**
+   * Load fallback models if API fails
+   */
+  loadFallbackModels() {
+    const modelSelect = document.getElementById('modelSelect');
+    modelSelect.innerHTML = `
+      <optgroup label="OpenRouter">
+        <option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 0528 (Free)</option>
+        <option value="deepseek/deepseek-r1-0528">DeepSeek R1 0528</option>
+        <option value="deepseek/deepseek-r1">DeepSeek R1</option>
+        <option value="deepseek/deepseek-r1-distill-qwen-1.5b">DeepSeek R1 Distill 1.5B</option>
+      </optgroup>
+      <optgroup label="Gemini">
+        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+      </optgroup>
+    `;
+  }
+
+  /**
+   * Update the API key field based on the selected model
+   */
+  updateApiKeyField() {
+    const modelSelect = document.getElementById('modelSelect');
+    const dynamicApiKeyInput = document.getElementById('dynamicApiKeyInput');
+    const apiKeyLabel = document.getElementById('apiKeyLabel');
+    const apiKeyInfo = document.getElementById('apiKeyInfo');
+    const apiKeyGroup = document.getElementById('apiKeyGroup');
+    
+    const selectedModel = modelSelect.value;
+    
+    if (selectedModel.includes('gemini-')) {
+      // Gemini model selected
+      apiKeyLabel.textContent = 'Gemini API Key:';
+      dynamicApiKeyInput.placeholder = 'Enter your Gemini API key';
+      dynamicApiKeyInput.value = this.settings?.apiKey || '';
+      apiKeyInfo.style.display = 'none';
+      apiKeyGroup.style.display = 'block';
+      
+    } else if (selectedModel.includes('deepseek/')) {
+      if (selectedModel.includes(':free')) {
+        // Free model selected - no API key needed
+        apiKeyGroup.style.display = 'none';
+      } else {
+        // Paid OpenRouter model selected
+        apiKeyLabel.textContent = 'OpenRouter API Key:';
+        dynamicApiKeyInput.placeholder = 'Enter your OpenRouter API key';
+        dynamicApiKeyInput.value = this.settings?.openRouterApiKey || '';
+        apiKeyInfo.style.display = 'none';
+        apiKeyGroup.style.display = 'block';
+      }
+    } else {
+      // Unknown model - show generic field
+      apiKeyLabel.textContent = 'API Key:';
+      dynamicApiKeyInput.placeholder = 'Enter your API key';
+      dynamicApiKeyInput.value = '';
+      apiKeyInfo.innerHTML = '<small>Unknown model selected</small>';
+      apiKeyInfo.style.display = 'block';
+      apiKeyGroup.style.display = 'block';
+    }
+    
+    console.log('PopupManager: Updated API key field for model:', selectedModel);
   }
 
   /**
@@ -355,13 +496,27 @@ class PopupManager {
   async generateChapters() {
     if (this.isProcessing) return;
 
-    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const dynamicApiKey = document.getElementById('dynamicApiKeyInput').value.trim();
     const model = document.getElementById('modelSelect').value;
     const customInstructions = document.getElementById('instructionsTextarea').value.trim();
 
-    if (!apiKey) {
-      this.showNotification('Please enter your Gemini API key', 'error');
-      return;
+    // Determine which API key to use based on the selected model
+    let apiKey = '';
+    if (model.includes('gemini-')) {
+      apiKey = dynamicApiKey;
+      if (!apiKey) {
+        this.showNotification('Please enter your Gemini API key for this model', 'error');
+        return;
+      }
+    } else if (model.includes('deepseek/')) {
+      // Free models don't need API key
+      if (!model.includes(':free')) {
+        apiKey = dynamicApiKey;
+        if (!apiKey) {
+          this.showNotification('Please enter your OpenRouter API key for this model', 'error');
+          return;
+        }
+      }
     }
 
     if (!this.currentVideo) {
@@ -490,13 +645,23 @@ class PopupManager {
   }
 
   /**
-   * Clear API key
+   * Clear dynamic API key
    */
-  async clearApiKey() {
+  async clearDynamicApiKey() {
     try {
-      document.getElementById('apiKeyInput').value = '';
+      const modelSelect = document.getElementById('modelSelect');
+      const selectedModel = modelSelect.value;
+      
+      document.getElementById('dynamicApiKeyInput').value = '';
       await this.saveSettings();
-      this.showNotification('API key cleared', 'success');
+      
+      if (selectedModel.includes('gemini-')) {
+        this.showNotification('Gemini API key cleared', 'success');
+      } else if (selectedModel.includes('deepseek/') && !selectedModel.includes(':free')) {
+        this.showNotification('OpenRouter API key cleared', 'success');
+      } else {
+        this.showNotification('API key cleared', 'success');
+      }
     } catch (error) {
       console.error('Error clearing API key:', error);
       this.showNotification('Error clearing API key', 'error');
@@ -554,20 +719,40 @@ class PopupManager {
   updateGenerateButtonState() {
     console.log('PopupManager: updateGenerateButtonState called');
     const generateBtn = document.getElementById('generateBtn');
-    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const dynamicApiKey = document.getElementById('dynamicApiKeyInput').value.trim();
+    const model = document.getElementById('modelSelect').value;
     
-    console.log('PopupManager: API key present:', !!apiKey);
-    console.log('PopupManager: API key length:', apiKey.length);
+    console.log('PopupManager: Dynamic API key present:', !!dynamicApiKey);
+    console.log('PopupManager: Selected model:', model);
     console.log('PopupManager: isProcessing:', this.isProcessing);
     console.log('PopupManager: currentVideo present:', !!this.currentVideo);
     
-    const shouldEnable = apiKey && !this.isProcessing && this.currentVideo;
+    // Check if the selected model can be used
+    let canUseModel = false;
+    let reasonDisabled = '';
+    
+    if (model.includes('gemini-')) {
+      canUseModel = !!dynamicApiKey;
+      if (!canUseModel) reasonDisabled = 'Gemini API key required for this model';
+    } else if (model.includes('deepseek/')) {
+      if (model.includes(':free')) {
+        canUseModel = true; // Free models don't need API key
+      } else {
+        canUseModel = !!dynamicApiKey;
+        if (!canUseModel) reasonDisabled = 'OpenRouter API key required for this model';
+      }
+    } else {
+      canUseModel = false;
+      reasonDisabled = 'Unknown model selected';
+    }
+    
+    const shouldEnable = canUseModel && !this.isProcessing && this.currentVideo;
     console.log('PopupManager: Should enable generate button:', shouldEnable);
     
     generateBtn.disabled = !shouldEnable;
     
-    if (!apiKey) {
-      console.log('PopupManager: Generate button disabled - no API key');
+    if (!canUseModel) {
+      console.log('PopupManager: Generate button disabled -', reasonDisabled);
     } else if (this.isProcessing) {
       console.log('PopupManager: Generate button disabled - currently processing');
     } else if (!this.currentVideo) {
@@ -582,10 +767,25 @@ class PopupManager {
    */
   async saveSettings() {
     try {
+      const modelSelect = document.getElementById('modelSelect');
+      const dynamicApiKeyInput = document.getElementById('dynamicApiKeyInput');
+      const selectedModel = modelSelect.value;
+      const dynamicApiKey = dynamicApiKeyInput.value.trim();
+      
+      // Get existing settings to preserve values
+      const existingSettings = this.settings || {};
+      
       const settings = {
-        apiKey: document.getElementById('apiKeyInput').value.trim(),
-        model: document.getElementById('modelSelect').value
+        ...existingSettings,
+        model: selectedModel
       };
+      
+      // Update the appropriate API key field based on selected model
+      if (selectedModel.includes('gemini-')) {
+        settings.apiKey = dynamicApiKey;
+      } else if (selectedModel.includes('deepseek/') && !selectedModel.includes(':free')) {
+        settings.openRouterApiKey = dynamicApiKey;
+      }
 
       const response = await browser.runtime.sendMessage({ action: 'saveSettings', settings });
       
@@ -593,7 +793,7 @@ class PopupManager {
         throw new Error(response?.error || 'Failed to save settings');
       }
 
-      this.settings = { ...this.settings, ...settings };
+      this.settings = settings;
 
     } catch (error) {
       console.error('Error saving settings:', error);

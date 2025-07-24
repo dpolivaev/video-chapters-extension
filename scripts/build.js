@@ -31,7 +31,10 @@ const config = {
     return [
       this.manifestFile,
       'background/background.js',
+      'background/prompt-generator.js',
+      'background/llm.js',
       'background/gemini-api.js',
+      'background/openrouter-api.js',
       'content/content.js',
       'content/content.css',
       'content/youtube-subtitle-extractor.js',
@@ -44,7 +47,8 @@ const config = {
       'results/results.js',
       'options/options.html',
       'options/options.css',
-      'options/options.js'
+      'options/options.js',
+      'vendor/browser-polyfill.js'
     ];
   },
   iconSizes: [16, 48, 128],
@@ -252,7 +256,10 @@ class ExtensionBuilder {
     
     const jsFiles = [
       'background/background.js',
+      'background/prompt-generator.js',
+      'background/llm.js',
       'background/gemini-api.js',
+      'background/openrouter-api.js',
       'content/content.js',
       'content/youtube-subtitle-extractor.js',
       'popup/popup.js',
@@ -378,7 +385,10 @@ class ExtensionBuilder {
     // Check required files (excluding the browser-specific manifest)
     const requiredFiles = [
       'background/background.js',
+      'background/prompt-generator.js',
+      'background/llm.js',
       'background/gemini-api.js',
+      'background/openrouter-api.js',
       'content/content.js',
       'content/content.css',
       'content/youtube-subtitle-extractor.js',

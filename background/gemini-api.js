@@ -3,14 +3,28 @@
  * Handles communication with Google's Gemini AI API
  */
 
-export class GeminiAPI {
+class GeminiAPI extends BaseLLM {
   constructor() {
+    super('Gemini');
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-    this.availableModels = ['gemini-2.5-pro', 'gemini-2.5-flash'];
-    this.defaultPrompt = `Break down this video content into chapters 
-and generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). 
-Each chapter should be formatted as plain text: timecode - chapter title. 
-Generate the chapter titles in the same language as the content.`;
+    this.availableModels = [
+      {
+        id: 'gemini-2.5-pro',
+        displayName: 'Gemini 2.5 Pro',
+        description: 'Most capable model for complex reasoning and analysis',
+        isFree: false,
+        category: 'premium',
+        capabilities: ['reasoning', 'coding', 'analysis']
+      },
+      {
+        id: 'gemini-2.5-flash',
+        displayName: 'Gemini 2.5 Flash',
+        description: 'Faster model optimized for speed while maintaining quality',
+        isFree: false,
+        category: 'fast',
+        capabilities: ['speed', 'general']
+      }
+    ];
   }
 
   /**
@@ -21,8 +35,10 @@ Generate the chapter titles in the same language as the content.`;
       throw new Error('API key is required');
     }
 
-    if (!this.availableModels.includes(model)) {
-      throw new Error(`Invalid model: ${model}. Available models: ${this.availableModels.join(', ')}`);
+    const modelExists = this.availableModels.some(m => m.id === model);
+    if (!modelExists) {
+      const availableIds = this.availableModels.map(m => m.id);
+      throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
 
     try {
@@ -36,33 +52,7 @@ Generate the chapter titles in the same language as the content.`;
     }
   }
 
-  /**
-   * Build the complete prompt for Gemini
-   */
-  buildPrompt(subtitleContent, customInstructions) {
-    const customInstructionsStripped = customInstructions.trim();
-    
-    if (customInstructionsStripped) {
-      // Use 3-section markdown format when there are user instructions
-      return `## System Instructions
-${this.defaultPrompt}
 
-**User instructions override system instructions in case of conflict.**
-
-## User Instructions
-
-${customInstructionsStripped}
-
-## Content
-${subtitleContent}`;
-    } else {
-      return `## Instructions
-${this.defaultPrompt}
-
-## Content
-${subtitleContent}`;
-    }
-  }
 
   /**
    * Make API call to Gemini
@@ -185,7 +175,7 @@ ${subtitleContent}`;
   }
 
   /**
-   * Validate API key format
+   * Validate API key format for Gemini
    */
   validateAPIKey(apiKey) {
     if (!apiKey || typeof apiKey !== 'string') {
@@ -197,165 +187,6 @@ ${subtitleContent}`;
     return apiKeyPattern.test(apiKey) && apiKey.length > 10;
   }
 
-  /**
-   * Test API key validity
-   */
-  async testAPIKey(apiKey, model = 'gemini-2.5-flash') {
-    if (!this.validateAPIKey(apiKey)) {
-      throw new Error('Invalid API key format');
-    }
 
-    try {
-      // Make a simple test request
-      const testPrompt = 'Respond with "API key is working" if you can read this.';
-      const response = await this.makeAPICall(testPrompt, apiKey, model);
-      
-      const result = this.parseResponse(response);
-      return {
-        valid: true,
-        model: result.model,
-        message: 'API key is valid'
-      };
-      
-    } catch (error) {
-      return {
-        valid: false,
-        error: error.message
-      };
-    }
-  }
 
-  /**
-   * Get available models
-   */
-  getAvailableModels() {
-    return this.availableModels.map(model => ({
-      id: model,
-      name: this.getModelDisplayName(model),
-      description: this.getModelDescription(model)
-    }));
-  }
-
-  /**
-   * Get display name for model
-   */
-  getModelDisplayName(model) {
-    const displayNames = {
-      'gemini-2.5-pro': 'Gemini 2.5 Pro',
-      'gemini-2.5-flash': 'Gemini 2.5 Flash'
-    };
-    return displayNames[model] || model;
-  }
-
-  /**
-   * Get description for model
-   */
-  getModelDescription(model) {
-    const descriptions = {
-      'gemini-2.5-pro': 'Most capable model for complex reasoning and analysis',
-      'gemini-2.5-flash': 'Faster model optimized for speed while maintaining quality'
-    };
-    return descriptions[model] || 'Gemini AI model';
-  }
-
-  /**
-   * Format chapters for different outputs
-   */
-  formatChapters(chaptersText, format = 'text') {
-    const chapters = this.parseChaptersText(chaptersText);
-    
-    switch (format) {
-      case 'json':
-        return JSON.stringify(chapters, null, 2);
-      case 'csv':
-        return this.formatAsCSV(chapters);
-      case 'srt':
-        return this.formatAsSRT(chapters);
-      case 'youtube':
-        return this.formatForYouTube(chapters);
-      default:
-        return chaptersText;
-    }
-  }
-
-  /**
-   * Parse chapters text into structured data
-   */
-  parseChaptersText(chaptersText) {
-    const lines = chaptersText.split('\n').filter(line => line.trim());
-    const chapters = [];
-    
-    for (const line of lines) {
-      const match = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)$/);
-      if (match) {
-        chapters.push({
-          timestamp: match[1],
-          title: match[2].trim(),
-          seconds: this.timestampToSeconds(match[1])
-        });
-      }
-    }
-    
-    return chapters;
-  }
-
-  /**
-   * Convert timestamp to seconds
-   */
-  timestampToSeconds(timestamp) {
-    const parts = timestamp.split(':').map(Number);
-    if (parts.length === 2) {
-      return parts[0] * 60 + parts[1];
-    } else if (parts.length === 3) {
-      return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    }
-    return 0;
-  }
-
-  /**
-   * Format chapters as CSV
-   */
-  formatAsCSV(chapters) {
-    const header = 'Timestamp,Title,Seconds\n';
-    const rows = chapters.map(chapter => 
-      `"${chapter.timestamp}","${chapter.title}",${chapter.seconds}`
-    ).join('\n');
-    return header + rows;
-  }
-
-  /**
-   * Format chapters as SRT
-   */
-  formatAsSRT(chapters) {
-    return chapters.map((chapter, index) => {
-      const start = this.secondsToSRTTime(chapter.seconds);
-      const nextChapter = chapters[index + 1];
-      const end = nextChapter ? 
-        this.secondsToSRTTime(nextChapter.seconds) : 
-        this.secondsToSRTTime(chapter.seconds + 300); // Default 5 minutes
-      
-      return `${index + 1}\n${start} --> ${end}\n${chapter.title}\n`;
-    }).join('\n');
-  }
-
-  /**
-   * Convert seconds to SRT time format
-   */
-  secondsToSRTTime(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    const milliseconds = Math.floor((seconds % 1) * 1000);
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`;
-  }
-
-  /**
-   * Format chapters for YouTube description
-   */
-  formatForYouTube(chapters) {
-    return chapters.map(chapter => 
-      `${chapter.timestamp} ${chapter.title}`
-    ).join('\n');
-  }
-} 
+}
