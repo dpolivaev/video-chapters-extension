@@ -74,9 +74,11 @@ const config = {
       drop_console: true,
       drop_debugger: true
     },
-    mangle: true,
+    mangle: false,
     format: {
-      comments: false
+      comments: /Copyright \(C\)/,
+      beautify: true,
+      indent_level: 2
     }
   }
 };
