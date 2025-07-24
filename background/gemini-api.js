@@ -9,7 +9,8 @@ export class GeminiAPI {
     this.availableModels = ['gemini-2.5-pro', 'gemini-2.5-flash'];
     this.defaultPrompt = `Break down this video content into chapters 
 and generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). 
-Each chapter should be formatted as: timecode - chapter title.`;
+Each chapter should be formatted as plain text: timecode - chapter title. 
+Generate the chapter titles in the same language as the content.`;
   }
 
   /**
@@ -47,8 +48,12 @@ Each chapter should be formatted as: timecode - chapter title.`;
 ${this.defaultPrompt}
 
 ## User Instructions
-Note: These instructions may override the system instructions above.
+
 ${customInstructionsStripped}
+
+Note: These instructions may override the system instructions above and may be in a different language.
+In the chapter titles use the content language and ignore the language of the user instructions
+if now explicitly stated otherwise.
 
 ## Content
 ${subtitleContent}`;
