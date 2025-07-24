@@ -168,6 +168,10 @@ class PopupManager {
     // Update generate button state based on API key
     console.log('PopupManager: Updating generate button state from applySettingsToUI');
     this.updateGenerateButtonState();
+    // Update video meta line if currentVideo is present
+    if (this.currentVideo) {
+      this.displayVideoInfo();
+    }
   }
 
   /**
@@ -285,14 +289,11 @@ class PopupManager {
    * Show loading message
    */
   showLoadingMessage() {
-    console.log('PopupManager: showLoadingMessage called');
-    const videoTitle = document.getElementById('videoTitle');
-    const videoAuthor = document.getElementById('videoAuthor');
-    const videoUrl = document.getElementById('videoUrl');
-    
-    videoTitle.textContent = 'Loading video data...';
-    videoAuthor.textContent = 'Loading...';
-    videoUrl.textContent = 'Loading...';
+    const videoMetaLine = document.getElementById('videoMetaLine');
+    if (videoMetaLine) {
+      videoMetaLine.textContent = 'Loading video info...';
+    }
+    this.updateUI();
   }
 
   /**
@@ -300,15 +301,10 @@ class PopupManager {
    */
   showNoVideoMessage(message = 'Please navigate to a YouTube video page and click the extension icon.') {
     console.log('PopupManager: showNoVideoMessage called with:', message);
-    const videoTitle = document.getElementById('videoTitle');
-    const videoAuthor = document.getElementById('videoAuthor');
-    const videoUrl = document.getElementById('videoUrl');
-    
-    videoTitle.textContent = 'No Video Detected';
-    videoAuthor.textContent = message;
-    videoUrl.textContent = 'Not on YouTube video page';
-    
-    // Also update the UI to reflect no video state
+    const videoMetaLine = document.getElementById('videoMetaLine');
+    if (videoMetaLine) {
+      videoMetaLine.textContent = message || 'Not loaded';
+    }
     this.updateUI();
   }
 
@@ -318,32 +314,17 @@ class PopupManager {
   displayVideoInfo() {
     console.log('PopupManager: displayVideoInfo called');
     console.log('PopupManager: currentVideo:', this.currentVideo);
-    
-    const videoTitle = document.getElementById('videoTitle');
-    const videoAuthor = document.getElementById('videoAuthor');
-    const videoUrl = document.getElementById('videoUrl');
-
+    const videoMetaLine = document.getElementById('videoMetaLine');
     if (!this.currentVideo) {
-      console.log('PopupManager: No currentVideo data');
-      videoTitle.textContent = 'Not loaded';
-      videoAuthor.textContent = 'Not loaded';
-      videoUrl.textContent = 'Not loaded';
+      videoMetaLine.textContent = 'Not loaded';
       return;
     }
-
-    // Use the data from our new transcript extraction format
     const title = this.currentVideo.title || 'No title available';
     const author = this.currentVideo.author || 'No author available';
-    const url = this.currentVideo.url || 'Not loaded';
-
-    console.log('PopupManager: Displaying video info - Title:', title, 'Author:', author, 'URL:', url);
-
-    // Populate video information
-    videoTitle.textContent = title;
-    videoAuthor.textContent = author;
-    videoUrl.textContent = url;
-    
-    // Update UI state
+    const url = this.currentVideo.url || '';
+    // Create a single line with bullets and a clickable URL
+    videoMetaLine.innerHTML =
+      `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a> &bull; ${title} &bull; ${author}`;
     this.updateUI();
   }
 
