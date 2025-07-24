@@ -28,7 +28,7 @@
         "https://www.youtube.com/shorts*",
         "*://*.youtube.com/*"
       ],
-      "js": ["vendor/browser-polyfill.js", "content/youtube-subtitle-extractor.js", "content/content.js"],
+      "js": ["vendor/browser-polyfill.js", "content/content.js"],
       "css": ["content/content.css"],
       "run_at": "document_end"
     }

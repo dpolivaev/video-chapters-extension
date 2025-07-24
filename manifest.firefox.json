@@ -29,7 +29,7 @@
         "https://www.youtube.com/shorts*",
         "*://*.youtube.com/*"
       ],
-      "js": ["content/youtube-subtitle-extractor.js", "content/content.js"],
+      "js": ["content/content.js"],
       "css": ["content/content.css"],
       "run_at": "document_end"
     }

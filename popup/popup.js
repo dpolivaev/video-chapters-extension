@@ -392,18 +392,11 @@ class PopupView {
       if (customInstructions && window.instructionHistory) {
         await window.instructionHistory.saveInstruction(customInstructions);
       }
-      let subtitleContent = null;
-      if (this.currentVideo.subtitleContent) {
-        subtitleContent = this.currentVideo.subtitleContent;
-      } else {
-        const subtitleResponse = await this.sendMessageToTab({
-          action: "extractSubtitles"
-        });
-        if (!subtitleResponse || !subtitleResponse.success) {
-          throw new Error(subtitleResponse?.error || "Failed to extract subtitles");
-        }
-        subtitleContent = subtitleResponse.data.content;
+      // Use the transcript content that was already extracted in loadCurrentVideo()
+      if (!this.currentVideo.subtitleContent) {
+        throw new Error("No transcript available. Please reload the page and try again.");
       }
+      const subtitleContent = this.currentVideo.subtitleContent;
       const resultId = Date.now();
       this._lastResultId = resultId;
       let chaptersWithUrl = this.currentVideo.url + "\n\n";

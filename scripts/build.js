@@ -48,7 +48,7 @@ const config = {
     return process.argv.includes("--firefox") ? "manifest.firefox.json" : "manifest.chrome.json";
   },
   get requiredFiles() {
-    return [ this.manifestFile, "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/content.css", "content/youtube-subtitle-extractor.js", "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", "results/results.css", "results/results.js", "options/options.html", "options/options.css", "options/options.js", "vendor/browser-polyfill.js" ];
+    return [ this.manifestFile, "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/content.css", "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", "results/results.css", "results/results.js", "options/options.html", "options/options.css", "options/options.js", "vendor/browser-polyfill.js" ];
   },
   iconSizes: [ 16, 48, 128 ],
   minifyOptions: {
@@ -173,7 +173,7 @@ class ExtensionBuilder {
   }
   async processJavaScript() {
     this.spinner = ora("Processing JavaScript files").start();
-    const jsFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/youtube-subtitle-extractor.js", "popup/popup.js", "popup/instruction-history.js", "results/results.js", "options/options.js" ];
+    const jsFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "popup/popup.js", "popup/instruction-history.js", "results/results.js", "options/options.js" ];
     for (const file of jsFiles) {
       const srcPath = path.join(config.srcDir, file);
       const distPath = path.join(config.distDir, file);
@@ -237,7 +237,10 @@ class ExtensionBuilder {
     if (!manifest.version) {
       throw new Error("Manifest missing version");
     }
-    const requiredFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/content.css", "content/youtube-subtitle-extractor.js", "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", "results/results.css", "results/results.js", "options/options.html", "options/options.css", "options/options.js" ];
+    const requiredFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js",
+      "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/content.css", 
+      "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", 
+      "results/results.css", "results/results.js", "options/options.html", "options/options.css", "options/options.js" ];
     for (const file of requiredFiles) {
       const filePath = path.join(config.distDir, file);
       if (!await fs.pathExists(filePath)) {

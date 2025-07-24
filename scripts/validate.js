@@ -109,7 +109,7 @@ class ExtensionValidator {
   }
   async validateSourceFiles() {
     this.spinner = ora("Validating source files").start();
-    const requiredFiles = [ "background/background.js", "background/gemini-api.js", "content/content.js", "content/content.css", "content/youtube-subtitle-extractor.js", "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", "results/results.css", "results/results.js" ];
+    const requiredFiles = [ "background/background.js", "background/gemini-api.js", "content/content.js", "content/content.css", "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", "results/results.css", "results/results.js" ];
     for (const file of requiredFiles) {
       const filePath = path.join(this.srcDir, file);
       if (!await fs.pathExists(filePath)) {

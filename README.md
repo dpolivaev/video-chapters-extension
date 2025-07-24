@@ -171,8 +171,7 @@ timecodes-browser-extension/
 │   └── openrouter-api.js     # OpenRouter API with multiple models
 ├── content/
 │   ├── content.js
-│   ├── content.css
-│   └── youtube-subtitle-extractor.js
+│   └── content.css
 ├── popup/
 │   ├── popup.html
 │   ├── popup.css
