@@ -2,7 +2,6 @@
   "manifest_version": 3,
   "name": "Video Chapters Generator",
   "version": "1.0.0-BUILD_INJECTED",
-  "_comment": "Version is auto-injected from package.json during build",
   "description": "Generate chapter timecodes from YouTube videos using AI subtitle analysis",
   
   "permissions": [
