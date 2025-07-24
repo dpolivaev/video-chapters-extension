@@ -319,6 +319,8 @@ class BackgroundService {
         let chaptersWithUrl = videoUrl + '\n\n' + result.chapters;
         
         existingResults.chapters = chaptersWithUrl;
+        existingResults.model = model;
+        existingResults.customInstructions = customInstructions;
         generationStatusById[resultId] = 'done';
         
         resultsById[resultId] = existingResults;

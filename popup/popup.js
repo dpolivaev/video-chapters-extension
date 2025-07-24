@@ -551,6 +551,8 @@ class PopupManager {
         subtitles: { content: subtitleContent },
         chapters: chaptersWithUrl,
         timestamp: resultId,
+        model: model,
+        customInstructions: customInstructions,
         videoMetadata: {
           title: this.currentVideo.title,
           author: this.currentVideo.author,

@@ -267,6 +267,10 @@ class ResultsManager {
       const response = await browser.runtime.sendMessage({ action: 'getSessionResults', resultId: this.resultId });
       if (response && response.success && response.results) {
         this.results = response.results;
+        
+        // Update page title immediately when results are loaded
+        this.updatePageTitle();
+        
         return;
       } else {
         throw new Error('No results found in this session. Please generate chapters first.');
@@ -310,6 +314,60 @@ class ResultsManager {
       const timeStr = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
       document.getElementById('generationTime').textContent = `Generated on ${timeStr}`;
     }
+
+
+  }
+
+  /**
+   * Update page title with model and custom instructions
+   */
+  updatePageTitle() {
+    const pageTitle = document.getElementById('pageTitle');
+    const userInstructions = document.getElementById('userInstructions');
+    if (!pageTitle) return;
+
+    let title = 'Chapters';
+    
+    // Add model information if available
+    if (this.results && this.results.model) {
+      // Extract a shorter model name for display
+      const modelName = this.getModelDisplayName(this.results.model);
+      title += ` (${modelName})`;
+    }
+    
+    pageTitle.textContent = title;
+    
+    // Update user instructions in separate element
+    if (userInstructions) {
+      if (this.results && this.results.customInstructions && this.results.customInstructions.trim()) {
+        userInstructions.textContent = `"${this.results.customInstructions.trim()}"`;
+        userInstructions.style.display = 'block';
+      } else {
+        userInstructions.style.display = 'none';
+      }
+    }
+  }
+
+  /**
+   * Get a shorter display name for the model
+   */
+  getModelDisplayName(model) {
+    // Handle common model patterns
+    if (model.includes('gemini-2.5-pro')) return 'Gemini 2.5 Pro';
+    if (model.includes('gemini-2.5-flash')) return 'Gemini 2.5 Flash';
+    if (model.includes('deepseek-r1-0528:free')) return 'DeepSeek R1 Free';
+    if (model.includes('deepseek-r1-0528')) return 'DeepSeek R1';
+    if (model.includes('deepseek-r1')) return 'DeepSeek R1';
+    if (model.includes('claude-3.5-sonnet')) return 'Claude 3.5 Sonnet';
+    if (model.includes('claude-3.5-haiku')) return 'Claude 3.5 Haiku';
+    if (model.includes('gpt-4o-mini')) return 'GPT-4o Mini';
+    if (model.includes('gpt-4o')) return 'GPT-4o';
+    if (model.includes('llama-3.3-70b')) return 'Llama 3.3 70B';
+    
+    // Fallback: try to extract a readable name
+    const parts = model.split('/');
+    const modelPart = parts[parts.length - 1];
+    return modelPart.replace(/:free$/, ' (Free)');
   }
 
   /**
