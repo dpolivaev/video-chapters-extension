@@ -364,25 +364,8 @@ class BackgroundService {
     try {
       const { content } = request;
       
-      // Get current history
-      const result = await browser.storage.local.get(['instructionHistory', 'historyLimit']);
-      const history = result.instructionHistory || [];
-      const limit = result.historyLimit || 10;
-
-      // Add new instruction
-      const newInstruction = {
-        id: Date.now(),
-        content: content,
-        timestamp: new Date().toISOString()
-      };
-
-      history.unshift(newInstruction);
-
-      // Keep only the specified limit
-      history.splice(limit);
-
-      // Save updated history
-      await browser.storage.local.set({ instructionHistory: history });
+      // Delegate to the model
+      await instructionHistory.addInstruction(content);
 
       sendResponse({ success: true });
     } catch (error) {
@@ -510,24 +493,41 @@ class InstructionHistoryManager {
    * Add instruction to history
    */
   async addInstruction(content) {
+    const trimmedContent = content.trim();
     const result = await browser.storage.local.get(['instructionHistory', 'historyLimit']);
     const history = result.instructionHistory || [];
     const limit = result.historyLimit || this.defaultLimit;
 
-    const newInstruction = {
-      id: Date.now(),
-      content: content.trim(),
-      timestamp: new Date().toISOString()
-    };
+    // Check for existing duplicate (exact match after trimming, case sensitive)
+    const existingIndex = history.findIndex(instruction => instruction.content.trim() === trimmedContent);
+    
+    let instructionToAdd;
+    
+    if (existingIndex !== -1) {
+      // Found duplicate - remove it and preserve its ID
+      const existingInstruction = history.splice(existingIndex, 1)[0];
+      instructionToAdd = {
+        id: existingInstruction.id, // Preserve original ID
+        content: trimmedContent, // Save trimmed content
+        timestamp: new Date().toISOString() // Update timestamp
+      };
+    } else {
+      // No duplicate - create new instruction
+      instructionToAdd = {
+        id: Date.now(),
+        content: trimmedContent, // Save trimmed content
+        timestamp: new Date().toISOString()
+      };
+    }
 
     // Add to beginning of array
-    history.unshift(newInstruction);
+    history.unshift(instructionToAdd);
 
     // Keep only specified number of instructions
     history.splice(limit);
 
     await browser.storage.local.set({ instructionHistory: history });
-    return newInstruction;
+    return instructionToAdd;
   }
 
   /**

@@ -1,6 +1,6 @@
 /**
  * Results Page Script for Video Chapters Generator
- * Handles display and management of generated chapters and subtitles
+ * Handles display and user interaction with generated chapters and subtitles
  */
 
 if (typeof browser === 'undefined') {
@@ -13,7 +13,7 @@ function getResultIdFromUrl() {
   return params.get('resultId');
 }
 
-class ResultsManager {
+class ResultsView {
   constructor(resultId) {
     this.resultId = resultId;
     this.results = null;
@@ -27,7 +27,7 @@ class ResultsManager {
   }
 
   /**
-   * Initialize the results manager
+   * Initialize the results view
    */
   async init() {
     try {
@@ -559,7 +559,7 @@ class ResultsManager {
   }
 }
 
-// Initialize the results manager when the page loads
+// Initialize the results view when the page loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', async () => {
     // Notify background of this tab's ID for tracking, with resultId
@@ -572,7 +572,7 @@ if (document.readyState === 'loading') {
         }
       } catch (e) {}
     }
-    new ResultsManager(resultId);
+    new ResultsView(resultId);
   });
 } else {
   (async () => {
@@ -585,6 +585,6 @@ if (document.readyState === 'loading') {
         }
       } catch (e) {}
     }
-    new ResultsManager(resultId);
+    new ResultsView(resultId);
   })();
 } 

@@ -10,14 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded fired in popup');
 });
 
-console.log('About to define PopupManager class...');
+console.log('About to define PopupView class...');
 
 /**
  * Main Popup Script for Video Chapters Generator
- * Handles UI interactions, video processing, and communication with content scripts
+ * Handles UI interactions and user interface for video processing
  */
 
-class PopupManager {
+class PopupView {
   constructor() {
     this.currentVideo = null;
     this.isProcessing = false;
@@ -28,31 +28,31 @@ class PopupManager {
   }
 
   /**
-   * Initialize the popup
+   * Initialize the popup view
    */
   async init() {
     try {
-      console.log('PopupManager: Starting initialization...');
-      console.log('PopupManager: Step 1 - loadSettings');
+      console.log('PopupView: Starting initialization...');
+      console.log('PopupView: Step 1 - loadSettings');
       await this.loadSettings();
-      console.log('PopupManager: Step 1 complete');
-      console.log('PopupManager: Step 2 - loadCurrentVideo');
+      console.log('PopupView: Step 1 complete');
+      console.log('PopupView: Step 2 - loadCurrentVideo');
       await this.loadCurrentVideo();
-      console.log('PopupManager: Step 2 complete');
-      console.log('PopupManager: Step 3 - setupEventListeners');
+      console.log('PopupView: Step 2 complete');
+      console.log('PopupView: Step 3 - setupEventListeners');
       this.setupEventListeners();
-      console.log('PopupManager: Step 3 complete');
-      console.log('PopupManager: Step 4 - updateUI');
+      console.log('PopupView: Step 3 complete');
+      console.log('PopupView: Step 4 - updateUI');
       await this.updateUI();
-      console.log('PopupManager: Step 4 complete');
+      console.log('PopupView: Step 4 complete');
       // Hide the debugStatus bar after successful initialization
       // const debugStatus = document.getElementById('debugStatus');
       // if (debugStatus) {
       //   debugStatus.style.display = 'none';
       // }
-      console.log('PopupManager: Initialization completed successfully');
+      console.log('PopupView: Initialization completed successfully');
     } catch (error) {
-      console.error('PopupManager: Error initializing popup:', error, error && error.stack);
+      console.error('PopupView: Error initializing popup:', error, error && error.stack);
       this.showNotification('Error initializing extension', 'error');
       // Show error in debugStatus
       // const debugStatus = document.getElementById('debugStatus');
@@ -123,22 +123,22 @@ class PopupManager {
    * Load settings from background script
    */
   async loadSettings() {
-    console.log('PopupManager: loadSettings called');
+    console.log('PopupView: loadSettings called');
     try {
       const response = await browser.runtime.sendMessage({ action: 'loadSettings' });
-      console.log('PopupManager: loadSettings response:', response);
+      console.log('PopupView: loadSettings response:', response);
       
       if (response && response.success) {
         this.settings = response.data;
-        console.log('PopupManager: Settings loaded successfully:', this.settings);
+        console.log('PopupView: Settings loaded successfully:', this.settings);
         this.applySettingsToUI();
         return;
       } else {
-        console.error('PopupManager: Failed to load settings:', response);
+        console.error('PopupView: Failed to load settings:', response);
         throw new Error(response?.error || 'Failed to load settings');
       }
     } catch (error) {
-      console.error('PopupManager: loadSettings error:', error);
+      console.error('PopupView: loadSettings error:', error);
       throw error;
     }
   }
@@ -147,17 +147,17 @@ class PopupManager {
    * Apply settings to UI elements
    */
   async applySettingsToUI() {
-    console.log('PopupManager: applySettingsToUI called');
-    console.log('PopupManager: Current settings:', this.settings);
+    console.log('PopupView: applySettingsToUI called');
+    console.log('PopupView: Current settings:', this.settings);
     
     if (!this.settings) {
-      console.log('PopupManager: No settings to apply');
+      console.log('PopupView: No settings to apply');
       return;
     }
 
     const modelSelect = document.getElementById('modelSelect');
     
-    console.log('PopupManager: Setting model select value:', this.settings.model);
+    console.log('PopupView: Setting model select value:', this.settings.model);
     
     // Load models and set selected model
     await this.loadModels();
@@ -170,7 +170,7 @@ class PopupManager {
     this.restoreCustomInstructions();
     
     // Update generate button state based on API keys
-    console.log('PopupManager: Updating generate button state from applySettingsToUI');
+    console.log('PopupView: Updating generate button state from applySettingsToUI');
     this.updateGenerateButtonState();
     // Update video meta line if currentVideo is present
     if (this.currentVideo) {
@@ -240,14 +240,14 @@ class PopupManager {
           modelSelect.appendChild(geminiGroup);
         }
         
-        console.log('PopupManager: Models loaded successfully:', models.length);
+        console.log('PopupView: Models loaded successfully:', models.length);
       } else {
-        console.error('PopupManager: Failed to load models:', response);
+        console.error('PopupView: Failed to load models:', response);
         // Fallback to basic options
         this.loadFallbackModels();
       }
     } catch (error) {
-      console.error('PopupManager: Error loading models:', error);
+      console.error('PopupView: Error loading models:', error);
       // Fallback to basic options
       this.loadFallbackModels();
     }
@@ -315,7 +315,7 @@ class PopupManager {
       apiKeyGroup.style.display = 'block';
     }
     
-    console.log('PopupManager: Updated API key field for model:', selectedModel);
+    console.log('PopupView: Updated API key field for model:', selectedModel);
   }
 
   /**
@@ -344,7 +344,7 @@ class PopupManager {
       if (lastInstructions && lastInstructions.trim()) {
         const instructionsTextarea = document.getElementById('instructionsTextarea');
         instructionsTextarea.value = lastInstructions;
-        console.log('PopupManager: Restored custom instructions');
+        console.log('PopupView: Restored custom instructions');
         
         // Trigger UI update
         if (window.instructionHistory) {
@@ -352,7 +352,7 @@ class PopupManager {
         }
       }
     } catch (error) {
-      console.error('PopupManager: Error restoring custom instructions:', error);
+      console.error('PopupView: Error restoring custom instructions:', error);
     }
   }
 
@@ -361,46 +361,46 @@ class PopupManager {
    */
   async loadCurrentVideo() {
     try {
-      console.log('PopupManager: loadCurrentVideo started');
+      console.log('PopupView: loadCurrentVideo started');
       
       // Get current active tab
-      console.log('PopupManager: Querying for active tab...');
+      console.log('PopupView: Querying for active tab...');
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      console.log('PopupManager: Current tab result:', tab);
+      console.log('PopupView: Current tab result:', tab);
       
       if (!tab) {
-        console.log('PopupManager: No tab found');
+        console.log('PopupView: No tab found');
         this.showNoVideoMessage('No active tab found');
         return;
       }
       
       if (!tab.url) {
-        console.log('PopupManager: Tab has no URL');
+        console.log('PopupView: Tab has no URL');
         this.showNoVideoMessage('Tab has no URL');
         return;
       }
       
-      console.log('PopupManager: Tab URL:', tab.url);
+      console.log('PopupView: Tab URL:', tab.url);
 
       // Check if it's a YouTube watch page or shorts page
       if (!tab.url.includes('youtube.com/watch') && !tab.url.includes('youtube.com/shorts')) {
-        console.log('PopupManager: Not a YouTube video page');
+        console.log('PopupView: Not a YouTube video page');
         this.showNoVideoMessage('Current tab is not a YouTube video page');
         return;
       }
 
-      console.log('PopupManager: YouTube video page detected, trying transcript extraction...');
+      console.log('PopupView: YouTube video page detected, trying transcript extraction...');
       this.showLoadingMessage();
 
       // First try the working extension approach
       try {
-        console.log('PopupManager: Trying working transcript extraction method...');
+        console.log('PopupView: Trying working transcript extraction method...');
         const transcriptResponse = await browser.tabs.sendMessage(tab.id, { action: 'copyTranscript' });
         
         if (transcriptResponse && transcriptResponse.status === 'success' && transcriptResponse.transcript) {
-          console.log('PopupManager: ✅ Working transcript extraction successful!');
-          console.log('PopupManager: Title:', transcriptResponse.title);
-          console.log('PopupManager: Transcript length:', transcriptResponse.transcript.length);
+          console.log('PopupView: ✅ Working transcript extraction successful!');
+          console.log('PopupView: Title:', transcriptResponse.title);
+          console.log('PopupView: Transcript length:', transcriptResponse.transcript.length);
           
           // Convert the transcript format for our processing
           const subtitleContent = `Video Title: ${transcriptResponse.title}\n\nTranscript Content:\n${transcriptResponse.transcript}`;
@@ -413,7 +413,7 @@ class PopupManager {
             tabId: tab.id
           };
           
-          console.log('PopupManager: ✅ currentVideo set with transcript data:', {
+          console.log('PopupView: ✅ currentVideo set with transcript data:', {
             title: this.currentVideo.title,
             author: this.currentVideo.author,
             url: this.currentVideo.url,
@@ -423,9 +423,9 @@ class PopupManager {
           this.displayVideoInfo();
           return;
         } else {
-          console.log('PopupManager: Working transcript extraction failed:', transcriptResponse);
-          console.log('PopupManager: Response status:', transcriptResponse?.status);
-          console.log('PopupManager: Response message:', transcriptResponse?.message);
+          console.log('PopupView: Working transcript extraction failed:', transcriptResponse);
+          console.log('PopupView: Response status:', transcriptResponse?.status);
+          console.log('PopupView: Response message:', transcriptResponse?.message);
           
           // Show the error message to the user
           const errorMessage = transcriptResponse?.message || 'Transcript extraction failed';
@@ -433,13 +433,13 @@ class PopupManager {
           return;
         }
       } catch (transcriptError) {
-        console.log('PopupManager: Transcript extraction error:', transcriptError);
+        console.log('PopupView: Transcript extraction error:', transcriptError);
         this.showNoVideoMessage(`Error extracting transcript: ${transcriptError.message}`);
         return;
       }
 
     } catch (error) {
-      console.error('PopupManager: Error in loadCurrentVideo:', error);
+      console.error('PopupView: Error in loadCurrentVideo:', error);
       this.showNoVideoMessage('Error: ' + error.message);
     }
   }
@@ -459,7 +459,7 @@ class PopupManager {
    * Show no video message
    */
   showNoVideoMessage(message = 'Please navigate to a YouTube video page and click the extension icon.') {
-    console.log('PopupManager: showNoVideoMessage called with:', message);
+    console.log('PopupView: showNoVideoMessage called with:', message);
     const videoMetaLine = document.getElementById('videoMetaLine');
     if (videoMetaLine) {
       videoMetaLine.textContent = message || 'Not loaded';
@@ -471,8 +471,8 @@ class PopupManager {
    * Display video information in the UI
    */
   displayVideoInfo() {
-    console.log('PopupManager: displayVideoInfo called');
-    console.log('PopupManager: currentVideo:', this.currentVideo);
+    console.log('PopupView: displayVideoInfo called');
+    console.log('PopupView: currentVideo:', this.currentVideo);
     const videoMetaLine = document.getElementById('videoMetaLine');
     if (!this.currentVideo) {
       videoMetaLine.textContent = 'Not loaded';
@@ -600,7 +600,7 @@ class PopupManager {
       await browser.runtime.sendMessage({ action: 'openResultsTab', videoTabId: tab.id, videoUrl, resultId });
       window.close();
     } catch (error) {
-      console.error('PopupManager: Error generating chapters:', error);
+      console.error('PopupView: Error generating chapters:', error);
       this.showNotification('Error: ' + error.message, 'error');
     }
   }
@@ -729,13 +729,13 @@ class PopupManager {
 
       if (customInstructions) {
         await browser.storage.local.set({ lastCustomInstructions: customInstructions });
-        console.log('PopupManager: Custom instructions saved to storage');
+        console.log('PopupView: Custom instructions saved to storage');
       } else {
         await browser.storage.local.remove('lastCustomInstructions');
-        console.log('PopupManager: Custom instructions removed from storage');
+        console.log('PopupView: Custom instructions removed from storage');
       }
     } catch (error) {
-      console.error('PopupManager: Error saving custom instructions:', error);
+      console.error('PopupView: Error saving custom instructions:', error);
     }
   }
 
@@ -743,15 +743,15 @@ class PopupManager {
    * Update the state of the generate button
    */
   updateGenerateButtonState() {
-    console.log('PopupManager: updateGenerateButtonState called');
+    console.log('PopupView: updateGenerateButtonState called');
     const generateBtn = document.getElementById('generateBtn');
     const dynamicApiKey = document.getElementById('dynamicApiKeyInput').value.trim();
     const model = document.getElementById('modelSelect').value;
     
-    console.log('PopupManager: Dynamic API key present:', !!dynamicApiKey);
-    console.log('PopupManager: Selected model:', model);
-    console.log('PopupManager: isProcessing:', this.isProcessing);
-    console.log('PopupManager: currentVideo present:', !!this.currentVideo);
+    console.log('PopupView: Dynamic API key present:', !!dynamicApiKey);
+    console.log('PopupView: Selected model:', model);
+    console.log('PopupView: isProcessing:', this.isProcessing);
+    console.log('PopupView: currentVideo present:', !!this.currentVideo);
     
     // Check if the selected model can be used
     let canUseModel = false;
@@ -774,18 +774,18 @@ class PopupManager {
     }
     
     const shouldEnable = canUseModel && !this.isProcessing && this.currentVideo;
-    console.log('PopupManager: Should enable generate button:', shouldEnable);
+    console.log('PopupView: Should enable generate button:', shouldEnable);
     
     generateBtn.disabled = !shouldEnable;
     
     if (!canUseModel) {
-      console.log('PopupManager: Generate button disabled -', reasonDisabled);
+      console.log('PopupView: Generate button disabled -', reasonDisabled);
     } else if (this.isProcessing) {
-      console.log('PopupManager: Generate button disabled - currently processing');
+      console.log('PopupView: Generate button disabled - currently processing');
     } else if (!this.currentVideo) {
-      console.log('PopupManager: Generate button disabled - no current video');
+      console.log('PopupView: Generate button disabled - no current video');
     } else {
-      console.log('PopupManager: Generate button enabled');
+      console.log('PopupView: Generate button enabled');
     }
   }
 
@@ -876,27 +876,27 @@ window.showNotification = function(message, type = 'info') {
   }
 };
 
-console.log('About to initialize PopupManager...');
+console.log('About to initialize PopupView...');
 console.log('Document ready state at init:', document.readyState);
 
 // Initialize when DOM is loaded
 if (document.readyState === 'loading') {
   console.log('Document still loading, waiting for DOMContentLoaded...');
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded fired, creating PopupManager...');
+    console.log('DOMContentLoaded fired, creating PopupView...');
     try {
-      window.popupManager = new PopupManager();
-      console.log('PopupManager created successfully');
+      window.popupManager = new PopupView();
+      console.log('PopupView created successfully');
     } catch (error) {
-      console.error('Error creating PopupManager:', error);
+      console.error('Error creating PopupView:', error);
     }
   });
 } else {
-  console.log('Document already loaded, creating PopupManager immediately...');
+  console.log('Document already loaded, creating PopupView immediately...');
   try {
-    window.popupManager = new PopupManager();
-    console.log('PopupManager created successfully');
+    window.popupManager = new PopupView();
+    console.log('PopupView created successfully');
   } catch (error) {
-    console.error('Error creating PopupManager:', error);
+    console.error('Error creating PopupView:', error);
   }
 } 

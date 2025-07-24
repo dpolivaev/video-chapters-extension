@@ -1,13 +1,13 @@
 /**
- * Instruction History Manager for Browser Extension
- * Handles the storage, display, and interaction with instruction history
+ * Instruction History View for Browser Extension
+ * Handles the display and user interaction with instruction history
  */
 
 if (typeof browser === 'undefined') {
   var browser = chrome;
 }
 
-class InstructionHistoryManager {
+class InstructionHistoryView {
   constructor() {
     this.modal = null;
     this.historyList = null;
@@ -19,7 +19,7 @@ class InstructionHistoryManager {
   }
 
   /**
-   * Initialize the history manager
+   * Initialize the history view
    */
   async init() {
     this.modal = document.getElementById('historyModal');
@@ -356,11 +356,11 @@ class InstructionHistoryManager {
   }
 }
 
-// Initialize the instruction history manager when DOM is loaded
+// Initialize the instruction history view when DOM is loaded
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    window.instructionHistory = new InstructionHistoryManager();
+    window.instructionHistory = new InstructionHistoryView();
   });
 } else {
-  window.instructionHistory = new InstructionHistoryManager();
+  window.instructionHistory = new InstructionHistoryView();
 } 
