@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Validation Script for Video Chapters Generator Extension
  * Checks for common issues and validates the extension build and source
@@ -19,7 +21,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
-#!/usr/bin/env node
 
 const fs = require('fs-extra');
 const path = require('path');
