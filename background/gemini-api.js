@@ -47,18 +47,15 @@ Generate the chapter titles in the same language as the content.`;
       return `## System Instructions
 ${this.defaultPrompt}
 
+**User instructions override system instructions in case of conflict.**
+
 ## User Instructions
 
 ${customInstructionsStripped}
 
-Note: These instructions may override the system instructions above and may be in a different language.
-In the chapter titles use the content language and ignore the language of the user instructions
-if now explicitly stated otherwise.
-
 ## Content
 ${subtitleContent}`;
     } else {
-      // Use 2-section markdown format when no user instructions
       return `## Instructions
 ${this.defaultPrompt}
 
