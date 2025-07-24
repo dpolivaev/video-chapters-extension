@@ -22,6 +22,7 @@ class PopupManager {
     this.currentVideo = null;
     this.isProcessing = false;
     this.settings = null;
+    this.allModels = []; // Store models for provider lookup
     
     this.init();
   }
@@ -189,6 +190,7 @@ class PopupManager {
         modelSelect.innerHTML = ''; // Clear existing options
         
         const models = response.data;
+        this.allModels = models; // Store for provider lookup
         
         // Group models by provider
         const providers = {};
@@ -283,16 +285,17 @@ class PopupManager {
     const selectedModel = modelSelect.value;
     
     if (selectedModel.includes('gemini-')) {
-      // Gemini model selected
+      // Direct Gemini model selected
       apiKeyLabel.textContent = 'Gemini API Key:';
       dynamicApiKeyInput.placeholder = 'Enter your Gemini API key';
       dynamicApiKeyInput.value = this.settings?.apiKey || '';
       apiKeyInfo.style.display = 'none';
       apiKeyGroup.style.display = 'block';
       
-    } else if (selectedModel.includes('deepseek/')) {
-      if (selectedModel.includes(':free')) {
-        // Free model selected - no API key needed
+    } else if (this.isOpenRouterModel(selectedModel)) {
+      const modelInfo = this.getModelInfo(selectedModel);
+      if (modelInfo && modelInfo.isFree) {
+        // Free OpenRouter model - no API key needed
         apiKeyGroup.style.display = 'none';
       } else {
         // Paid OpenRouter model selected
@@ -313,6 +316,21 @@ class PopupManager {
     }
     
     console.log('PopupManager: Updated API key field for model:', selectedModel);
+  }
+
+  /**
+   * Get model information by ID
+   */
+  getModelInfo(modelId) {
+    return this.allModels.find(model => model.id === modelId);
+  }
+
+  /**
+   * Check if a model is from OpenRouter
+   */
+  isOpenRouterModel(modelId) {
+    const modelInfo = this.getModelInfo(modelId);
+    return modelInfo && modelInfo.provider === 'OpenRouter';
   }
 
   /**
@@ -508,9 +526,10 @@ class PopupManager {
         this.showNotification('Please enter your Gemini API key for this model', 'error');
         return;
       }
-    } else if (model.includes('deepseek/')) {
+    } else if (this.isOpenRouterModel(model)) {
       // Free models don't need API key
-      if (!model.includes(':free')) {
+      const modelInfo = this.getModelInfo(model);
+      if (modelInfo && !modelInfo.isFree) {
         apiKey = dynamicApiKey;
         if (!apiKey) {
           this.showNotification('Please enter your OpenRouter API key for this model', 'error');
@@ -659,8 +678,13 @@ class PopupManager {
       
       if (selectedModel.includes('gemini-')) {
         this.showNotification('Gemini API key cleared', 'success');
-      } else if (selectedModel.includes('deepseek/') && !selectedModel.includes(':free')) {
-        this.showNotification('OpenRouter API key cleared', 'success');
+      } else if (this.isOpenRouterModel(selectedModel)) {
+        const modelInfo = this.getModelInfo(selectedModel);
+        if (modelInfo && !modelInfo.isFree) {
+          this.showNotification('OpenRouter API key cleared', 'success');
+        } else {
+          this.showNotification('API key cleared', 'success');
+        }
       } else {
         this.showNotification('API key cleared', 'success');
       }
@@ -736,8 +760,9 @@ class PopupManager {
     if (model.includes('gemini-')) {
       canUseModel = !!dynamicApiKey;
       if (!canUseModel) reasonDisabled = 'Gemini API key required for this model';
-    } else if (model.includes('deepseek/')) {
-      if (model.includes(':free')) {
+    } else if (this.isOpenRouterModel(model)) {
+      const modelInfo = this.getModelInfo(model);
+      if (modelInfo && modelInfo.isFree) {
         canUseModel = true; // Free models don't need API key
       } else {
         canUseModel = !!dynamicApiKey;
@@ -785,8 +810,11 @@ class PopupManager {
       // Update the appropriate API key field based on selected model
       if (selectedModel.includes('gemini-')) {
         settings.apiKey = dynamicApiKey;
-      } else if (selectedModel.includes('deepseek/') && !selectedModel.includes(':free')) {
-        settings.openRouterApiKey = dynamicApiKey;
+      } else if (this.isOpenRouterModel(selectedModel)) {
+        const modelInfo = this.getModelInfo(selectedModel);
+        if (modelInfo && !modelInfo.isFree) {
+          settings.openRouterApiKey = dynamicApiKey;
+        }
       }
 
       const response = await browser.runtime.sendMessage({ action: 'saveSettings', settings });
