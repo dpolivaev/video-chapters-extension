@@ -155,23 +155,44 @@ class InstructionHistoryManager {
       console.warn('Failed to parse timestamp:', entry.timestamp);
     }
 
-    entryDiv.innerHTML = `
-      <div class="history-entry-header">
-        <div class="history-timestamp">${timestampStr}</div>
-      </div>
-      <div class="history-content">
-        <div class="history-text">${this.escapeHtml(entry.content)}</div>
-      </div>
-      <div class="history-actions">
-        <button class="btn-select" data-content="${this.escapeHtml(entry.content)}">Select</button>
-        <button class="btn-delete" data-id="${entry.id}">Delete</button>
-      </div>
-    `;
+    // Create elements safely without innerHTML
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'history-entry-header';
+    
+    const timestampDiv = document.createElement('div');
+    timestampDiv.className = 'history-timestamp';
+    timestampDiv.textContent = timestampStr;
+    headerDiv.appendChild(timestampDiv);
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'history-content';
+    
+    const textDiv = document.createElement('div');
+    textDiv.className = 'history-text';
+    textDiv.textContent = entry.content;
+    contentDiv.appendChild(textDiv);
+    
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'history-actions';
+    
+    const selectBtn = document.createElement('button');
+    selectBtn.className = 'btn-select';
+    selectBtn.textContent = 'Select';
+    selectBtn.setAttribute('data-content', entry.content);
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-delete';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.setAttribute('data-id', entry.id);
+    
+    actionsDiv.appendChild(selectBtn);
+    actionsDiv.appendChild(deleteBtn);
+    
+    entryDiv.appendChild(headerDiv);
+    entryDiv.appendChild(contentDiv);
+    entryDiv.appendChild(actionsDiv);
 
     // Add event listeners
-    const selectBtn = entryDiv.querySelector('.btn-select');
-    const deleteBtn = entryDiv.querySelector('.btn-delete');
-
     selectBtn.addEventListener('click', () => {
       this.selectInstruction(entry.content);
     });

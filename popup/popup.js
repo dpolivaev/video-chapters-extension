@@ -322,9 +322,30 @@ class PopupManager {
     const title = this.currentVideo.title || 'No title available';
     const author = this.currentVideo.author || 'No author available';
     const url = this.currentVideo.url || '';
-    // Create a single line with bullets and a clickable URL
-    videoMetaLine.innerHTML =
-      `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a> &bull; ${title} &bull; ${author}`;
+    
+    // Create elements safely without innerHTML
+    videoMetaLine.textContent = '';
+    
+    // Create and append the URL link
+    const urlLink = document.createElement('a');
+    urlLink.href = url;
+    urlLink.target = '_blank';
+    urlLink.rel = 'noopener noreferrer';
+    urlLink.textContent = url;
+    videoMetaLine.appendChild(urlLink);
+    
+    // Add bullet separator
+    videoMetaLine.appendChild(document.createTextNode(' • '));
+    
+    // Add title
+    videoMetaLine.appendChild(document.createTextNode(title));
+    
+    // Add bullet separator
+    videoMetaLine.appendChild(document.createTextNode(' • '));
+    
+    // Add author
+    videoMetaLine.appendChild(document.createTextNode(author));
+    
     this.updateUI();
   }
 
