@@ -1,30 +1,113 @@
+// Browser compatibility
 if (typeof browser === 'undefined') {
   var browser = chrome;
 }
 
-document.getElementById('save').onclick = async function() {
-  try {
-    const apiKey = document.getElementById('apiKey').value;
-    await browser.storage.sync.set({ apiKey });
-    
-    const status = document.getElementById('status');
-    status.textContent = 'API Key saved!';
-    setTimeout(() => { status.textContent = ''; }, 2000);
-  } catch (error) {
-    console.error('Error saving API key:', error);
-    const status = document.getElementById('status');
-    status.textContent = 'Error saving API key!';
-    setTimeout(() => { status.textContent = ''; }, 2000);
-  }
-};
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', async function() {
+  // Load saved API key
+  await loadApiKey();
+  
+  // Fetch and display version and build info
+  await loadVersionInfo();
+  
+  // Setup event listeners
+  setupEventListeners();
+});
 
-window.onload = async function() {
+// Load saved API key from storage
+async function loadApiKey() {
   try {
-    const data = await browser.storage.sync.get('apiKey');
-    if (data.apiKey) {
-      document.getElementById('apiKey').value = data.apiKey;
-    }
+    const result = await browser.storage.sync.get('userSettings');
+    const settings = result.userSettings || {};
+    const apiKey = settings.apiKey || '';
+    document.getElementById('apiKey').value = apiKey;
   } catch (error) {
     console.error('Error loading API key:', error);
+    showStatus('Error loading settings!', 'error');
   }
-}; 
+}
+
+// Save API key to storage
+async function saveApiKey() {
+  try {
+    const apiKey = document.getElementById('apiKey').value;
+    
+    // Get existing settings to preserve other values
+    const result = await browser.storage.sync.get('userSettings');
+    const existingSettings = result.userSettings || {};
+    
+    // Update only the apiKey
+    const updatedSettings = { ...existingSettings, apiKey };
+    
+    await browser.storage.sync.set({ userSettings: updatedSettings });
+    showStatus('API Key saved!', 'success');
+  } catch (error) {
+    console.error('Error saving API key:', error);
+    showStatus('Error saving API key!', 'error');
+  }
+}
+
+// Load version and build time information
+async function loadVersionInfo() {
+  try {
+    // Fetch version from manifest
+    const manifestResponse = await fetch(chrome.runtime.getURL('manifest.json'));
+    if (manifestResponse.ok) {
+      const manifest = await manifestResponse.json();
+      const versionEl = document.getElementById('version');
+      if (versionEl) versionEl.textContent = manifest.version || 'Unknown';
+    }
+  } catch (error) {
+    console.error('Error loading version:', error);
+    const versionEl = document.getElementById('version');
+    if (versionEl) versionEl.textContent = 'Unknown';
+  }
+
+  try {
+    // Fetch build time from build info
+    const buildInfoResponse = await fetch(chrome.runtime.getURL('build-info.json'));
+    if (buildInfoResponse.ok) {
+      const buildInfo = await buildInfoResponse.json();
+      const buildTimeEl = document.getElementById('buildTime');
+      if (buildTimeEl) buildTimeEl.textContent = buildInfo.buildTime || 'Unknown';
+    }
+  } catch (error) {
+    console.error('Error loading build info:', error);
+    const buildTimeEl = document.getElementById('buildTime');
+    if (buildTimeEl) buildTimeEl.textContent = 'Unknown';
+  }
+}
+
+// Show status message
+function showStatus(message, type = 'info') {
+  const statusEl = document.getElementById('status');
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.className = type;
+    
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      statusEl.textContent = '';
+      statusEl.className = '';
+    }, 3000);
+  }
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  const saveButton = document.getElementById('save');
+  if (saveButton) {
+    saveButton.addEventListener('click', saveApiKey);
+  }
+  
+  // Save on Enter key in API key field
+  const apiKeyInput = document.getElementById('apiKey');
+  if (apiKeyInput) {
+    apiKeyInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        saveApiKey();
+      }
+    });
+  }
+} 

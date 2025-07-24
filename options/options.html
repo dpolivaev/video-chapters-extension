@@ -11,9 +11,15 @@
   <div class="container">
     <h1>Extension Settings</h1>
     <label for="apiKey">Gemini API Key:</label>
-    <input type="text" id="apiKey" placeholder="Enter your Gemini API key" />
+    <input type="password" id="apiKey" placeholder="Enter your Gemini API key" />
     <button id="save">Save</button>
     <div id="status"></div>
+    <section class="setting-group">
+      <h2>About</h2>
+      <p>Version: <span id="version">Unknown</span></p>
+      <p>Created by Dimitry Polivaev</p>
+      <p>Build time: <span id="buildTime">Unknown</span></p>
+    </section>
   </div>
   <script src="options.js"></script>
 </body>
