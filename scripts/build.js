@@ -237,15 +237,24 @@ class ExtensionBuilder {
   async processManifest() {
     this.spinner = ora('Processing manifest').start();
     
+    // Read package.json to get the version (single source of truth)
+    const packageJsonPath = path.join(config.srcDir, 'package.json');
+    const packageJson = await fs.readJson(packageJsonPath);
+    const version = packageJson.version;
+    
     let manifestPath = path.join(config.srcDir, config.manifestFile);
     const manifest = await fs.readJson(manifestPath);
+    
+    manifest.version = version;
+    console.log(`  → Replaced version placeholder with ${version}`);
+
     // Write only manifest.json for browser compatibility
     await fs.writeJson(
       path.join(config.distDir, 'manifest.json'),
       manifest,
       { spaces: 2 }
     );
-    this.spinner.succeed('Manifest processed');
+    this.spinner.succeed(`Manifest processed (version: ${version})`);
   }
 
   /**
