@@ -1,6 +1,6 @@
 # Video Chapters Generator
 
-A cross-browser extension that automatically generates AI-powered chapter timecodes for YouTube videos using Google's Gemini AI and subtitle analysis.
+A cross-browser extension that automatically generates AI-powered chapter timecodes for YouTube videos using multiple AI providers (Google Gemini, OpenRouter) and subtitle analysis.
 
 Copyright (C) 2025 Dimitry Polivaev
 
@@ -22,12 +22,15 @@ along with this program. If not, see [https://www.gnu.org/licenses/](https://www
 ## Features
 
 * **One-Click Chapter Generation**: Generate chapters directly from YouTube video pages
-* **AI-Powered Analysis**: Uses Google Gemini AI to analyze video transcripts and create meaningful chapters
+* **Multiple AI Providers**: Choose from Google Gemini (direct API) or OpenRouter (with access to DeepSeek R1, Claude, GPT-4o, Llama, and more)
+* **Free Model Options**: Use DeepSeek R1 for free without requiring an API key
+* **Model Selection**: Choose from 11+ different AI models based on your needs and budget
 * **Custom Instructions**: Add personalized instructions to tailor chapter generation to your needs
 * **Instruction History**: Save and reuse successful instruction prompts
 * **Smart Tab Management**: Intelligent handling of results tabs and video navigation
 * **Session-Based Results**: Results are stored only for the current browser session
 * **Cross-Browser Support**: Works on both Chrome (Manifest V3) and Firefox (Manifest V2)
+* **Dynamic API Key Management**: Automatically shows the correct API key field based on selected model
 * **Multiple Export Formats**: Copy chapters in various formats for different use cases
 
 ---
@@ -77,12 +80,42 @@ along with this program. If not, see [https://www.gnu.org/licenses/](https://www
 
 ## Setup
 
-### API Key Configuration
+### Model Selection & API Configuration
 
+The extension supports multiple AI providers with different models:
+
+#### Free Options (No API Key Required)
+* **DeepSeek R1 Free**: Latest reasoning model, completely free to use
+
+#### Gemini Models (Direct Google API)
+* **Gemini 2.5 Pro**: Most capable model for complex analysis
+* **Gemini 2.5 Flash**: Faster model optimized for speed
+
+#### OpenRouter Models (Single API Key for Multiple Providers)
+* **DeepSeek R1**: Advanced reasoning capabilities
+* **Claude 3.5 Sonnet/Haiku**: Anthropic's powerful models
+* **GPT-4o/GPT-4o Mini**: OpenAI's latest models
+* **Llama 3.3 70B**: Meta's advanced open-source model
+* **Gemini via OpenRouter**: Access Gemini through OpenRouter
+
+### API Key Setup
+
+#### Option 1: Use Free Models
+1. Click the extension icon and select "DeepSeek R1 0528 (Free)"
+2. No API key required - start generating chapters immediately!
+
+#### Option 2: Gemini Direct API
 1. Get a free Gemini API key from [Google AI Studio](https://ai.google.dev)
-2. Click the extension icon in your browser toolbar
-3. Enter your API key in the options page
-4. Your API key is stored securely in your browser's local storage
+2. Open extension options page and enter your Gemini API key
+3. Select any Gemini model in the popup
+
+#### Option 3: OpenRouter (Multiple Models)
+1. Create a free account at [OpenRouter](https://openrouter.ai)
+2. Generate an API key from your OpenRouter dashboard
+3. Open extension options page and enter your OpenRouter API key  
+4. Select any OpenRouter model in the popup
+
+**Note**: API keys are stored securely in your browser's local storage and never leave your device except when sent to the respective AI service.
 
 ---
 
@@ -92,9 +125,11 @@ along with this program. If not, see [https://www.gnu.org/licenses/](https://www
 
 1. **Navigate to any YouTube video**
 2. **Open the extension popup** by clicking the extension icon
-3. **Add custom instructions** (optional) to guide the AI in generating specific types of chapters
-4. **Click "Generate Chapters"** to start the process
-5. **View results** in the automatically opened results tab
+3. **Select your preferred AI model** from the dropdown (defaults to free DeepSeek R1)
+4. **Enter API key if required** (automatically shows the correct field based on selected model)
+5. **Add custom instructions** (optional) to guide the AI in generating specific types of chapters
+6. **Click "Generate Chapters"** to start the process
+7. **View results** in the automatically opened results tab with model and prompt information displayed
 
 ### Custom Instructions
 
@@ -129,8 +164,11 @@ timecodes-browser-extension/
 ├── manifest.chrome.json
 ├── manifest.firefox.json
 ├── background/
-│   ├── background.js
-│   └── gemini-api.js
+│   ├── background.js           # Main service worker
+│   ├── llm.js                 # Base class for all LLM providers
+│   ├── prompt-generator.js    # Centralized prompt building
+│   ├── gemini-api.js         # Direct Google Gemini API integration
+│   └── openrouter-api.js     # OpenRouter API with multiple models
 ├── content/
 │   ├── content.js
 │   ├── content.css
@@ -153,6 +191,7 @@ timecodes-browser-extension/
 │   ├── build.js
 │   ├── generate-icons.js
 │   ├── package.js
+│   ├── clean.js
 │   └── validate.js
 └── vendor/
     └── browser-polyfill.js
@@ -160,6 +199,16 @@ timecodes-browser-extension/
 
 - Chrome build uses `manifest.chrome.json` (Manifest V3)
 - Firefox build uses `manifest.firefox.json` (Manifest V2)
+
+### Modular LLM Architecture
+
+The extension uses a modular architecture for AI provider integration:
+
+* **`llm.js`**: Base class with shared functionality (error handling, response parsing, token estimation)
+* **`prompt-generator.js`**: Centralized prompt building for different use cases and output formats  
+* **`gemini-api.js`**: Direct Google Gemini API integration (extends BaseLLM)
+* **`openrouter-api.js`**: OpenRouter API integration with 8+ models (extends BaseLLM)
+* **Dynamic routing**: Background script automatically routes requests to the appropriate API based on selected model
 
 ### Cross-Browser Compatibility
 
@@ -221,22 +270,31 @@ npm run generate-icons
 
 ### API Integration
 
-The extension integrates with Google's Gemini AI API:
+The extension integrates with multiple AI APIs through a modular architecture:
 
+#### Google Gemini API (Direct)
 * **Retry Logic**: Handles 503 errors with up to 3 retry attempts
-* **Error Handling**: Distinguishes between retryable and non-retryable errors
+* **Error Handling**: Distinguishes between retryable and non-retryable errors  
 * **Rate Limiting**: Respects API rate limits and quota restrictions
+
+#### OpenRouter API (Multiple Providers)
+* **Unified Interface**: Single API for accessing DeepSeek, Claude, GPT-4o, Llama, and Gemini
+* **Free Model Support**: Handles models that don't require API keys
+* **Provider-Specific Error Handling**: Tailored error messages based on model type and provider
+* **Dynamic Authentication**: Automatically handles authentication based on model selection
 
 ---
 
 ## Privacy & Security
 
 * **Local Storage Only**: All your data is stored solely in your browser’s local storage and never leaves your device except when explicitly sent to Gemini (Google’s LLM).
-* **No External Data Collection**: The extension does not send any data to external servers, except to Gemini for processing the transcript.
+* **No External Data Collection**: The extension does not send any data to external servers, except to your selected AI provider for processing the transcript.
 * **No DOM Parsing**: Subtitles are not extracted from the webpage DOM.
-* **Transcript Retrieval**: The extension retrieves subtitles from YouTube by issuing the same requests the browser makes when the user opens the transcript panel, and sends them to Gemini for processing.
+* **Transcript Retrieval**: The extension retrieves subtitles from YouTube by issuing the same requests the browser makes when the user opens the transcript panel, and sends them to your selected AI provider for processing.
 * **Minimal Permissions**: The extension requests only the permissions necessary for integration with YouTube and session storage.
 * **Session-Only Results**: Generated chapters are stored only for the current browser session and are not persisted.
+* **Provider Choice**: You control which AI service processes your data by selecting the model. Data is only sent to the provider of your chosen model.
+* **API Key Security**: API keys are stored locally in your browser and only transmitted to their respective services.
 
 ---
 
@@ -264,6 +322,19 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
+
+---
+
+## Recent Updates
+
+### v2.0.0 - Multi-Provider AI Support
+
+* **🚀 New Providers**: Added OpenRouter integration with 8+ AI models
+* **🆓 Free Options**: DeepSeek R1 available for free without API key
+* **🎯 Model Selection**: Choose from Gemini, Claude, GPT-4o, Llama, and more
+* **🏗️ Modular Architecture**: Clean separation of AI providers with shared functionality
+* **🔧 Smart UI**: Dynamic API key field based on selected model
+* **📊 Provider Info**: Results page shows which model and custom instructions were used
 
 ---
 
