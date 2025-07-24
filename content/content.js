@@ -32,7 +32,6 @@ if (window.hasYouTubeIntegration) {
   
   class YouTubeIntegration {
     constructor() {
-      // Removed subtitleExtractor and isProcessing as they're no longer needed
     }
 
     init() {
