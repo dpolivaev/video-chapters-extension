@@ -22,6 +22,14 @@
       </div>
     </header>
 
+    <!-- Progress Bar Section -->
+    <section class="progress-section" id="progressSection" style="display: none;">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-message" id="progressMessage">Generating chapters...</div>
+    </section>
+
     <!-- Video Info -->
     <section class="video-info" id="videoInfo">
       <div class="video-metadata">
@@ -33,45 +41,24 @@
 
     <!-- Tab Navigation -->
     <nav class="tab-nav">
-      <button class="tab-btn active" data-tab="chapters">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-        </svg>
-        Chapters
-      </button>
-      <button class="tab-btn" data-tab="subtitles">
+      <button class="tab-btn active" data-tab="subtitles">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path d="M20,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4M4,12H6V14H4V12M4,8H6V10H4V8M8,12H18V14H8V12M8,8H18V10H8V8Z"/>
         </svg>
         Subtitles
       </button>
+      <button class="tab-btn" data-tab="chapters">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+        </svg>
+        Chapters
+      </button>
     </nav>
 
     <!-- Tab Content -->
     <main class="tab-content">
-      <!-- Chapters Tab -->
-      <div class="tab-pane active" id="chaptersTab">
-        <div class="content-header">
-          <h3>Generated Chapters</h3>
-          <div class="content-actions">
-            <button id="copyChaptersBtn" class="btn-secondary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
-              </svg>
-              Copy
-            </button>
-          </div>
-        </div>
-        
-        <div class="content-body">
-          <div class="content-display">
-            <textarea id="chaptersContent" class="content-textarea" readonly placeholder="No chapters generated yet..."></textarea>
-          </div>
-        </div>
-      </div>
-
       <!-- Subtitles Tab -->
-      <div class="tab-pane" id="subtitlesTab">
+      <div class="tab-pane active" id="subtitlesTab">
         <div class="content-header">
           <h3>Video Subtitles</h3>
           <div class="content-actions">
@@ -91,6 +78,27 @@
           </div>
         </div>
       </div>
+
+      <!-- Chapters Tab -->
+      <div class="tab-pane" id="chaptersTab">
+        <div class="content-header">
+          <h3>Generated Chapters</h3>
+          <div class="content-actions">
+            <button id="copyChaptersBtn" class="btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        
+        <div class="content-body">
+          <div class="content-display">
+            <textarea id="chaptersContent" class="content-textarea" readonly placeholder="No chapters generated yet..."></textarea>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- Footer -->
@@ -99,14 +107,6 @@
         <span class="status-text" id="statusText">Ready</span>
       </div>
     </footer>
-  </div>
-
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading results...</div>
-    </div>
   </div>
 
   <!-- Notification Container -->

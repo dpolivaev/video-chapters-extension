@@ -19,7 +19,10 @@ class ResultsManager {
     this.results = null;
     this.currentFormat = 'text';
     this.geminiAPI = null;
-    
+    this.userSwitchedTab = false;
+    this.status = 'pending';
+    this.progress = 0;
+    this.progressTimeout = null;
     this.init();
   }
 
@@ -28,17 +31,91 @@ class ResultsManager {
    */
   async init() {
     try {
+      await this.checkStatusAndInit();
+    } catch (error) {
+      console.error('Error initializing results:', error);
+      this.showError('Error loading results: ' + error.message);
+      this.hideProgress();
+    }
+  }
+
+  async checkStatusAndInit() {
+    this.status = await this.getGenerationStatus();
+    if (this.status === 'done') {
       await this.loadResults();
       this.setupEventListeners();
       this.setupTabSwitching();
       this.initializeGeminiAPI();
+      this.switchTab('chapters');
       this.updateDisplay();
-      this.hideLoading();
-    } catch (error) {
-      console.error('Error initializing results:', error);
-      this.showError('Error loading results: ' + error.message);
-      this.hideLoading();
+      this.hideProgress();
+    } else {
+      this.switchTab('subtitles');
+      this.showProgress('Generating chapters...', 30);
+      this.setupEventListeners();
+      this.setupTabSwitching();
+      this.initializeGeminiAPI();
+      await this.loadResults();
+      this.updateDisplay();
+      this.pollForCompletion();
+      this.startProgressTimeout();
     }
+  }
+
+  async getGenerationStatus() {
+    try {
+      const response = await browser.runtime.sendMessage({ action: 'getGenerationStatus', resultId: this.resultId });
+      if (response && response.success) return response.status;
+    } catch (e) {}
+    return 'pending';
+  }
+
+  showProgress(message, percent) {
+    const section = document.getElementById('progressSection');
+    const fill = document.getElementById('progressFill');
+    const msg = document.getElementById('progressMessage');
+    section.style.display = 'block';
+    fill.style.width = (percent || 30) + '%';
+    msg.textContent = message || 'Generating chapters...';
+  }
+
+  hideProgress() {
+    const section = document.getElementById('progressSection');
+    section.style.display = 'none';
+    if (this.progressTimeout) {
+      clearTimeout(this.progressTimeout);
+      this.progressTimeout = null;
+    }
+  }
+
+  async pollForCompletion() {
+    if (this.status === 'done') return;
+    let elapsed = 0;
+    const poll = async () => {
+      const status = await this.getGenerationStatus();
+      if (status === 'done') {
+        this.status = 'done';
+        await this.loadResults();
+        this.updateDisplay();
+        if (!this.userSwitchedTab) this.switchTab('chapters');
+        this.hideProgress();
+      } else {
+        elapsed += 2;
+        if (elapsed >= 300) {
+          this.showProgress('Generation is taking longer than expected...', 90);
+        } else if (elapsed >= 60) {
+          this.showProgress('Still generating chapters, please wait...', 60);
+        }
+        setTimeout(poll, 2000);
+      }
+    };
+    poll();
+  }
+
+  startProgressTimeout() {
+    this.progressTimeout = setTimeout(() => {
+      this.showProgress('Generation timed out. Please try again.', 100);
+    }, 5 * 60 * 1000);
   }
 
   /**
@@ -130,6 +207,8 @@ class ResultsManager {
         if (targetPane) {
           targetPane.classList.add('active');
         }
+        if (this.status !== 'done' && targetTab !== 'subtitles') this.userSwitchedTab = true;
+        if (this.status === 'pending') this.userSwitchedTab = true;
       });
     });
   }
@@ -331,10 +410,12 @@ class ResultsManager {
   /**
    * Hide loading overlay
    */
-  hideLoading() {
-    const overlay = document.getElementById('loadingOverlay');
-    overlay.style.display = 'none';
-  }
+  hideLoading() {}
+
+  /**
+   * Show loading overlay
+   */
+  showLoading() {}
 
   /**
    * Show error message

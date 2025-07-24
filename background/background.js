@@ -229,6 +229,7 @@ let videoTabId = null;
 let videoUrl = null;
 let resultsTabsById = {};
 let resultsById = {};
+let generationStatusById = {};
 
 class BackgroundService {
   constructor() {
@@ -288,6 +289,13 @@ class BackgroundService {
           if (request.resultId) {
             resultsById[request.resultId] = request.results;
             sessionResults = request.results;
+            // Track status: if chapters is empty or only contains the URL, mark as pending; else done
+            const chapters = (request.results && request.results.chapters) || '';
+            if (!chapters.trim() || chapters.trim() === request.results.videoMetadata.url) {
+              generationStatusById[request.resultId] = 'pending';
+            } else {
+              generationStatusById[request.resultId] = 'done';
+            }
           }
           sendResponse({ success: true });
           return true;
@@ -302,6 +310,12 @@ class BackgroundService {
           } else {
             sendResponse({ success: false });
           }
+          return true;
+        }
+        case 'getGenerationStatus': {
+          const resultId = request.resultId;
+          const status = generationStatusById[resultId] || 'pending';
+          sendResponse({ success: true, status });
           return true;
         }
         case 'openResultsTab': {
@@ -469,7 +483,7 @@ class BackgroundService {
    */
   async handleGeminiProcessing(request, sendResponse) {
     try {
-      const { subtitleContent, customInstructions, apiKey, model } = request;
+      const { subtitleContent, customInstructions, apiKey, model, resultId } = request;
       
       const result = await this.geminiAPI.processSubtitles(
         subtitleContent,
@@ -478,9 +492,28 @@ class BackgroundService {
         model
       );
 
+      // If resultId is provided, update the stored results
+      if (resultId && resultsById[resultId]) {
+        const existingResults = resultsById[resultId];
+        const videoUrl = existingResults.videoMetadata.url;
+        let chaptersWithUrl = videoUrl + '\n\n' + result.chapters;
+        
+        existingResults.chapters = chaptersWithUrl;
+        generationStatusById[resultId] = 'done';
+        
+        resultsById[resultId] = existingResults;
+        sessionResults = existingResults;
+      }
+
       sendResponse({ success: true, data: result });
     } catch (error) {
       console.error('Gemini processing error:', error);
+      
+      // If resultId is provided, mark as error
+      if (request.resultId) {
+        generationStatusById[request.resultId] = 'error';
+      }
+      
       sendResponse({ success: false, error: error.message });
     }
   }

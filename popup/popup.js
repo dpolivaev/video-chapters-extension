@@ -368,60 +368,27 @@ class PopupManager {
     }
 
     try {
-      this.isProcessing = true;
-      this.updateProcessingState(true);
-      
-      // Save custom instructions to history if provided
       if (customInstructions && window.instructionHistory) {
         await window.instructionHistory.saveInstruction(customInstructions);
       }
 
       let subtitleContent = null;
 
-      // Check if we already have transcript content (from working extraction method)
       if (this.currentVideo.subtitleContent) {
-        console.log('PopupManager: Using pre-extracted transcript content');
-        this.updateProgress(40, 'Using extracted transcript...');
         subtitleContent = this.currentVideo.subtitleContent;
       } else {
-        // Step 1: Extract subtitles using original method
-        this.updateProgress(20, 'Extracting subtitles...');
-        
         const subtitleResponse = await this.sendMessageToTab({
           action: 'extractSubtitles'
         });
-
         if (!subtitleResponse || !subtitleResponse.success) {
           throw new Error(subtitleResponse?.error || 'Failed to extract subtitles');
         }
-
         subtitleContent = subtitleResponse.data.content;
       }
 
-      if (!subtitleContent) {
-        throw new Error('No subtitle content available');
-      }
-      
-      // Step 2: Process with Gemini
-      this.updateProgress(60, 'Processing with AI...');
-      
-      const geminiResponse = await browser.runtime.sendMessage({
-        action: 'processWithGemini',
-        subtitleContent: subtitleContent,
-        customInstructions: customInstructions,
-        apiKey: apiKey,
-        model: model
-      });
-      
-      if (!geminiResponse || !geminiResponse.success) {
-        throw new Error(geminiResponse?.error || 'AI processing failed');
-      }
-
-      // Step 3: Store results in background session relay with a unique resultId
       const resultId = Date.now();
       this._lastResultId = resultId;
-      // Prepend video URL and empty line to chapters
-      let chaptersWithUrl = this.currentVideo.url + '\n\n' + geminiResponse.data.chapters;
+      let chaptersWithUrl = this.currentVideo.url + '\n\n';
       const sessionResults = {
         resultId,
         subtitles: { content: subtitleContent },
@@ -435,22 +402,28 @@ class PopupManager {
       };
       await browser.runtime.sendMessage({ action: 'setSessionResults', results: sessionResults, resultId });
 
-      // Show view results button
-      document.getElementById('viewResultsBtn').style.display = 'inline-block';
-      
-      this.showNotification('Chapters generated successfully!', 'success');
-      
-      // Auto-open results after a short delay
-      setTimeout(() => {
-        this.viewResults();
-      }, 1000);
+      // Start generation in background (no await - let it run async)
+      browser.runtime.sendMessage({
+        action: 'processWithGemini',
+        subtitleContent: subtitleContent,
+        customInstructions: customInstructions,
+        apiKey: apiKey,
+        model: model,
+        resultId: resultId
+      });
 
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      let videoUrl = null;
+      if (this.currentVideo && this.currentVideo.url) {
+        videoUrl = this.currentVideo.url;
+      } else if (tab && tab.url) {
+        videoUrl = tab.url;
+      }
+      await browser.runtime.sendMessage({ action: 'openResultsTab', videoTabId: tab.id, videoUrl, resultId });
+      window.close();
     } catch (error) {
       console.error('PopupManager: Error generating chapters:', error);
       this.showNotification('Error: ' + error.message, 'error');
-    } finally {
-      this.isProcessing = false;
-      this.updateProcessingState(false);
     }
   }
 
