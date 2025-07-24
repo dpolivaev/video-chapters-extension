@@ -48,7 +48,11 @@ const config = {
     return process.argv.includes("--firefox") ? "manifest.firefox.json" : "manifest.chrome.json";
   },
   get requiredFiles() {
-    return [ this.manifestFile, "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/content.css", "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", "results/results.css", "results/results.js", "options/options.html", "options/options.css", "options/options.js", "vendor/browser-polyfill.js" ];
+    return [ this.manifestFile, "background/background.js", "background/prompt-generator.js", "background/llm.js", 
+      "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", 
+      "content/content.css", "popup/popup.html", "popup/popup.css", "popup/popup.js", 
+      "popup/instruction-history.js", "results/results.html", "results/results.css",
+       "results/results.js", "options/options.html", "options/options.css", "options/options.js", "vendor/browser-polyfill.js" ];
   },
   iconSizes: [ 16, 48, 128 ],
   minifyOptions: {
@@ -173,7 +177,9 @@ class ExtensionBuilder {
   }
   async processJavaScript() {
     this.spinner = ora("Processing JavaScript files").start();
-    const jsFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js", "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "popup/popup.js", "popup/instruction-history.js", "results/results.js", "options/options.js" ];
+    const jsFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js", 
+      "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "popup/popup.js", 
+      "popup/instruction-history.js", "results/results.js", "options/options.js" ];
     for (const file of jsFiles) {
       const srcPath = path.join(config.srcDir, file);
       const distPath = path.join(config.distDir, file);
@@ -256,7 +262,8 @@ class ExtensionBuilder {
     return content;
   }
   minifyCSS(css) {
-    return css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ").replace(/;\s*}/g, "}").replace(/\s*{\s*/g, "{").replace(/\s*}\s*/g, "}").replace(/;\s*/g, ";").trim();
+    return css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ").replace(/;\s*}/g, "}")
+    .replace(/\s*{\s*/g, "{").replace(/\s*}\s*/g, "}").replace(/;\s*/g, ";").trim();
   }
   minifyHTML(html) {
     return html.replace(/<!--[\s\S]*?-->/g, "").replace(/\s+/g, " ").replace(/>\s+</g, "><").trim();
@@ -278,7 +285,8 @@ class ExtensionBuilder {
   }
 }
 
-program.option("-d, --dev", "Development build").option("-p, --production", "Production build").option("-f, --firefox", "Firefox compatibility").option("-v, --verbose", "Verbose output").parse();
+program.option("-d, --dev", "Development build").option("-p, --production", "Production build")
+.option("-f, --firefox", "Firefox compatibility").option("-v, --verbose", "Verbose output").parse();
 
 const builder = new ExtensionBuilder(program.opts());
 
