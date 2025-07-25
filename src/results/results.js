@@ -32,8 +32,6 @@ class ResultsView {
   constructor(resultId) {
     this.resultId = resultId;
     this.results = null;
-    this.currentFormat = "text";
-    this.geminiAPI = null;
     this.userSwitchedTab = false;
     this.status = "pending";
     this.progress = 0;
@@ -55,14 +53,12 @@ class ResultsView {
       await this.loadResults();
       this.setupEventListeners();
       this.setupTabSwitching();
-      this.initializeGeminiAPI();
       this.switchTab("chapters");
       this.updateDisplay();
       this.hideProgress();
     } else if (this.status === "error") {
       this.setupEventListeners();
       this.setupTabSwitching();
-      this.initializeGeminiAPI();
       await this.loadResults();
       this.handleGenerationError();
     } else {
@@ -70,7 +66,6 @@ class ResultsView {
       this.showProgress(chrome.i18n.getMessage('progress_generating_chapters'), 30);
       this.setupEventListeners();
       this.setupTabSwitching();
-      this.initializeGeminiAPI();
       await this.loadResults();
       this.updateDisplay();
       this.pollForCompletion();
@@ -155,25 +150,6 @@ class ResultsView {
     if (!this.userSwitchedTab) {
       this.switchTab("chapters");
     }
-  }
-  initializeGeminiAPI() {
-    this.geminiAPI = {
-      formatChapters: (chapters, format) => {
-        switch (format) {
-         case "youtube":
-          return this.formatForYouTube(chapters);
-
-         case "json":
-          return this.formatAsJSON(chapters);
-
-         case "csv":
-          return this.formatAsCSV(chapters);
-
-         default:
-          return chapters;
-        }
-      }
-    };
   }
   setupEventListeners() {
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -354,55 +330,6 @@ class ResultsView {
       console.error("Error copying to clipboard:", error);
       this.showNotification(chrome.i18n.getMessage('failed_to_copy'), "error");
     }
-  }
-  formatForYouTube(chapters) {
-    const lines = chapters.split("\n").filter(line => line.trim());
-    return lines.map(line => {
-      if (line.includes(" - ")) {
-        return line.replace(" - ", " ");
-      }
-      return line;
-    }).join("\n");
-  }
-  formatAsJSON(chapters) {
-    const lines = chapters.split("\n").filter(line => line.trim());
-    const parsed = lines.map(line => {
-      const match = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)$/);
-      if (match) {
-        return {
-          timestamp: match[1],
-          title: match[2].trim(),
-          seconds: this.timestampToSeconds(match[1])
-        };
-      }
-      return {
-        timestamp: "",
-        title: line,
-        seconds: 0
-      };
-    }).filter(item => item.title);
-    return JSON.stringify(parsed, null, 2);
-  }
-  formatAsCSV(chapters) {
-    const lines = chapters.split("\n").filter(line => line.trim());
-    const header = "Timestamp,Title,Seconds\n";
-    const rows = lines.map(line => {
-      const match = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)$/);
-      if (match) {
-        return `"${match[1]}","${match[2].trim().replace(/"/g, '""')}",${this.timestampToSeconds(match[1])}`;
-      }
-      return `"","${line.replace(/"/g, '""')}",0`;
-    }).filter(row => row.split(",")[1] !== '""');
-    return header + rows.join("\n");
-  }
-  timestampToSeconds(timestamp) {
-    const parts = timestamp.split(":").map(Number);
-    if (parts.length === 2) {
-      return parts[0] * 60 + parts[1];
-    } else if (parts.length === 3) {
-      return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    }
-    return 0;
   }
   hideLoading() {}
   showLoading() {}
