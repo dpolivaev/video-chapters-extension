@@ -730,6 +730,10 @@ class PopupView {
       });
       if (response && response.open) {
         document.getElementById("viewResultsBtn").style.display = "inline-block";
+        // Store the resultId for the view results button
+        if (response.resultId) {
+          this._lastResultId = response.resultId;
+        }
       } else {
         document.getElementById("viewResultsBtn").style.display = "none";
       }

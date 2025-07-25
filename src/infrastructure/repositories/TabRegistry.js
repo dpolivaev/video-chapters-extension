@@ -42,6 +42,8 @@ class TabRegistry {
         }
       }
       
+      this.cleanupResultsTab(tabId);
+      
       return true;
     }
     return false;
@@ -170,5 +172,15 @@ class TabRegistry {
         this.resultsTabs.delete(resultId);
       }
     }
+  }
+  
+  getResultIdForTab(tabId) {
+    this.resultsTabs = this.resultsTabs || new Map();
+    for (const [resultId, storedTabId] of this.resultsTabs.entries()) {
+      if (storedTabId === tabId) {
+        return resultId;
+      }
+    }
+    return null;
   }
 }

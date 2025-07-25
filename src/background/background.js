@@ -253,9 +253,12 @@ class BackgroundService {
             .then(validTabIds => {
               const firstValidTab = validTabIds.find(id => id !== null);
               if (firstValidTab) {
+                // Find the resultId for this tabId
+                const resultId = tabRegistry.getResultIdForTab(firstValidTab);
                 sendResponse({
                   open: true,
-                  tabId: firstValidTab
+                  tabId: firstValidTab,
+                  resultId: resultId
                 });
               } else {
                 sendResponse({ open: false });
