@@ -86,6 +86,7 @@
   "content_too_long": { "message": "The video content is too long. Try with a shorter video or split the content." },
   "content_filtered": { "message": "Content was filtered by safety systems. Try with different content." },
   "general_error": { "message": "Please try again or switch to a different model." },
+  "free": { "message": "Free" },
   "about_github_link_text": { "message": "Project on GitHub" },
   "about_license_text": { "message": "Licensed under GPL3 or later" },
   "about_license_link_text": { "message": "View License" }

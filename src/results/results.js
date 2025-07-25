@@ -270,7 +270,9 @@ class ResultsView {
     if (!pageTitle) return;
     let title = chrome.i18n.getMessage('results_page_title');
     if (this.results && this.results.model) {
+      console.log('🔍 MODEL_DEBUG: Stored model ID:', this.results.model);
       const modelName = this.getModelDisplayName(this.results.model);
+      console.log('🔍 MODEL_DEBUG: Display name:', modelName);
       title += ` (${modelName})`;
     }
     pageTitle.textContent = title;
@@ -284,19 +286,20 @@ class ResultsView {
     }
   }
   getModelDisplayName(model) {
-    if (model.includes("gemini-2.5-pro")) return chrome.i18n.getMessage('gemini_2_5_pro');
-    if (model.includes("gemini-2.5-flash")) return chrome.i18n.getMessage('gemini_2_5_flash');
-    if (model.includes("deepseek-r1-0528:free")) return chrome.i18n.getMessage('deepseek_r1_free');
-    if (model.includes("deepseek-r1-0528")) return chrome.i18n.getMessage('deepseek_r1');
-    if (model.includes("deepseek-r1")) return chrome.i18n.getMessage('deepseek_r1');
-    if (model.includes("claude-3.5-sonnet")) return chrome.i18n.getMessage('claude_3_5_sonnet');
-    if (model.includes("claude-3.5-haiku")) return chrome.i18n.getMessage('claude_3_5_haiku');
-    if (model.includes("gpt-4o-mini")) return chrome.i18n.getMessage('gpt_4o_mini');
-    if (model.includes("gpt-4o")) return chrome.i18n.getMessage('gpt_4o');
-    if (model.includes("llama-3.3-70b")) return chrome.i18n.getMessage('llama_3_3_70b');
+    if (model.includes("gemini-2.5-pro")) return "Gemini 2.5 Pro";
+    if (model.includes("gemini-2.5-flash")) return "Gemini 2.5 Flash";
+    if (model.includes("deepseek-r1-0528:free")) return "DeepSeek R1 (Free)";
+    if (model.includes("deepseek-r1-0528")) return "DeepSeek R1";
+    if (model.includes("deepseek-r1")) return "DeepSeek R1";
+    if (model.includes("claude-3.5-sonnet")) return "Claude 3.5 Sonnet";
+    if (model.includes("claude-3.5-haiku")) return "Claude 3.5 Haiku";
+    if (model.includes("gpt-4o-mini")) return "GPT-4o Mini";
+    if (model.includes("gpt-4o")) return "GPT-4o";
+    if (model.includes("llama-3.3-70b")) return "Llama 3.3 70B";
     const parts = model.split("/");
     const modelPart = parts[parts.length - 1];
-    return modelPart.replace(/:free$/, " (" + chrome.i18n.getMessage('free') + ")");
+    const freeText = chrome.i18n.getMessage('free') || 'Free';
+    return modelPart.replace(/:free$/, " (" + freeText + ")");
   }
   updateChaptersDisplay() {
     if (!this.results || !this.results.chapters) return;
