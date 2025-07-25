@@ -37,7 +37,7 @@ async function loadApiKeys() {
     document.getElementById("openRouterApiKey").value = settings.openRouterApiKey || "";
   } catch (error) {
     console.error("Error loading API keys:", error);
-    showStatus("Error loading settings!", "error");
+    showStatus(chrome.i18n.getMessage('error_loading_settings'), "error");
   }
 }
 
@@ -53,10 +53,10 @@ async function saveApiKey() {
     await browser.storage.sync.set({
       userSettings: updatedSettings
     });
-    showStatus("Gemini API Key saved!", "success");
+    showStatus(chrome.i18n.getMessage('gemini_api_key_saved'), "success");
   } catch (error) {
     console.error("Error saving Gemini API key:", error);
-    showStatus("Error saving Gemini API key!", "error");
+    showStatus(chrome.i18n.getMessage('error_saving_gemini_api_key'), "error");
   }
 }
 
@@ -72,10 +72,10 @@ async function saveOpenRouterApiKey() {
     await browser.storage.sync.set({
       userSettings: updatedSettings
     });
-    showStatus("OpenRouter API Key saved!", "success");
+    showStatus(chrome.i18n.getMessage('openrouter_api_key_saved'), "success");
   } catch (error) {
     console.error("Error saving OpenRouter API key:", error);
-    showStatus("Error saving OpenRouter API key!", "error");
+    showStatus(chrome.i18n.getMessage('error_saving_openrouter_api_key'), "error");
   }
 }
 

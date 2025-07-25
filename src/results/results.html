@@ -22,9 +22,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Chapters - Results</title>
+  <title>__MSG_results_page_title__</title>
   <link rel="stylesheet" href="results.css">
   <script src="../vendor/browser-polyfill.js"></script>
+  <script src="../popup/l10n.js"></script>
 </head>
 <body>
   <div class="container">
@@ -35,12 +36,12 @@
           <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
         </svg>
         <div class="title-section">
-          <div class="title" id="pageTitle">Chapters</div>
+          <div class="title" id="pageTitle">__MSG_results_page_title__</div>
           <div class="user-instructions" id="userInstructions"></div>
         </div>
       </div>
       <div class="header-actions">
-        <button id="backBtn" class="btn-secondary">Back to Video</button>
+        <button id="backBtn" class="btn-secondary">__MSG_back_to_video_button__</button>
       </div>
     </header>
 
@@ -49,13 +50,13 @@
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
       </div>
-      <div class="progress-message" id="progressMessage">Generating chapters...</div>
+      <div class="progress-message" id="progressMessage">__MSG_progress_generating_chapters__</div>
     </section>
 
     <!-- Video Info -->
     <section class="video-info" id="videoInfo">
       <div class="video-metadata">
-        <h2 class="video-title" id="videoTitle">Loading...</h2>
+        <h2 class="video-title" id="videoTitle">__MSG_video_title_loading__</h2>
         <p class="video-author" id="videoAuthor"></p>
         <p class="generation-time" id="generationTime"></p>
       </div>
@@ -67,13 +68,13 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path d="M20,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4M4,12H6V14H4V12M4,8H6V10H4V8M8,12H18V14H8V12M8,8H18V10H8V8Z"/>
         </svg>
-        Subtitles
+        __MSG_tab_subtitles__
       </button>
       <button class="tab-btn" data-tab="chapters">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
         </svg>
-        Chapters
+        __MSG_tab_chapters__
       </button>
     </nav>
 
@@ -82,21 +83,21 @@
       <!-- Subtitles Tab -->
       <div class="tab-pane active" id="subtitlesTab">
         <div class="content-header">
-          <h3>Video Subtitles</h3>
+          <h3>__MSG_video_subtitles_header__</h3>
           <div class="content-actions">
             <div class="subtitle-info" id="subtitleInfo"></div>
             <button id="copySubtitlesBtn" class="btn-secondary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
               </svg>
-              Copy
+              __MSG_copy_button__
             </button>
           </div>
         </div>
         
         <div class="content-body">
           <div class="content-display">
-            <textarea id="subtitlesContent" class="content-textarea" readonly placeholder="No subtitles available..."></textarea>
+            <textarea id="subtitlesContent" class="content-textarea" readonly placeholder="__MSG_no_subtitles_available__"></textarea>
           </div>
         </div>
       </div>
@@ -104,20 +105,20 @@
       <!-- Chapters Tab -->
       <div class="tab-pane" id="chaptersTab">
         <div class="content-header">
-          <h3>Generated Chapters</h3>
+          <h3>__MSG_generated_chapters_header__</h3>
           <div class="content-actions">
             <button id="copyChaptersBtn" class="btn-secondary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
               </svg>
-              Copy
+              __MSG_copy_button__
             </button>
           </div>
         </div>
         
         <div class="content-body">
           <div class="content-display">
-            <textarea id="chaptersContent" class="content-textarea" readonly placeholder="No chapters generated yet..."></textarea>
+            <textarea id="chaptersContent" class="content-textarea" readonly placeholder="__MSG_no_chapters_generated__"></textarea>
           </div>
         </div>
       </div>
@@ -126,7 +127,7 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-info">
-        <span class="status-text" id="statusText">Ready</span>
+        <span class="status-text" id="statusText">__MSG_status_ready__</span>
       </div>
     </footer>
   </div>

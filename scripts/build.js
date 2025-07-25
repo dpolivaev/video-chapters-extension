@@ -35,7 +35,7 @@ const Jimp = require("jimp");
 const {minify: minify} = require("terser");
 
 const config = {
-  srcDir: process.cwd(),
+  srcDir: path.join(process.cwd(), "src"),
   get distDir() {
     if (process.argv.includes("--firefox")) {
       return path.join(process.cwd(), "dist", "firefox");
@@ -47,12 +47,13 @@ const config = {
   get manifestFile() {
     return process.argv.includes("--firefox") ? "manifest.firefox.json" : "manifest.chrome.json";
   },
-  get requiredFiles() {
-    return [ this.manifestFile, "background/background.js", "background/prompt-generator.js", "background/llm.js", 
-      "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", 
-      "content/content.css", "popup/popup.html", "popup/popup.css", "popup/popup.js", 
-      "popup/instruction-history.js", "results/results.html", "results/results.css",
-       "results/results.js", "options/options.html", "options/options.css", "options/options.js", "vendor/browser-polyfill.js" ];
+  get manifestPath() {
+    return path.join(process.cwd(), this.manifestFile);
+  },
+  // Special files that need individual handling
+  specialFiles: {
+    vendor: ["vendor/browser-polyfill.js"],
+    legal: ["LICENSE", "README.md"]
   },
   iconSizes: [ 16, 48, 128 ],
   minifyOptions: {
@@ -79,6 +80,58 @@ class ExtensionBuilder {
     };
     this.spinner = null;
   }
+
+  // Helper method to recursively discover files by extension in src/
+  async discoverFiles(extension) {
+    const files = [];
+    
+    // Add manifest file (lives in root, not src/)
+    if (extension === '.json') {
+      files.push(config.manifestFile);
+    }
+    
+    // Recursively scan src/ directory
+    const scanDirectory = async (dir, relativePath = '') => {
+      if (!(await fs.pathExists(dir))) return;
+      
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        const relPath = path.join(relativePath, entry.name);
+        
+        if (entry.isDirectory()) {
+          await scanDirectory(fullPath, relPath);
+        } else if (entry.isFile() && path.extname(entry.name) === extension) {
+          files.push(relPath);
+        }
+      }
+    };
+    
+    await scanDirectory(config.srcDir);
+    
+    // Add special files from root directory
+    for (const fileList of Object.values(config.specialFiles)) {
+      for (const file of fileList) {
+        if (path.extname(file) === extension) {
+          files.push(file);
+        }
+      }
+    }
+    
+    return files;
+  }
+
+  // Helper method to get all required files
+  async getAllRequiredFiles() {
+    const jsFiles = await this.discoverFiles('.js');
+    const cssFiles = await this.discoverFiles('.css');
+    const htmlFiles = await this.discoverFiles('.html');
+    const jsonFiles = await this.discoverFiles('.json');
+    
+    return [...jsFiles, ...cssFiles, ...htmlFiles, ...jsonFiles];
+  }
+
   async build() {
     try {
       this.log(chalk.blue("🔨 Building Video Chapters Generator Extension\n"));
@@ -86,6 +139,7 @@ class ExtensionBuilder {
       await this.validateSource();
       await this.createDistDirectory();
       await this.copyStaticFiles();
+      await this.copyLocales();
       await this.processManifest();
       await this.processJavaScript();
       await this.processCSS();
@@ -117,56 +171,96 @@ class ExtensionBuilder {
   async validateSource() {
     this.spinner = ora("Validating source files").start();
     const missing = [];
-    for (const file of config.requiredFiles) {
-      const filePath = path.join(config.srcDir, file);
-      if (!await fs.pathExists(filePath)) {
-        missing.push(file);
+    
+    // Check src directory exists
+    if (!await fs.pathExists(config.srcDir)) {
+      missing.push("src/ (directory)");
+    }
+    
+    // Check manifest file (in root)
+    if (!await fs.pathExists(config.manifestPath)) {
+      missing.push(config.manifestFile);
+    }
+    
+    // Check special files
+    for (const fileList of Object.values(config.specialFiles)) {
+      for (const file of fileList) {
+        const filePath = path.join(process.cwd(), file);
+        if (!await fs.pathExists(filePath)) {
+          missing.push(file);
+        }
       }
     }
+    
     if (missing.length > 0) {
-      this.spinner.fail("Missing required files");
-      throw new Error(`Missing files: ${missing.join(", ")}`);
+      this.spinner.fail("Missing required files/directories");
+      throw new Error(`Missing: ${missing.join(", ")}`);
     }
     this.spinner.succeed("Source files validated");
   }
   async createDistDirectory() {
     this.spinner = ora("Creating distribution structure").start();
-    const dirs = [ "background", "content", "popup", "results", "options", "icons", "vendor" ];
-    for (const dir of dirs) {
-      await fs.ensureDir(path.join(config.distDir, dir));
-    }
-    await fs.copy(path.join(config.srcDir, "vendor", "browser-polyfill.js"), path.join(config.distDir, "vendor", "browser-polyfill.js"));
+    
+    // Create dist root
+    await fs.ensureDir(config.distDir);
+    
+    // Recursively create directory structure from src/
+    const createDirStructure = async (srcDir, distDir) => {
+      if (!(await fs.pathExists(srcDir))) return;
+      
+      const entries = await fs.readdir(srcDir, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const srcSubDir = path.join(srcDir, entry.name);
+          const distSubDir = path.join(distDir, entry.name);
+          await fs.ensureDir(distSubDir);
+          await createDirStructure(srcSubDir, distSubDir);
+        }
+      }
+    };
+    
+    await createDirStructure(config.srcDir, config.distDir);
+    
+    // Create additional required directories
+    await fs.ensureDir(path.join(config.distDir, "icons"));
+    await fs.ensureDir(path.join(config.distDir, "vendor"));
+    
+    // Copy vendor files immediately
+    await fs.copy(path.join(process.cwd(), "vendor", "browser-polyfill.js"), path.join(config.distDir, "vendor", "browser-polyfill.js"));
+    
     this.spinner.succeed("Distribution structure created");
   }
   async copyStaticFiles() {
     this.spinner = ora("Copying static files").start();
-    const htmlFiles = [ "popup/popup.html", "results/results.html", "options/options.html" ];
-    for (const file of htmlFiles) {
-      await fs.copy(path.join(config.srcDir, file), path.join(config.distDir, file));
-    }
-    const cssFiles = [ "options/options.css" ];
-    for (const file of cssFiles) {
-      await fs.copy(path.join(config.srcDir, file), path.join(config.distDir, file));
-    }
-    const jsFiles = [ "options/options.js" ];
-    for (const file of jsFiles) {
-      await fs.copy(path.join(config.srcDir, file), path.join(config.distDir, file));
-    }
-    const legalFiles = [ "LICENSE", "README.md" ];
-    for (const file of legalFiles) {
-      const srcPath = path.join(config.srcDir, file);
+    
+    // Copy legal files (from root directory)
+    for (const file of config.specialFiles.legal) {
+      const srcPath = path.join(process.cwd(), file);
       if (await fs.pathExists(srcPath)) {
         await fs.copy(srcPath, path.join(config.distDir, file));
       }
     }
+    
     this.spinner.succeed("Static files copied");
+  }
+  async copyLocales() {
+    this.spinner = ora("Copying locales").start();
+    const localesSrc = path.join(config.srcDir, "_locales");
+    const localesDest = path.join(config.distDir, "_locales");
+    if (await fs.pathExists(localesSrc)) {
+      await fs.copy(localesSrc, localesDest);
+      this.spinner.succeed("Locales copied");
+    } else {
+      this.spinner.info("No _locales directory to copy");
+    }
   }
   async processManifest() {
     this.spinner = ora("Processing manifest").start();
-    const packageJsonPath = path.join(config.srcDir, "package.json");
+    const packageJsonPath = path.join(process.cwd(), "package.json");
     const packageJson = await fs.readJson(packageJsonPath);
     const version = packageJson.version;
-    let manifestPath = path.join(config.srcDir, config.manifestFile);
+    const manifestPath = config.manifestPath;
     const manifest = await fs.readJson(manifestPath);
     manifest.version = version;
     console.log(`  → Replaced version placeholder with ${version}`);
@@ -177,57 +271,91 @@ class ExtensionBuilder {
   }
   async processJavaScript() {
     this.spinner = ora("Processing JavaScript files").start();
-    const jsFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js", 
-      "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "popup/popup.js", 
-      "popup/instruction-history.js", "results/results.js", "options/options.js" ];
+    const jsFiles = await this.discoverFiles('.js');
+    
     for (const file of jsFiles) {
-      const srcPath = path.join(config.srcDir, file);
+      // Skip vendor files as they're copied directly in createDistDirectory
+      if (file.startsWith('vendor/')) continue;
+      
+      // Determine source path - special files come from root, others from src/
+      const isSpecialFile = Object.values(config.specialFiles).flat().includes(file);
+      const srcPath = isSpecialFile ? 
+        path.join(process.cwd(), file) : 
+        path.join(config.srcDir, file);
+        
       const distPath = path.join(config.distDir, file);
       let content = await fs.readFile(srcPath, "utf8");
+      
+      // Special handling for background.js
       if (file === "background/background.js") {
-        const polyfillPath = path.join(config.srcDir, "vendor", "browser-polyfill.js");
+        const polyfillPath = path.join(process.cwd(), "vendor", "browser-polyfill.js");
         const polyfill = await fs.readFile(polyfillPath, "utf8");
         content = polyfill + "\n" + content;
       }
+      
       content = this.processImports(content);
+      
       if (this.options.production && !this.options.dev) {
         const result = await minify(content, config.minifyOptions);
         content = result.code;
       }
+      
       await fs.writeFile(distPath, content);
     }
+    
     this.spinner.succeed("JavaScript files processed");
   }
   async processCSS() {
     this.spinner = ora("Processing CSS files").start();
-    const cssFiles = [ "content/content.css", "popup/popup.css", "results/results.css", "options/options.css" ];
+    const cssFiles = await this.discoverFiles('.css');
+    
     for (const file of cssFiles) {
-      const srcPath = path.join(config.srcDir, file);
+      // Determine source path - special files come from root, others from src/
+      const isSpecialFile = Object.values(config.specialFiles).flat().includes(file);
+      const srcPath = isSpecialFile ? 
+        path.join(process.cwd(), file) : 
+        path.join(config.srcDir, file);
+        
       const distPath = path.join(config.distDir, file);
       let content = await fs.readFile(srcPath, "utf8");
+      
       if (this.options.production && !this.options.dev) {
         content = this.minifyCSS(content);
       }
+      
       await fs.writeFile(distPath, content);
     }
+    
     this.spinner.succeed("CSS files processed");
   }
   async processHTML() {
     this.spinner = ora("Processing HTML files").start();
-    const htmlFiles = [ "popup/popup.html", "results/results.html", "options/options.html" ];
+    const htmlFiles = await this.discoverFiles('.html');
+    
     for (const file of htmlFiles) {
+      // Determine source path - special files come from root, others from src/
+      const isSpecialFile = Object.values(config.specialFiles).flat().includes(file);
+      const srcPath = isSpecialFile ? 
+        path.join(process.cwd(), file) : 
+        path.join(config.srcDir, file);
+        
       const distPath = path.join(config.distDir, file);
+      
+      // Copy HTML file first, then process
+      await fs.copy(srcPath, distPath);
+      
       let content = await fs.readFile(distPath, "utf8");
       if (this.options.production && !this.options.dev) {
         content = this.minifyHTML(content);
       }
       await fs.writeFile(distPath, content);
     }
+    
     this.spinner.succeed("HTML files processed");
   }
   async generateIcons() {
     this.spinner = ora("Generating icons").start();
-    const iconsDir = path.join(config.srcDir, "icons");
+    const iconsDir = path.join(process.cwd(), "icons");
     const distIconsDir = path.join(config.distDir, "icons");
     if (await fs.pathExists(iconsDir)) {
       await fs.copy(iconsDir, distIconsDir);
@@ -237,22 +365,75 @@ class ExtensionBuilder {
     await this.generatePlaceholderIcons();
     this.spinner.succeed("Placeholder icons generated");
   }
+
+  async generatePlaceholderIcons() {
+    const iconsDir = path.join(config.distDir, "icons");
+    await fs.ensureDir(iconsDir);
+    
+    // Create simple placeholder icons for each required size
+    for (const size of config.iconSizes) {
+      const iconPath = path.join(iconsDir, `icon${size}.png`);
+      // Create a simple colored square as placeholder
+      const canvas = await new Promise((resolve, reject) => {
+        try {
+          const canvas = require('canvas').createCanvas(size, size);
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#4CAF50';
+          ctx.fillRect(0, 0, size, size);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `${size / 4}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.fillText('VCG', size / 2, size / 2);
+          resolve(canvas);
+        } catch (error) {
+          // If canvas is not available, create a minimal PNG
+          resolve(null);
+        }
+      });
+      
+      if (canvas) {
+        const buffer = canvas.toBuffer('image/png');
+        await fs.writeFile(iconPath, buffer);
+      } else {
+        // Fallback: create a minimal valid PNG file
+        const minimalPng = Buffer.from([
+          0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+          0x00, 0x00, 0x00, 0x0D, // IHDR chunk length
+          0x49, 0x48, 0x44, 0x52, // IHDR
+          0x00, 0x00, 0x00, size, 0x00, 0x00, 0x00, size, // width x height
+          0x08, 0x02, 0x00, 0x00, 0x00 // bit depth, color type, compression, filter, interlace
+        ]);
+        await fs.writeFile(iconPath, minimalPng);
+      }
+    }
+  }
   async validateBuild() {
     this.spinner = ora("Validating build").start();
+    
+    // Check manifest
     const manifest = await fs.readJson(path.join(config.distDir, "manifest.json"));
     if (!manifest.version) {
       throw new Error("Manifest missing version");
     }
-    const requiredFiles = [ "background/background.js", "background/prompt-generator.js", "background/llm.js",
-      "background/gemini-api.js", "background/openrouter-api.js", "content/content.js", "content/content.css", 
-      "popup/popup.html", "popup/popup.css", "popup/popup.js", "popup/instruction-history.js", "results/results.html", 
-      "results/results.css", "results/results.js", "options/options.html", "options/options.css", "options/options.js" ];
-    for (const file of requiredFiles) {
+    
+    // Check that all discovered source files were built
+    const allFiles = await this.getAllRequiredFiles();
+    const missing = [];
+    
+    for (const file of allFiles) {
+      // Skip manifest as it's renamed to manifest.json
+      if (file === config.manifestFile) continue;
+      
       const filePath = path.join(config.distDir, file);
       if (!await fs.pathExists(filePath)) {
-        throw new Error(`Missing build file: ${file}`);
+        missing.push(file);
       }
     }
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing build files: ${missing.join(", ")}`);
+    }
+    
     this.spinner.succeed("Build validation passed");
   }
   processImports(content) {

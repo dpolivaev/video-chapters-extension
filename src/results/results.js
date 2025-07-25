@@ -45,7 +45,7 @@ class ResultsView {
       await this.checkStatusAndInit();
     } catch (error) {
       console.error("Error initializing results:", error);
-      this.showError("Error loading results: " + error.message);
+      this.showError(chrome.i18n.getMessage('error_loading_results') + ": " + error.message);
       this.hideProgress();
     }
   }
@@ -67,7 +67,7 @@ class ResultsView {
       this.handleGenerationError();
     } else {
       this.switchTab("subtitles");
-      this.showProgress("Generating chapters...", 30);
+      this.showProgress(chrome.i18n.getMessage('progress_generating_chapters'), 30);
       this.setupEventListeners();
       this.setupTabSwitching();
       this.initializeGeminiAPI();
@@ -93,7 +93,7 @@ class ResultsView {
     const msg = document.getElementById("progressMessage");
     section.style.display = "block";
     fill.style.width = (percent || 30) + "%";
-    msg.textContent = message || "Generating chapters...";
+    msg.textContent = message || chrome.i18n.getMessage('progress_generating_chapters');
   }
   hideProgress() {
     const section = document.getElementById("progressSection");
@@ -122,9 +122,9 @@ class ResultsView {
       } else {
         elapsed += 2;
         if (elapsed >= 300) {
-          this.showProgress("Generation is taking longer than expected...", 90);
+          this.showProgress(chrome.i18n.getMessage('generation_is_taking_longer_than_expected'), 90);
         } else if (elapsed >= 60) {
-          this.showProgress("Still generating chapters, please wait...", 60);
+          this.showProgress(chrome.i18n.getMessage('still_generating_chapters_please_wait'), 60);
         }
         setTimeout(poll, 2e3);
       }
@@ -133,23 +133,23 @@ class ResultsView {
   }
   startProgressTimeout() {
     this.progressTimeout = setTimeout(() => {
-      this.showProgress("Generation timed out. Please try again.", 100);
+      this.showProgress(chrome.i18n.getMessage('generation_timed_out_please_try_again'), 100);
     }, 5 * 60 * 1e3);
   }
   async handleGenerationError() {
-    let errorMessage = "Chapter generation failed.";
-    let suggestion = "Please try again.";
+    let errorMessage = chrome.i18n.getMessage('chapter_generation_failed');
+    let suggestion = chrome.i18n.getMessage('please_try_again');
     if (this.results && this.results.error) {
       errorMessage = this.results.error;
       if (this.results.errorType && this.results.errorType.suggestion) {
         suggestion = this.results.errorType.suggestion;
       }
     }
-    this.showNotification(`${errorMessage} ${suggestion}`, "error");
-    document.getElementById("statusText").textContent = "Generation failed";
+    this.showNotification(errorMessage + ' ' + suggestion, "error");
+    document.getElementById("statusText").textContent = chrome.i18n.getMessage('generation_failed');
     const chaptersContent = document.getElementById("chaptersContent");
     if (chaptersContent) {
-      chaptersContent.value = `Error: ${errorMessage}\n\nSuggestion: ${suggestion}\n\nPlease try again or switch to a different model.`;
+      chaptersContent.value = chrome.i18n.getMessage('error') + ': ' + errorMessage + '\n\n' + chrome.i18n.getMessage('please_try_again') + '\n\n' + chrome.i18n.getMessage('general_error');
       chaptersContent.classList.add("error-content");
     }
     if (!this.userSwitchedTab) {
@@ -239,7 +239,7 @@ class ResultsView {
         this.updatePageTitle();
         return;
       } else {
-        throw new Error("No results found in this session. Please generate chapters first.");
+        throw new Error(chrome.i18n.getMessage('no_results_found_in_this_session_please_generate_chapters_first'));
       }
     } catch (error) {
       console.error("Error loading results:", error);
@@ -256,19 +256,19 @@ class ResultsView {
   updateVideoInfo() {
     const metadata = this.results.videoMetadata;
     if (!metadata) return;
-    document.getElementById("videoTitle").textContent = metadata.title || "Unknown Title";
-    document.getElementById("videoAuthor").textContent = metadata.author || "Unknown Author";
+    document.getElementById("videoTitle").textContent = metadata.title || chrome.i18n.getMessage('unknown_title');
+    document.getElementById("videoAuthor").textContent = metadata.author || chrome.i18n.getMessage('unknown_author');
     if (this.results.timestamp) {
       const date = new Date(this.results.timestamp);
       const timeStr = date.toLocaleDateString() + " at " + date.toLocaleTimeString();
-      document.getElementById("generationTime").textContent = `Generated on ${timeStr}`;
+      document.getElementById("generationTime").textContent = chrome.i18n.getMessage('generated_on') + ' ' + timeStr;
     }
   }
   updatePageTitle() {
     const pageTitle = document.getElementById("pageTitle");
     const userInstructions = document.getElementById("userInstructions");
     if (!pageTitle) return;
-    let title = "Chapters";
+    let title = chrome.i18n.getMessage('results_page_title');
     if (this.results && this.results.model) {
       const modelName = this.getModelDisplayName(this.results.model);
       title += ` (${modelName})`;
@@ -276,7 +276,7 @@ class ResultsView {
     pageTitle.textContent = title;
     if (userInstructions) {
       if (this.results && this.results.customInstructions && this.results.customInstructions.trim()) {
-        userInstructions.textContent = `"${this.results.customInstructions.trim()}"`;
+        userInstructions.textContent = '"' + this.results.customInstructions.trim() + '"';
         userInstructions.style.display = "block";
       } else {
         userInstructions.style.display = "none";
@@ -284,19 +284,19 @@ class ResultsView {
     }
   }
   getModelDisplayName(model) {
-    if (model.includes("gemini-2.5-pro")) return "Gemini 2.5 Pro";
-    if (model.includes("gemini-2.5-flash")) return "Gemini 2.5 Flash";
-    if (model.includes("deepseek-r1-0528:free")) return "DeepSeek R1 Free";
-    if (model.includes("deepseek-r1-0528")) return "DeepSeek R1";
-    if (model.includes("deepseek-r1")) return "DeepSeek R1";
-    if (model.includes("claude-3.5-sonnet")) return "Claude 3.5 Sonnet";
-    if (model.includes("claude-3.5-haiku")) return "Claude 3.5 Haiku";
-    if (model.includes("gpt-4o-mini")) return "GPT-4o Mini";
-    if (model.includes("gpt-4o")) return "GPT-4o";
-    if (model.includes("llama-3.3-70b")) return "Llama 3.3 70B";
+    if (model.includes("gemini-2.5-pro")) return chrome.i18n.getMessage('gemini_2_5_pro');
+    if (model.includes("gemini-2.5-flash")) return chrome.i18n.getMessage('gemini_2_5_flash');
+    if (model.includes("deepseek-r1-0528:free")) return chrome.i18n.getMessage('deepseek_r1_free');
+    if (model.includes("deepseek-r1-0528")) return chrome.i18n.getMessage('deepseek_r1');
+    if (model.includes("deepseek-r1")) return chrome.i18n.getMessage('deepseek_r1');
+    if (model.includes("claude-3.5-sonnet")) return chrome.i18n.getMessage('claude_3_5_sonnet');
+    if (model.includes("claude-3.5-haiku")) return chrome.i18n.getMessage('claude_3_5_haiku');
+    if (model.includes("gpt-4o-mini")) return chrome.i18n.getMessage('gpt_4o_mini');
+    if (model.includes("gpt-4o")) return chrome.i18n.getMessage('gpt_4o');
+    if (model.includes("llama-3.3-70b")) return chrome.i18n.getMessage('llama_3_3_70b');
     const parts = model.split("/");
     const modelPart = parts[parts.length - 1];
-    return modelPart.replace(/:free$/, " (Free)");
+    return modelPart.replace(/:free$/, " (" + chrome.i18n.getMessage('free') + ")");
   }
   updateChaptersDisplay() {
     if (!this.results || !this.results.chapters) return;
@@ -310,13 +310,13 @@ class ResultsView {
     subtitlesContent.value = this.results.subtitles.content || "";
     const info = [];
     if (this.results.subtitles.language) {
-      info.push(`Language: ${this.results.subtitles.language}`);
+      info.push(`${chrome.i18n.getMessage('language')}: ${this.results.subtitles.language}`);
     }
     if (this.results.subtitles.trackName) {
-      info.push(`Track: ${this.results.subtitles.trackName}`);
+      info.push(`${chrome.i18n.getMessage('track')}: ${this.results.subtitles.trackName}`);
     }
     if (this.results.subtitles.isAutoGenerated) {
-      info.push("Auto-generated");
+      info.push(chrome.i18n.getMessage('auto_generated'));
     }
     subtitleInfo.textContent = info.join(" • ");
   }
@@ -342,14 +342,14 @@ class ResultsView {
         contentName = "Subtitles";
       }
       if (!content.trim()) {
-        this.showNotification(`No ${contentName.toLowerCase()} to copy`, "warning");
+        this.showNotification(chrome.i18n.getMessage('no_' + contentName.toLowerCase() + '_to_copy'), "warning");
         return;
       }
       await navigator.clipboard.writeText(content);
-      this.showNotification(`${contentName} copied to clipboard!`, "success");
+      this.showNotification(chrome.i18n.getMessage(contentName.toLowerCase() + '_copied'), "success");
     } catch (error) {
       console.error("Error copying to clipboard:", error);
-      this.showNotification("Failed to copy to clipboard", "error");
+      this.showNotification(chrome.i18n.getMessage('failed_to_copy'), "error");
     }
   }
   formatForYouTube(chapters) {
@@ -405,7 +405,7 @@ class ResultsView {
   showLoading() {}
   showError(message) {
     this.showNotification(message, "error");
-    document.getElementById("statusText").textContent = "Error loading results";
+    document.getElementById("statusText").textContent = chrome.i18n.getMessage('error_loading_results');
   }
   showNotification(message, type = "info") {
     const container = document.getElementById("notificationContainer");

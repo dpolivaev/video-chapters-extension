@@ -22,27 +22,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Extension Options</title>
+  <title>__MSG_extension_settings_title__</title>
   <link rel="stylesheet" href="options.css">
   <script src="../vendor/browser-polyfill.js"></script>
+  <script src="../l10n/l10n.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Extension Settings</h1>
-    <label for="apiKey">Gemini API Key:</label>
-    <input type="password" id="apiKey" placeholder="Enter your Gemini API key (optional)" />
-    <button id="save">Save</button>
+    <h1>__MSG_extension_settings_title__</h1>
+    <label for="apiKey">__MSG_gemini_api_key_label__</label>
+    <input type="password" id="apiKey" placeholder="__MSG_gemini_api_key_placeholder__" />
+    <button id="save">__MSG_save_button__</button>
     
-    <label for="openRouterApiKey">OpenRouter API Key:</label>
-    <input type="password" id="openRouterApiKey" placeholder="Enter your OpenRouter API key (optional)" />
-    <button id="saveOpenRouter">Save</button>
+    <label for="openRouterApiKey">__MSG_openrouter_api_key_label__</label>
+    <input type="password" id="openRouterApiKey" placeholder="__MSG_openrouter_api_key_placeholder__" />
+    <button id="saveOpenRouter">__MSG_save_button__</button>
     
     <div id="status"></div>
     <section class="setting-group">
-      <h2>About</h2>
-      <p>Version: <span id="version">Unknown</span></p>
-      <p>Created by Dimitry Polivaev</p>
-      <p>Build time: <span id="buildTime">Unknown</span></p>
+      <h2>__MSG_about_section_title__</h2>
+      <p>__MSG_version_label__ <span id="version">__MSG_unknown__</span></p>
+      <p>__MSG_created_by_label__</p>
+      <p>__MSG_build_time_label__ <span id="buildTime">__MSG_unknown__</span></p>
     </section>
   </div>
   <script src="options.js"></script>
