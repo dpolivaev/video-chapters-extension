@@ -24,7 +24,7 @@
   "openrouter_api_key_placeholder": { "message": "Введіть ваш ключ OpenRouter API (необов'язково)" },
   "about_section_title": { "message": "Про програму" },
   "version_label": { "message": "Версія:" },
-  "created_by_label": { "message": "Створено Дмитром Поліваєвим" },
+  "created_by_label": { "message": "Створено Dimitry Polivaev за допомогою ШІ" },
   "build_time_label": { "message": "Час збірки:" },
   "results_page_title": { "message": "Розділи" },
   "back_to_video_button": { "message": "Назад до відео" },
@@ -85,5 +85,8 @@
   "model_temporarily_unavailable": { "message": "Модель тимчасово недоступна." },
   "content_too_long": { "message": "Вміст відео занадто довгий. Спробуйте використати коротше відео або розділіть вміст." },
   "content_filtered": { "message": "Вміст було відфільтровано системами безпеки. Спробуйте інший вміст." },
-  "general_error": { "message": "Будь ласка, спробуйте ще раз або виберіть іншу модель." }
+  "general_error": { "message": "Будь ласка, спробуйте ще раз або виберіть іншу модель." },
+  "about_github_link_text": { "message": "Проєкт на GitHub" },
+  "about_license_text": { "message": "Ліцензовано за GPL3 або пізнішою версією" },
+  "about_license_link_text": { "message": "Переглянути ліцензію" }
 } 

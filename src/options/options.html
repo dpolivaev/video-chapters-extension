@@ -30,20 +30,24 @@
 <body>
   <div class="container">
     <h1>__MSG_extension_settings_title__</h1>
-    <label for="apiKey">__MSG_gemini_api_key_label__</label>
-    <input type="password" id="apiKey" placeholder="__MSG_gemini_api_key_placeholder__" />
-    <button id="save">__MSG_save_button__</button>
-    
-    <label for="openRouterApiKey">__MSG_openrouter_api_key_label__</label>
-    <input type="password" id="openRouterApiKey" placeholder="__MSG_openrouter_api_key_placeholder__" />
-    <button id="saveOpenRouter">__MSG_save_button__</button>
-    
+    <div class="input-row">
+      <label for="apiKey">__MSG_gemini_api_key_label__</label>
+      <input type="password" id="apiKey" placeholder="__MSG_gemini_api_key_placeholder__" />
+      <button id="save">__MSG_save_button__</button>
+    </div>
+    <div class="input-row">
+      <label for="openRouterApiKey">__MSG_openrouter_api_key_label__</label>
+      <input type="password" id="openRouterApiKey" placeholder="__MSG_openrouter_api_key_placeholder__" />
+      <button id="saveOpenRouter">__MSG_save_button__</button>
+    </div>
     <div id="status"></div>
     <section class="setting-group">
       <h2>__MSG_about_section_title__</h2>
       <p>__MSG_version_label__ <span id="version">__MSG_unknown__</span></p>
       <p>__MSG_created_by_label__</p>
       <p>__MSG_build_time_label__ <span id="buildTime">__MSG_unknown__</span></p>
+      <p><a href="https://github.com/dpolivaev/video-chapters-extension" target="_blank" rel="noopener noreferrer">__MSG_about_github_link_text__</a></p>
+      <p><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">__MSG_about_license_link_text__</a> (__MSG_about_license_text__)</p>
     </section>
   </div>
   <script src="options.js"></script>

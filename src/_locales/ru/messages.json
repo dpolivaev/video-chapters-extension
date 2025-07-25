@@ -24,7 +24,7 @@
   "openrouter_api_key_placeholder": { "message": "Введите ваш ключ OpenRouter API (необязательно)" },
   "about_section_title": { "message": "О программе" },
   "version_label": { "message": "Версия:" },
-  "created_by_label": { "message": "Создано Дмитрием Поливаевым" },
+  "created_by_label": { "message": "Создано Dimitry Polivaev с помощью ИИ" },
   "build_time_label": { "message": "Время сборки:" },
   "results_page_title": { "message": "Главы" },
   "back_to_video_button": { "message": "Назад к видео" },
@@ -85,5 +85,8 @@
   "model_temporarily_unavailable": { "message": "Модель временно недоступна." },
   "content_too_long": { "message": "Содержимое видео слишком длинное. Попробуйте использовать более короткое видео или разделить содержимое." },
   "content_filtered": { "message": "Содержимое было отфильтровано системами безопасности. Попробуйте другое содержимое." },
-  "general_error": { "message": "Пожалуйста, попробуйте снова или выберите другую модель." }
+  "general_error": { "message": "Пожалуйста, попробуйте снова или выберите другую модель." },
+  "about_github_link_text": { "message": "Проект на GitHub" },
+  "about_license_text": { "message": "Лицензировано по GPL3 или более поздней версии" },
+  "about_license_link_text": { "message": "Просмотреть лицензию" }
 } 

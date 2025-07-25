@@ -24,7 +24,7 @@
   "openrouter_api_key_placeholder": { "message": "请输入您的 OpenRouter API 密钥（可选）" },
   "about_section_title": { "message": "关于" },
   "version_label": { "message": "版本：" },
-  "created_by_label": { "message": "由 Dimitry Polivaev 创建" },
+  "created_by_label": { "message": "由 Dimitry Polivaev 在 AI 协助下创建" },
   "build_time_label": { "message": "构建时间：" },
   "results_page_title": { "message": "章节" },
   "back_to_video_button": { "message": "返回视频" },
@@ -85,5 +85,8 @@
   "model_temporarily_unavailable": { "message": "模型暂时不可用。" },
   "content_too_long": { "message": "视频内容过长。请尝试更短的视频或拆分内容。" },
   "content_filtered": { "message": "内容被安全系统过滤。请尝试其他内容。" },
-  "general_error": { "message": "请重试或切换到其他模型。" }
+  "general_error": { "message": "请重试或切换到其他模型。" },
+  "about_github_link_text": { "message": "GitHub 项目" },
+  "about_license_text": { "message": "遵循 GPL3 或更高版本许可" },
+  "about_license_link_text": { "message": "查看许可证" }
 } 

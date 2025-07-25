@@ -24,7 +24,7 @@
   "openrouter_api_key_placeholder": { "message": "OpenRouter API-Schlüssel eingeben (optional)" },
   "about_section_title": { "message": "Über" },
   "version_label": { "message": "Version:" },
-  "created_by_label": { "message": "Erstellt von Dimitry Polivaev" },
+  "created_by_label": { "message": "Erstellt von Dimitry Polivaev mit KI-Unterstützung" },
   "build_time_label": { "message": "Build-Zeit:" },
   "results_page_title": { "message": "Kapitelmarken" },
   "back_to_video_button": { "message": "Zurück zum Video" },
@@ -85,5 +85,8 @@
   "model_temporarily_unavailable": { "message": "Modell vorübergehend nicht verfügbar." },
   "content_too_long": { "message": "Der Videoinhalt ist zu lang. Versuchen Sie es mit einem kürzeren Video oder teilen Sie den Inhalt auf." },
   "content_filtered": { "message": "Inhalt wurde durch Sicherheitssysteme gefiltert. Versuchen Sie es mit anderem Inhalt." },
-  "general_error": { "message": "Bitte versuchen Sie es erneut oder wechseln Sie zu einem anderen Modell." }
+  "general_error": { "message": "Bitte versuchen Sie es erneut oder wechseln Sie zu einem anderen Modell." },
+  "about_github_link_text": { "message": "Projekt auf GitHub" },
+  "about_license_text": { "message": "Lizenziert unter GPL3 oder neuer" },
+  "about_license_link_text": { "message": "Lizenz anzeigen" }
 } 
