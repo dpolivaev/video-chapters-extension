@@ -273,6 +273,60 @@ class PopupView {
         return;
       }
       console.log("PopupView: Tab URL:", tab.url);
+      
+      // Check if we're on a results page by asking background if this tab is registered
+      if (tab.url.includes("results/results.html")) {
+        console.log("PopupView: On results page, checking for session data...");
+        try {
+          // Extract result ID from URL
+          const urlParams = new URLSearchParams(tab.url.split('?')[1]);
+          const resultId = urlParams.get('resultId');
+          
+          if (resultId) {
+            console.log("PopupView: Found result ID:", resultId);
+            const response = await browser.runtime.sendMessage({
+              action: "getSessionResults",
+              resultId: resultId
+            });
+            
+            if (response && response.success && response.results) {
+              console.log("PopupView: Found session results for results page");
+              const results = response.results;
+              
+              // Use the stored video metadata and subtitles
+              this.currentVideo = {
+                title: results.videoMetadata?.title || "Unknown Title",
+                author: results.videoMetadata?.author || "Unknown Author", 
+                url: results.videoMetadata?.url || "",
+                subtitleContent: results.subtitles?.content || "",
+                tabId: tab.id,
+                fromResultsPage: true
+              };
+              
+              console.log("PopupView: Set currentVideo from results page data:", {
+                title: this.currentVideo.title,
+                author: this.currentVideo.author,
+                url: this.currentVideo.url,
+                hasSubtitleContent: !!this.currentVideo.subtitleContent
+              });
+              
+              this.displayVideoInfo();
+              return;
+            } else {
+              console.log("PopupView: No session results found for result ID:", resultId);
+            }
+          } else {
+            console.log("PopupView: No result ID found in URL");
+          }
+        } catch (error) {
+          console.log("PopupView: Error getting session data:", error);
+        }
+        
+        // If we couldn't get session data, show appropriate message
+        this.showNoVideoMessage(chrome.i18n.getMessage('no_results_found'));
+        return;
+      }
+      
       if (!tab.url.includes("youtube.com/watch") && !tab.url.includes("youtube.com/shorts")) {
         console.log("PopupView: Not a YouTube video page");
         this.showNoVideoMessage(chrome.i18n.getMessage('not_a_youtube_video_page'));
