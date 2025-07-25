@@ -19,33 +19,46 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
-console.log("BACKGROUND SCRIPT LOADING...");
 
 if (typeof importScripts !== "undefined") {
-  importScripts("../utils/url-utils.js", "errorhandler.js", "prompt-generator.js", "llm.js", "gemini-api.js", "openrouter-api.js");
+  if (typeof SessionRepository === "undefined") {
+    importScripts(
+      "../utils/url-utils.js",
+      "errorhandler.js",
+      "../domain/values/VideoUrl.js",
+      "../domain/values/ModelId.js", 
+      "../domain/values/ApiCredentials.js",
+      "../domain/values/GenerationProgress.js",
+      "../domain/entities/VideoTranscript.js",
+      "../domain/entities/ChapterGeneration.js",
+      "../domain/entities/BrowserTab.js",
+      "../infrastructure/repositories/SessionRepository.js",
+      "../infrastructure/repositories/TabRegistry.js",
+      "../infrastructure/repositories/SettingsRepository.js",
+      "../domain/services/TranscriptExtractor.js",
+      "../domain/services/ChapterGenerator.js",
+      "prompt-generator.js", 
+      "llm.js", 
+      "gemini-api.js", 
+      "openrouter-api.js"
+    );
+  }
 }
 
-console.log("BACKGROUND SCRIPT: API classes loaded successfully");
 
-let sessionResults = null;
-
-let resultsTabId = null;
-
-let videoTabId = null;
-
-let videoUrl = null;
-
-let resultsTabsById = {};
-
-let resultsById = {};
-
-let generationStatusById = {};
+const sessionRepository = new SessionRepository();
+const tabRegistry = new TabRegistry();
+const settingsRepository = new SettingsRepository();
 
 class BackgroundService {
   constructor() {
     console.log("BACKGROUND SCRIPT: BackgroundService constructor called");
     this.geminiAPI = new GeminiAPI;
     this.openRouterAPI = new OpenRouterAPI;
+    
+    this.chapterGenerator = new ChapterGenerator(this.geminiAPI, this.openRouterAPI);
+    this.transcriptExtractor = new TranscriptExtractor();
+    
     this.setupMessageListeners();
     this.setupContextMenus();
     this.setupTabListeners();
@@ -54,13 +67,10 @@ class BackgroundService {
   setupTabListeners() {
     if (browser.tabs && browser.tabs.onRemoved) {
       browser.tabs.onRemoved.addListener(tabId => {
-        if (tabId === resultsTabId) resultsTabId = null;
-        if (tabId === videoTabId) videoTabId = null;
-        for (const [rid, tid] of Object.entries(resultsTabsById)) {
-          if (tid === tabId) {
-            delete resultsTabsById[rid];
-            delete resultsById[rid];
-          }
+        tabRegistry.unregister(tabId);
+        const sessionId = tabRegistry.findSessionForTab(tabId);
+        if (sessionId) {
+          sessionRepository.remove(sessionId);
         }
       });
     }
@@ -101,15 +111,11 @@ class BackgroundService {
 
        case "setSessionResults":
         {
-          if (request.resultId) {
-            resultsById[request.resultId] = request.results;
-            sessionResults = request.results;
-            const chapters = request.results && request.results.chapters || "";
-            if (!chapters.trim() || chapters.trim() === request.results.videoMetadata.url) {
-              generationStatusById[request.resultId] = "pending";
-            } else {
-              generationStatusById[request.resultId] = "done";
-            }
+          if (request.resultId && request.results) {
+            const session = ChapterGeneration.fromSessionResults(request.results);
+            console.log(`BACKGROUND: Creating session - requestId: ${request.resultId}, sessionId: ${session.id}`);
+            sessionRepository.save(session);
+            console.log(`BACKGROUND: Session saved, repository now has ${sessionRepository.sessions.size} sessions`);
           }
           sendResponse({
             success: true
@@ -120,15 +126,21 @@ class BackgroundService {
        case "getSessionResults":
         {
           const resultId = request.resultId;
-          if (resultId && resultsById[resultId]) {
+          if (resultId) {
+            const session = sessionRepository.findById(resultId);
+            if (session) {
+              sendResponse({
+                success: true,
+                results: session.toSessionResults()
+              });
+              return true;
+            }
+          }
+          const activeSession = sessionRepository.getActiveSession();
+          if (activeSession) {
             sendResponse({
               success: true,
-              results: resultsById[resultId]
-            });
-          } else if (sessionResults) {
-            sendResponse({
-              success: true,
-              results: sessionResults
+              results: activeSession.toSessionResults()
             });
           } else {
             sendResponse({
@@ -141,7 +153,18 @@ class BackgroundService {
        case "getGenerationStatus":
         {
           const resultId = request.resultId;
-          const status = generationStatusById[resultId] || "pending";
+          console.log(`BACKGROUND: Repository state - total sessions: ${sessionRepository.sessions.size}`);
+          const allKeys = Array.from(sessionRepository.sessions.keys());
+          console.log(`BACKGROUND: All session IDs:`, allKeys);
+          console.log(`BACKGROUND: Search ID type:`, typeof resultId, "value:", resultId);
+          console.log(`BACKGROUND: Stored ID types:`, allKeys.map(k => typeof k));
+          
+          const session = sessionRepository.findById(resultId);
+          const status = sessionRepository.getGenerationStatus(resultId);
+          console.log(`BACKGROUND: getGenerationStatus for ${resultId} - session exists:`, !!session, "status:", status);
+          if (session) {
+            console.log("BACKGROUND: Session details - status:", session.status, "isPending:", session.isPending(), "isCompleted:", session.isCompleted());
+          }
           sendResponse({
             success: true,
             status: status
@@ -152,10 +175,12 @@ class BackgroundService {
        case "openResultsTab":
         {
           const {resultId: resultId, videoTabId: vidTabId, videoUrl: vidUrl} = request;
-          if (vidTabId) videoTabId = vidTabId;
-          if (vidUrl) videoUrl = vidUrl;
-          if (resultId && resultsTabsById[resultId]) {
-            const tabId = resultsTabsById[resultId];
+          if (vidTabId && vidUrl) {
+            tabRegistry.registerVideoTab(vidTabId, vidUrl);
+          }
+          const existingResultsTab = tabRegistry.getResultsTab(resultId);
+          if (existingResultsTab) {
+            const tabId = existingResultsTab;
             browser.tabs.get(tabId).then(tab => {
               browser.tabs.update(tabId, {
                 active: true
@@ -171,7 +196,7 @@ class BackgroundService {
               const tab = await browser.tabs.create({
                 url: browser.runtime.getURL("results/results.html") + "?resultId=" + resultId
               });
-              resultsTabsById[resultId] = tab.id;
+              tabRegistry.registerResultsTab(resultId, tab.id);
               sendResponse({
                 success: true,
                 tabId: tab.id
@@ -183,7 +208,7 @@ class BackgroundService {
               url: browser.runtime.getURL("results/results.html") + "?resultId=" + resultId
             });
             tab.then(t => {
-              resultsTabsById[resultId] = t.id;
+              tabRegistry.registerResultsTab(resultId, t.id);
               sendResponse({
                 success: true,
                 tabId: t.id
@@ -198,9 +223,8 @@ class BackgroundService {
           const url = sender.tab && sender.tab.url;
           const resultId = url && url.includes("resultId=") ? url.split("resultId=")[1].split("&")[0] : null;
           if (resultId && sender.tab && sender.tab.id) {
-            resultsTabsById[resultId] = sender.tab.id;
+            tabRegistry.registerResultsTab(resultId, sender.tab.id);
           }
-          resultsTabId = request.tabId;
           sendResponse({
             success: true
           });
@@ -208,139 +232,59 @@ class BackgroundService {
         }
 
        case "getResultsTabStatus":
-        if (resultsTabId == null) {
+        {
+          const allResultsTabIds = tabRegistry.getAllResultsTabIds();
+          if (allResultsTabIds.length === 0) {
+            sendResponse({ open: false });
+            return true;
+          }
+          
+          const validateTab = async (tabId) => {
+            try {
+              await browser.tabs.get(tabId);
+              return tabId;
+            } catch (error) {
+              tabRegistry.cleanupResultsTab(tabId);
+              return null;
+            }
+          };
+          
+          Promise.all(allResultsTabIds.map(validateTab))
+            .then(validTabIds => {
+              const firstValidTab = validTabIds.find(id => id !== null);
+              if (firstValidTab) {
+                sendResponse({
+                  open: true,
+                  tabId: firstValidTab
+                });
+              } else {
+                sendResponse({ open: false });
+              }
+            })
+            .catch(err => {
+              console.error("Error validating results tabs:", err);
+              sendResponse({ open: false });
+            });
+          return true;
+        }
+
+       case "getVideoTabInfo":
+        {
+          const videoTabInfo = tabRegistry.getActiveVideoTab();
           sendResponse({
-            open: false
+            videoTabId: videoTabInfo?.tabId || null,
+            videoUrl: videoTabInfo?.url || null
           });
           return true;
         }
-        browser.tabs.get(resultsTabId).then(tab => sendResponse({
-          open: true,
-          tabId: resultsTabId
-        }), err => {
-          resultsTabId = null;
-          sendResponse({
-            open: false
-          });
-        });
-        return true;
-
-       case "getVideoTabInfo":
-        sendResponse({
-          videoTabId: videoTabId,
-          videoUrl: videoUrl
-        });
-        return true;
 
        case "goBackToVideo":
         {
-          if (videoTabId != null) {
-            browser.tabs.get(videoTabId).then(tab => {
-              if (tab.url === videoUrl) {
-                browser.tabs.update(videoTabId, {
-                  active: true
-                });
-                browser.windows.update(tab.windowId, {
-                  focused: true
-                });
-                sendResponse({
-                  success: true,
-                  method: "focusOriginal"
-                });
-              } else {
-                (async () => {
-                  const tabs = await browser.tabs.query({
-                    url: videoUrl
-                  });
-                  const filtered = tabs.filter(t => t.id !== videoTabId);
-                  if (filtered.length > 0) {
-                    const t = filtered[0];
-                    browser.tabs.update(t.id, {
-                      active: true
-                    });
-                    browser.windows.update(t.windowId, {
-                      focused: true
-                    });
-                    sendResponse({
-                      success: true,
-                      method: "focusOther"
-                    });
-                  } else {
-                    await browser.tabs.create({
-                      url: videoUrl
-                    });
-                    sendResponse({
-                      success: true,
-                      method: "openNew"
-                    });
-                  }
-                })();
-              }
-            }, async () => {
-              if (videoUrl) {
-                const tabs = await browser.tabs.query({
-                  url: videoUrl
-                });
-                if (tabs.length > 0) {
-                  const tab = tabs[0];
-                  browser.tabs.update(tab.id, {
-                    active: true
-                  });
-                  browser.windows.update(tab.windowId, {
-                    focused: true
-                  });
-                  sendResponse({
-                    success: true,
-                    method: "focusOther"
-                  });
-                } else {
-                  await browser.tabs.create({
-                    url: videoUrl
-                  });
-                  sendResponse({
-                    success: true,
-                    method: "openNew"
-                  });
-                }
-              } else {
-                sendResponse({
-                  success: false
-                });
-              }
-            });
-            return true;
-          } else if (videoUrl) {
-            (async () => {
-              const tabs = await browser.tabs.query({
-                url: videoUrl
-              });
-              if (tabs.length > 0) {
-                const tab = tabs[0];
-                browser.tabs.update(tab.id, {
-                  active: true
-                });
-                browser.windows.update(tab.windowId, {
-                  focused: true
-                });
-                sendResponse({
-                  success: true,
-                  method: "focusOther"
-                });
-              } else {
-                await browser.tabs.create({
-                  url: videoUrl
-                });
-                sendResponse({
-                  success: true,
-                  method: "openNew"
-                });
-              }
-            })();
-            return true;
+          const videoTabInfo = tabRegistry.getActiveVideoTab();
+          if (videoTabInfo) {
+            return this.focusOrCreateVideoTab(videoTabInfo.tabId, videoTabInfo.url, sendResponse);
           } else {
-            sendResponse({
-              success: false
-            });
+            sendResponse({ success: false });
             return true;
           }
         }
@@ -382,50 +326,44 @@ class BackgroundService {
   }
   async handleGeminiProcessing(request, sendResponse, sender) {
     try {
-      const {subtitleContent: subtitleContent, customInstructions: customInstructions, apiKey: apiKey, model: model, resultId: resultId} = request;
-      const tabId = sender?.tab?.id || null; // Get tab ID for retry cancellation
-      let result;
-      const geminiModelIds = this.geminiAPI.availableModels.map(m => m.id);
-      const openRouterModelIds = this.openRouterAPI.availableModels.map(m => m.id);
-      if (geminiModelIds.includes(model)) {
-        result = await this.geminiAPI.processSubtitles(subtitleContent, customInstructions, apiKey, model, tabId);
-      } else if (openRouterModelIds.includes(model)) {
-        result = await this.openRouterAPI.processSubtitles(subtitleContent, customInstructions, apiKey, model, tabId);
-      } else {
-        throw new Error(`Unknown model: ${model}`);
+      const {subtitleContent, customInstructions, apiKey, model, resultId} = request;
+      const tabId = sender?.tab?.id || null;
+      
+      const existingSession = sessionRepository.findById(resultId);
+      if (!existingSession) {
+        throw new Error(`Session ${resultId} not found`);
       }
-      if (resultId && resultsById[resultId]) {
-        const existingResults = resultsById[resultId];
-        const videoUrl = existingResults.videoMetadata.url;
-        let chaptersWithUrl = videoUrl + "\n\n" + result.chapters;
-        existingResults.chapters = chaptersWithUrl;
-        existingResults.model = model;
-        existingResults.customInstructions = customInstructions;
-        generationStatusById[resultId] = "done";
-        resultsById[resultId] = existingResults;
-        sessionResults = existingResults;
-      }
+      const modelId = new ModelId(model);
+      const credentials = modelId.isGemini() 
+        ? new ApiCredentials(apiKey, '')
+        : new ApiCredentials('', apiKey);
+      const completedSession = await this.chapterGenerator.generateChapters(
+        existingSession, 
+        credentials, 
+        tabId
+      );
+      sessionRepository.save(completedSession);
+      console.log(`BACKGROUND: Session ${resultId} saved with status:`, completedSession.status);
+      console.log(`BACKGROUND: Session ID in completedSession:`, completedSession.id);
+      console.log(`BACKGROUND: Repository has ${sessionRepository.sessions.size} sessions`);
+      const verifySession = sessionRepository.findById(resultId);
+      console.log(`BACKGROUND: Verification - session exists:`, !!verifySession);
+      
       sendResponse({
         success: true,
-        data: result
+        data: { chapters: completedSession.chapters }
       });
+      
     } catch (error) {
       console.error("AI processing error:", error);
       if (request.resultId) {
-        generationStatusById[request.resultId] = "error";
-        if (resultsById[request.resultId]) {
-          const existingResults = resultsById[request.resultId];
-          existingResults.error = error.message;
-          const geminiModelIds = this.geminiAPI.availableModels.map(m => m.id);
-          if (geminiModelIds.includes(request.model)) {
-            existingResults.errorType = this.geminiAPI.categorizeError(error.message, request.model);
-          } else {
-            existingResults.errorType = this.openRouterAPI.categorizeError(error.message, request.model);
-          }
-          resultsById[request.resultId] = existingResults;
-          sessionResults = existingResults;
+        const session = sessionRepository.findById(request.resultId);
+        if (session) {
+          session.markFailed(error.message);
+          sessionRepository.save(session);
         }
       }
+      
       sendResponse({
         success: false,
         error: error.message
@@ -487,10 +425,10 @@ class BackgroundService {
   }
   async handleSaveSettings(request, sendResponse) {
     try {
-      const {settings: settings} = request;
-      await browser.storage.sync.set({
-        userSettings: settings
-      });
+      const {settings} = request;
+      
+      await settingsRepository.saveSettings(settings);
+      
       sendResponse({
         success: true
       });
@@ -505,22 +443,9 @@ class BackgroundService {
   async handleLoadSettings(request, sendResponse) {
     console.log("BACKGROUND SCRIPT: handleLoadSettings called");
     try {
-      console.log("BACKGROUND SCRIPT: Getting userSettings from storage...");
-      const result = await browser.storage.sync.get("userSettings");
-      console.log("BACKGROUND SCRIPT: Storage result:", result);
-      const defaultSettings = {
-        apiKey: "",
-        openRouterApiKey: "",
-        model: "deepseek/deepseek-r1-0528:free"
-      };
-      const settings = {
-        ...defaultSettings,
-        ...result.userSettings || {}
-      };
-      if (!settings.apiKey && !settings.openRouterApiKey) {
-        settings.model = "deepseek/deepseek-r1-0528:free";
-      }
-      console.log("BACKGROUND SCRIPT: Final settings:", settings);
+      const settings = await settingsRepository.loadSettings();
+      console.log("BACKGROUND SCRIPT: Settings loaded:", settings);
+      
       sendResponse({
         success: true,
         data: settings
@@ -550,6 +475,40 @@ class BackgroundService {
         error: error.message
       });
     }
+  }
+  
+  async focusOrCreateVideoTab(videoTabId, videoUrl, sendResponse) {
+    try {
+      const tab = await browser.tabs.get(videoTabId);
+      if (tab.url === videoUrl) {
+        await browser.tabs.update(videoTabId, { active: true });
+        await browser.windows.update(tab.windowId, { focused: true });
+        sendResponse({ success: true, method: "focusOriginal" });
+      } else {
+        return this.findOrCreateVideoTab(videoUrl, sendResponse);
+      }
+    } catch (error) {
+      return this.findOrCreateVideoTab(videoUrl, sendResponse);
+    }
+    return true;
+  }
+  
+  async findOrCreateVideoTab(videoUrl, sendResponse) {
+    try {
+      const tabs = await browser.tabs.query({ url: videoUrl });
+      if (tabs.length > 0) {
+        const tab = tabs[0];
+        await browser.tabs.update(tab.id, { active: true });
+        await browser.windows.update(tab.windowId, { focused: true });
+        sendResponse({ success: true, method: "focusOther" });
+      } else {
+        await browser.tabs.create({ url: videoUrl });
+        sendResponse({ success: true, method: "openNew" });
+      }
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+    return true;
   }
 }
 
@@ -666,9 +625,6 @@ const instructionHistory = new InstructionHistoryManager;
 
 const settingsManager = new SettingsManager;
 
-self.instructionHistory = instructionHistory;
-
-self.settingsManager = settingsManager;
 
 browser.runtime.onInstalled.addListener(details => {
   if (details.reason === "install") {

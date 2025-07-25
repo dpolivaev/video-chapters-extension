@@ -51,7 +51,6 @@ class SimpleRetryHandler {
       try {
         const response = await fetch(url, options);
 
-                 // If it's not a 5xx error, return the response
          if (!this.isRetryableError(response)) {
            if (attempt > 0) {
              console.log(`✅ CONTENT_RETRY_SUCCESS: Request succeeded after ${attempt} retries for ${url}`);
@@ -61,15 +60,12 @@ class SimpleRetryHandler {
            return response;
          }
 
-        // It's a 5xx error, prepare for retry
         lastError = new Error(`Server error: ${response.status} ${response.statusText}`);
         
-        // If we've exhausted retries, throw the error
         if (attempt >= this.maxRetries) {
           break;
         }
 
-                 // Calculate delay: 5s, 10s, 15s for attempts 1, 2, 3
          const delay = (attempt + 1) * 5000;
          console.log(`🔄 CONTENT_RETRY: Server error ${response.status} ${response.statusText} - Retry attempt ${attempt + 1}/${this.maxRetries} after ${delay}ms for ${url}`);
 
@@ -91,7 +87,6 @@ class SimpleRetryHandler {
       }
     }
 
-    // All retries exhausted
     console.log(`❌ CONTENT_RETRY_FAILED: All ${this.maxRetries} retries exhausted for ${url}. Final error: ${lastError?.message || 'Unknown error'}`);
     throw lastError || new Error('All retries exhausted');
   }
@@ -364,7 +359,6 @@ if (window.hasYouTubeIntegration) {
     }
   }
 
-  // Initialize YouTubeIntegration when DOM is ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       console.log("YouTubeIntegration: DOM loaded, initializing...");

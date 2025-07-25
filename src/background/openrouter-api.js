@@ -20,7 +20,6 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Import retry handler for 5xx error handling
 if (typeof retryHandler === 'undefined') {
   if (typeof importScripts !== 'undefined') {
     importScripts('errorhandler.js');
@@ -149,7 +148,6 @@ class OpenRouterAPI extends BaseLLM {
       max_tokens: 8192,
       top_p: .95
     };
-    // Use retry handler for 5xx errors
     const requestId = retryHandler.generateRequestId();
     const response = await retryHandler.fetchWithRetry(url, {
       method: "POST",
@@ -250,3 +248,4 @@ class OpenRouterAPI extends BaseLLM {
     };
   }
 }
+

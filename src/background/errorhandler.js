@@ -20,8 +20,6 @@ class RetryHandler {
       });
 
       browser.windows.onRemoved.addListener(() => {
-        // Cancel all retries when any window is closed
-        // This handles the case where the entire browser window is closed
         this.cancelAllRetries();
       });
     }
@@ -95,7 +93,6 @@ class RetryHandler {
       signal: controller.signal
     };
 
-    // Register this retry for cancellation
     this.activeRetries.set(requestId, controller);
     if (tabId !== null) {
       this.registerRetryForTab(requestId, tabId);
@@ -109,14 +106,12 @@ class RetryHandler {
     try {
       while (attempt <= maxRetries) {
         try {
-          // Check if cancelled before making request
           if (controller.signal.aborted) {
             throw new Error('Request cancelled');
           }
 
           const response = await fetch(url, mergedOptions);
 
-          // If it's not a 5xx error, return the response (success or non-retryable error)
           if (!this.isRetryableError(response)) {
             if (attempt > 0) {
               console.log(`✅ RETRY_SUCCESS: Request succeeded after ${attempt} retries for ${url}`);
@@ -126,30 +121,24 @@ class RetryHandler {
             return response;
           }
 
-          // It's a 5xx error, prepare for retry
           lastError = new Error(`Server error: ${response.status} ${response.statusText}`);
           
-          // If we've exhausted retries, throw the error
           if (attempt >= maxRetries) {
             break;
           }
 
-          // Calculate delay: 5s, 10s, 15s for attempts 1, 2, 3
           const delay = (attempt + 1) * 5000;
           console.log(`🔄 RETRY: Server error ${response.status} ${response.statusText} - Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms for ${url}`);
 
-          // Wait with cancellation support
           await this.delay(delay, controller.signal);
           attempt++;
 
         } catch (error) {
-          // If it's an AbortError, the request was cancelled
           if (error.name === 'AbortError' || error.message === 'Request cancelled') {
             console.log(`🚫 RETRY_CANCELLED: Request cancelled after ${attempt} attempts for ${url}`);
             throw new Error('Request cancelled');
           }
 
-          // For other errors (network issues, etc.), retry if we haven't exhausted attempts
           lastError = error;
           
           if (attempt >= maxRetries) {
@@ -163,18 +152,15 @@ class RetryHandler {
             await this.delay(delay, controller.signal);
             attempt++;
           } catch (delayError) {
-            // Delay was cancelled
             throw new Error('Request cancelled');
           }
         }
       }
 
-      // All retries exhausted
       console.log(`❌ RETRY_FAILED: All ${maxRetries} retries exhausted for ${url}. Final error: ${lastError?.message || 'Unknown error'}`);
       throw lastError || new Error('All retries exhausted');
 
     } finally {
-      // Clean up tracking
       this.activeRetries.delete(requestId);
       if (tabId !== null) {
         const requestIds = this.tabRetries.get(tabId);
@@ -212,12 +198,5 @@ class RetryHandler {
   }
 }
 
-// Create singleton instance
 const retryHandler = new RetryHandler();
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = retryHandler;
-} else if (typeof window !== 'undefined') {
-  window.retryHandler = retryHandler;
-} 

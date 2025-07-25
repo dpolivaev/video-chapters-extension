@@ -20,7 +20,6 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Import retry handler for 5xx error handling
 if (typeof retryHandler === 'undefined') {
   if (typeof importScripts !== 'undefined') {
     importScripts('errorhandler.js');
@@ -94,7 +93,6 @@ class GeminiAPI extends BaseLLM {
       } ]
     };
 
-    // Use retry handler for 5xx errors
     const requestId = retryHandler.generateRequestId();
     const response = await retryHandler.fetchWithRetry(url, {
       method: "POST",
@@ -164,3 +162,4 @@ class GeminiAPI extends BaseLLM {
     return apiKeyPattern.test(apiKey) && apiKey.length > 10;
   }
 }
+
