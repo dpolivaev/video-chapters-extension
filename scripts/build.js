@@ -64,8 +64,6 @@ const config = {
     mangle: true,
     format: {
       comments: /Copyright \(C\)/,
-      beautify: true,
-      indent_level: 2
     }
   }
 };
