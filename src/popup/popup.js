@@ -293,7 +293,7 @@ class PopupView {
           this.currentVideo = {
             title: transcriptResponse.title,
             author: transcriptResponse.author || "YouTube Video",
-            url: transcriptResponse.url || tab.url,
+            url: cleanVideoURL(transcriptResponse.url || tab.url),
             subtitleContent: subtitleContent,
             tabId: tab.id
           };
@@ -348,7 +348,7 @@ class PopupView {
     }
     const title = this.currentVideo.title || chrome.i18n.getMessage('unknown_title');
     const author = this.currentVideo.author || chrome.i18n.getMessage('unknown_author');
-    const url = this.currentVideo.url || "";
+    const url = cleanVideoURL(this.currentVideo.url || "");
     videoMetaLine.textContent = "";
     const urlLink = document.createElement("a");
     urlLink.href = url;
@@ -399,7 +399,8 @@ class PopupView {
       const subtitleContent = this.currentVideo.subtitleContent;
       const resultId = Date.now();
       this._lastResultId = resultId;
-      let chaptersWithUrl = this.currentVideo.url + "\n\n";
+      const cleanUrl = cleanVideoURL(this.currentVideo.url);
+      let chaptersWithUrl = cleanUrl + "\n\n";
       const sessionResults = {
         resultId: resultId,
         subtitles: {
@@ -412,7 +413,7 @@ class PopupView {
         videoMetadata: {
           title: this.currentVideo.title,
           author: this.currentVideo.author,
-          url: this.currentVideo.url
+          url: cleanUrl
         }
       };
       await browser.runtime.sendMessage({
@@ -434,9 +435,9 @@ class PopupView {
       });
       let videoUrl = null;
       if (this.currentVideo && this.currentVideo.url) {
-        videoUrl = this.currentVideo.url;
+        videoUrl = cleanVideoURL(this.currentVideo.url);
       } else if (tab && tab.url) {
-        videoUrl = tab.url;
+        videoUrl = cleanVideoURL(tab.url);
       }
       await browser.runtime.sendMessage({
         action: "openResultsTab",
@@ -483,9 +484,9 @@ class PopupView {
     });
     let videoUrl = null;
     if (this.currentVideo && this.currentVideo.url) {
-      videoUrl = this.currentVideo.url;
+      videoUrl = cleanVideoURL(this.currentVideo.url);
     } else if (tab && tab.url) {
-      videoUrl = tab.url;
+      videoUrl = cleanVideoURL(tab.url);
     }
     const resultId = this._lastResultId;
     await browser.runtime.sendMessage({

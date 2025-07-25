@@ -22,7 +22,7 @@
 console.log("BACKGROUND SCRIPT LOADING...");
 
 if (typeof importScripts !== "undefined") {
-  importScripts("errorhandler.js", "prompt-generator.js", "llm.js", "gemini-api.js", "openrouter-api.js");
+  importScripts("../utils/url-utils.js", "errorhandler.js", "prompt-generator.js", "llm.js", "gemini-api.js", "openrouter-api.js");
 }
 
 console.log("BACKGROUND SCRIPT: API classes loaded successfully");
