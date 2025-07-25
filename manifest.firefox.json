@@ -15,6 +15,7 @@
   ],
   "background": {
     "scripts": [
+      "background/errorhandler.js",
       "background/prompt-generator.js",
       "background/llm.js", 
       "background/gemini-api.js",
