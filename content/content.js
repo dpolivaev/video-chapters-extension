@@ -2,7 +2,7 @@
  * YouTube Integration Content Script
  * Handles subtitle extraction and communication with popup
  * 
- * Copyright (C) 2025 Dimitry Polivaev
+ * Copyright (C) 2025 Hamza Wasim
  * 
  * This file is part of Video Chapters Generator.
  * 
