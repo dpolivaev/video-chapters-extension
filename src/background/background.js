@@ -483,7 +483,11 @@ class BackgroundService {
   async focusOrCreateVideoTab(videoTabId, videoUrl, sendResponse) {
     try {
       const tab = await browser.tabs.get(videoTabId);
-      if (tab.url === videoUrl) {
+      // Compare cleaned URLs to ignore timestamp parameters
+      const cleanedTabUrl = cleanVideoURL(tab.url);
+      const cleanedStoredUrl = cleanVideoURL(videoUrl);
+      
+      if (cleanedTabUrl === cleanedStoredUrl) {
         await browser.tabs.update(videoTabId, { active: true });
         await browser.windows.update(tab.windowId, { focused: true });
         sendResponse({ success: true, method: "focusOriginal" });
@@ -498,9 +502,18 @@ class BackgroundService {
   
   async findOrCreateVideoTab(videoUrl, sendResponse) {
     try {
-      const tabs = await browser.tabs.query({ url: videoUrl });
-      if (tabs.length > 0) {
-        const tab = tabs[0];
+      // Get all tabs and find ones with matching cleaned URLs
+      const allTabs = await browser.tabs.query({});
+      const cleanedTargetUrl = cleanVideoURL(videoUrl);
+      
+      const matchingTabs = allTabs.filter(tab => {
+        if (!tab.url) return false;
+        const cleanedTabUrl = cleanVideoURL(tab.url);
+        return cleanedTabUrl === cleanedTargetUrl;
+      });
+      
+      if (matchingTabs.length > 0) {
+        const tab = matchingTabs[0];
         await browser.tabs.update(tab.id, { active: true });
         await browser.windows.update(tab.windowId, { focused: true });
         sendResponse({ success: true, method: "focusOther" });
