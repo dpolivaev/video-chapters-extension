@@ -61,7 +61,7 @@ const config = {
       drop_console: true,
       drop_debugger: true
     },
-    mangle: false,
+    mangle: true,
     format: {
       comments: /Copyright \(C\)/,
       beautify: true,
