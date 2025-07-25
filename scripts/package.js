@@ -30,6 +30,8 @@ const chalk = require("chalk");
 
 const ora = require("ora");
 
+const {execSync} = require("child_process");
+
 const {program: program} = require("commander");
 
 class ExtensionPackager {
@@ -52,6 +54,17 @@ class ExtensionPackager {
       this.showSummary(version);
     } catch (error) {
       this.logError("Packaging failed:", error);
+      process.exit(1);
+    }
+  }
+  async packageSource() {
+    try {
+      this.log(chalk.blue("📦 Creating Source Code Package\n"));
+      const version = await this.getSourceVersion();
+      await this.createSourcePackage(version);
+      this.showSourceSummary(version);
+    } catch (error) {
+      this.logError("Source packaging failed:", error);
       process.exit(1);
     }
   }
@@ -78,6 +91,11 @@ class ExtensionPackager {
     const manifest = await fs.readJson(manifestPath);
     return manifest.version;
   }
+  async getSourceVersion() {
+    const packagePath = path.join(process.cwd(), "package.json");
+    const packageJson = await fs.readJson(packagePath);
+    return packageJson.version;
+  }
   async createMainPackage(version) {
     this.spinner = ora("Creating main package").start();
     await fs.ensureDir(this.outputDir);
@@ -93,6 +111,13 @@ class ExtensionPackager {
     const versionedZipPath = path.join(this.outputDir, `video-chapters-extension-${browserName}-v${version}.zip`);
     await fs.copy(mainZipPath, versionedZipPath);
     this.spinner.succeed(`Versioned package created: video-chapters-extension-${browserName}-v${version}.zip`);
+  }
+  async createSourcePackage(version) {
+    this.spinner = ora("Creating source code package").start();
+    await fs.ensureDir(this.outputDir);
+    const outputPath = path.join(this.outputDir, `video-chapters-extension-source-v${version}.zip`);
+    await this.createSourceZip(outputPath);
+    this.spinner.succeed(`Source package created: video-chapters-extension-source-v${version}.zip`);
   }
   async createZip(sourceDir, outputPath) {
     return new Promise((resolve, reject) => {
@@ -116,6 +141,37 @@ class ExtensionPackager {
       archive.finalize();
     });
   }
+  async createSourceZip(outputPath) {
+    return new Promise((resolve, reject) => {
+      try {
+        const gitFiles = execSync("git ls-files", { encoding: "utf8", cwd: process.cwd() }).trim().split("\n").filter(file => file.length > 0);
+        const output = fs.createWriteStream(outputPath);
+        const archive = archiver("zip", {
+          zlib: {
+            level: 9
+          }
+        });
+        output.on("close", () => {
+          resolve();
+        });
+        archive.on("error", err => {
+          reject(err);
+        });
+        archive.pipe(output);
+        for (const file of gitFiles) {
+          const filePath = path.join(process.cwd(), file);
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            archive.file(filePath, {
+              name: file
+            });
+          }
+        }
+        archive.finalize();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
   async showSummary(version) {
     this.log(chalk.green("\n✅ Packaging completed successfully!\n"));
     const browserName = this.options.output.includes("firefox") ? "firefox" : "chrome";
@@ -136,6 +192,18 @@ class ExtensionPackager {
     if (await this.getFileSizeBytes(mainPackagePath) > 5 * 1024 * 1024) {
       this.log(chalk.yellow("⚠️  Warning: Package size is larger than 5MB. Consider optimizing."));
     }
+  }
+  async showSourceSummary(version) {
+    this.log(chalk.green("\n✅ Source packaging completed successfully!\n"));
+    const sourcePackagePath = path.join(this.outputDir, `video-chapters-extension-source-v${version}.zip`);
+    const sourceSize = await this.getFileSize(sourcePackagePath);
+    this.log(chalk.bold("📦 Source Package Information:"));
+    this.log(`   Version: ${chalk.cyan(version)}`);
+    this.log(`   Source package: ${chalk.gray(`video-chapters-extension-source-v${version}.zip`)} (${sourceSize})`);
+    this.log(`   Output directory: ${chalk.gray(this.outputDir)}\n`);
+    this.log(chalk.bold("ℹ️  Package Contents:"));
+    this.log("   Contains all git-tracked files, excluding git-ignored files");
+    this.log("   Suitable for code review or distribution purposes\n");
   }
   async getFileSize(filePath) {
     const stats = await fs.stat(filePath);
@@ -165,11 +233,18 @@ class ExtensionPackager {
   }
 }
 
-program.option("-v, --verbose", "Verbose output").option("-o, --output <dir>", "Output directory", "dist/chrome").parse();
+program.option("-v, --verbose", "Verbose output").option("-o, --output <dir>", "Output directory", "dist/chrome").option("-s, --source", "Create source code package").parse();
 
 const packager = new ExtensionPackager(program.opts());
 
-packager.package().catch(error => {
-  console.error(chalk.red("Packaging failed:"), error);
-  process.exit(1);
-});
+if (program.opts().source) {
+  packager.packageSource().catch(error => {
+    console.error(chalk.red("Source packaging failed:"), error);
+    process.exit(1);
+  });
+} else {
+  packager.package().catch(error => {
+    console.error(chalk.red("Packaging failed:"), error);
+    process.exit(1);
+  });
+}
