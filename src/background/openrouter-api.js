@@ -19,6 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
+
+// Import retry handler for 5xx error handling
+if (typeof retryHandler === 'undefined') {
+  if (typeof importScripts !== 'undefined') {
+    importScripts('errorhandler.js');
+  }
+}
+
 class OpenRouterAPI extends BaseLLM {
   constructor() {
     super("OpenRouter");
@@ -102,7 +110,7 @@ class OpenRouterAPI extends BaseLLM {
       capabilities: [ "reasoning", "coding", "general" ]
     } ];
   }
-  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "deepseek/deepseek-r1-0528:free") {
+  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "deepseek/deepseek-r1-0528:free", tabId = null) {
     const isFreeModel = this.isModelFree(model);
     if (!isFreeModel && !apiKey) {
       throw new Error("API key is required for paid models");
@@ -114,14 +122,14 @@ class OpenRouterAPI extends BaseLLM {
     }
     try {
       const prompt = this.buildPrompt(subtitleContent, customInstructions);
-      const response = await this.makeAPICall(prompt, apiKey, model);
+      const response = await this.makeAPICall(prompt, apiKey, model, tabId);
       return this.parseResponse(response);
     } catch (error) {
       console.error("OpenRouter API error:", error);
       throw new Error(`AI processing failed: ${error.message}`);
     }
   }
-  async makeAPICall(prompt, apiKey, model) {
+  async makeAPICall(prompt, apiKey, model, tabId = null) {
     const url = `${this.baseUrl}/chat/completions`;
     const headers = {
       "Content-Type": "application/json",
@@ -141,11 +149,13 @@ class OpenRouterAPI extends BaseLLM {
       max_tokens: 8192,
       top_p: .95
     };
-    const response = await fetch(url, {
+    // Use retry handler for 5xx errors
+    const requestId = retryHandler.generateRequestId();
+    const response = await retryHandler.fetchWithRetry(url, {
       method: "POST",
       headers: headers,
       body: JSON.stringify(requestBody)
-    });
+    }, requestId, tabId);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       if (response.status === 401) {

@@ -22,7 +22,7 @@
 console.log("BACKGROUND SCRIPT LOADING...");
 
 if (typeof importScripts !== "undefined") {
-  importScripts("prompt-generator.js", "llm.js", "gemini-api.js", "openrouter-api.js");
+  importScripts("errorhandler.js", "prompt-generator.js", "llm.js", "gemini-api.js", "openrouter-api.js");
 }
 
 console.log("BACKGROUND SCRIPT: API classes loaded successfully");
@@ -71,7 +71,7 @@ class BackgroundService {
       console.log("BACKGROUND SCRIPT: Received message:", request.action, "from:", sender);
       switch (request.action) {
        case "processWithGemini":
-        this.handleGeminiProcessing(request, sendResponse);
+        this.handleGeminiProcessing(request, sendResponse, sender);
         return true;
 
        case "saveInstruction":
@@ -380,16 +380,17 @@ class BackgroundService {
       console.log("BACKGROUND SCRIPT: Continuing without context menus");
     }
   }
-  async handleGeminiProcessing(request, sendResponse) {
+  async handleGeminiProcessing(request, sendResponse, sender) {
     try {
       const {subtitleContent: subtitleContent, customInstructions: customInstructions, apiKey: apiKey, model: model, resultId: resultId} = request;
+      const tabId = sender?.tab?.id || null; // Get tab ID for retry cancellation
       let result;
       const geminiModelIds = this.geminiAPI.availableModels.map(m => m.id);
       const openRouterModelIds = this.openRouterAPI.availableModels.map(m => m.id);
       if (geminiModelIds.includes(model)) {
-        result = await this.geminiAPI.processSubtitles(subtitleContent, customInstructions, apiKey, model);
+        result = await this.geminiAPI.processSubtitles(subtitleContent, customInstructions, apiKey, model, tabId);
       } else if (openRouterModelIds.includes(model)) {
-        result = await this.openRouterAPI.processSubtitles(subtitleContent, customInstructions, apiKey, model);
+        result = await this.openRouterAPI.processSubtitles(subtitleContent, customInstructions, apiKey, model, tabId);
       } else {
         throw new Error(`Unknown model: ${model}`);
       }

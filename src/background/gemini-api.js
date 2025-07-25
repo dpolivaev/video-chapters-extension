@@ -19,6 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
+
+// Import retry handler for 5xx error handling
+if (typeof retryHandler === 'undefined') {
+  if (typeof importScripts !== 'undefined') {
+    importScripts('errorhandler.js');
+  }
+}
+
 class GeminiAPI extends BaseLLM {
   constructor() {
     super("Gemini");
@@ -39,7 +47,7 @@ class GeminiAPI extends BaseLLM {
       capabilities: [ "speed", "general" ]
     } ];
   }
-  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "gemini-2.5-pro") {
+  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "gemini-2.5-pro", tabId = null) {
     if (!apiKey) {
       throw new Error("API key is required");
     }
@@ -50,14 +58,14 @@ class GeminiAPI extends BaseLLM {
     }
     try {
       const prompt = this.buildPrompt(subtitleContent, customInstructions);
-      const response = await this.makeAPICall(prompt, apiKey, model);
+      const response = await this.makeAPICall(prompt, apiKey, model, tabId);
       return this.parseResponse(response);
     } catch (error) {
       console.error("Gemini API error:", error);
       throw new Error(`AI processing failed: ${error.message}`);
     }
   }
-  async makeAPICall(prompt, apiKey, model) {
+  async makeAPICall(prompt, apiKey, model, tabId = null) {
     const url = `${this.baseUrl}/models/${model}:generateContent?key=${apiKey}`;
     const requestBody = {
       contents: [ {
@@ -85,13 +93,17 @@ class GeminiAPI extends BaseLLM {
         threshold: "BLOCK_MEDIUM_AND_ABOVE"
       } ]
     };
-    const response = await fetch(url, {
+
+    // Use retry handler for 5xx errors
+    const requestId = retryHandler.generateRequestId();
+    const response = await retryHandler.fetchWithRetry(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(requestBody)
-    });
+    }, requestId, tabId);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       if (response.status === 401) {

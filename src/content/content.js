@@ -25,6 +25,80 @@ if (typeof browser === "undefined") {
 
 console.log("🚀 YouTubeIntegration content script loaded - CLEAN MODERN APPROACH");
 
+/**
+ * Simple retry utility for content scripts
+ * Handles 5xx server errors with exponential backoff
+ */
+class SimpleRetryHandler {
+  constructor() {
+    this.maxRetries = 3;
+  }
+
+  isRetryableError(response) {
+    return response && response.status >= 500 && response.status < 600;
+  }
+
+  async delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async fetchWithRetry(url, options = {}) {
+    console.log(`🚀 CONTENT_RETRY_START: Initiating request with up to ${this.maxRetries} retries for ${url}`);
+    let lastError;
+    let attempt = 0;
+
+    while (attempt <= this.maxRetries) {
+      try {
+        const response = await fetch(url, options);
+
+                 // If it's not a 5xx error, return the response
+         if (!this.isRetryableError(response)) {
+           if (attempt > 0) {
+             console.log(`✅ CONTENT_RETRY_SUCCESS: Request succeeded after ${attempt} retries for ${url}`);
+           } else {
+             console.log(`✅ CONTENT_REQUEST_SUCCESS: Request succeeded on first attempt for ${url}`);
+           }
+           return response;
+         }
+
+        // It's a 5xx error, prepare for retry
+        lastError = new Error(`Server error: ${response.status} ${response.statusText}`);
+        
+        // If we've exhausted retries, throw the error
+        if (attempt >= this.maxRetries) {
+          break;
+        }
+
+                 // Calculate delay: 5s, 10s, 15s for attempts 1, 2, 3
+         const delay = (attempt + 1) * 5000;
+         console.log(`🔄 CONTENT_RETRY: Server error ${response.status} ${response.statusText} - Retry attempt ${attempt + 1}/${this.maxRetries} after ${delay}ms for ${url}`);
+
+        await this.delay(delay);
+        attempt++;
+
+      } catch (error) {
+        lastError = error;
+        
+        if (attempt >= this.maxRetries) {
+          break;
+        }
+
+                 const delay = (attempt + 1) * 5000;
+         console.log(`🔄 CONTENT_RETRY: Network/fetch error "${error.message}" - Retry attempt ${attempt + 1}/${this.maxRetries} after ${delay}ms for ${url}`);
+        
+        await this.delay(delay);
+        attempt++;
+      }
+    }
+
+    // All retries exhausted
+    console.log(`❌ CONTENT_RETRY_FAILED: All ${this.maxRetries} retries exhausted for ${url}. Final error: ${lastError?.message || 'Unknown error'}`);
+    throw lastError || new Error('All retries exhausted');
+  }
+}
+
+const simpleRetryHandler = new SimpleRetryHandler();
+
 if (window.hasYouTubeIntegration) {
   console.log("YouTubeIntegration: Script already loaded, skipping...");
 } else {
@@ -119,7 +193,7 @@ if (window.hasYouTubeIntegration) {
       const dataKey = "ytInitialData";
       
       console.log("YouTubeIntegration: Fetching page HTML for:", videoUrl);
-      const html = await fetch(videoUrl).then(res => res.text());
+      const html = await simpleRetryHandler.fetchWithRetry(videoUrl).then(res => res.text());
       let ytData = this.extractJsonFromHtml(html, dataKey);
       
       let title = ytData?.videoDetails?.title ||
@@ -182,7 +256,7 @@ if (window.hasYouTubeIntegration) {
         console.log("YouTubeIntegration: Fetching captions from:", captionUrl);
         
         try {
-          const json = await fetch(captionUrl).then(res => {
+          const json = await simpleRetryHandler.fetchWithRetry(captionUrl).then(res => {
             if (!res.ok) throw new Error(`Fetch failed with status: ${res.status}`);
             return res.json();
           });
@@ -221,7 +295,7 @@ if (window.hasYouTubeIntegration) {
       };
       
       console.log("YouTubeIntegration: Calling YouTube internal transcript API");
-      const res = await fetch("https://www.youtube.com/youtubei/v1/get_transcript?prettyPrint=false", {
+      const res = await simpleRetryHandler.fetchWithRetry("https://www.youtube.com/youtubei/v1/get_transcript?prettyPrint=false", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
