@@ -3,6 +3,7 @@
   "name": "Video Chapters Generator",
   "version": "1.0.0-BUILD_INJECTED",
   "description": "Generate chapter timecodes from YouTube videos using AI subtitle analysis",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "storage",
@@ -41,8 +42,7 @@
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
-    },
-    "default_locale": "en"
+    }
   },
   "options_page": "options/options.html",
   "icons": {
