@@ -82,6 +82,10 @@ class PromptGenerator {
       limit: limits.input
     };
   }
+  buildPrompt(subtitleContent, customInstructions = '') {
+    return this.buildChapterPrompt(subtitleContent, customInstructions);
+  }
+
   getTokenLimits(provider, model) {
     const limits = {
       gemini: {
@@ -106,4 +110,8 @@ class PromptGenerator {
       output: 4096
     };
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PromptGenerator;
 }

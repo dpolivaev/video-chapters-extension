@@ -10,12 +10,12 @@ module.exports = {
   testEnvironment: 'node',
 
   testMatch: [
-    '**/src/domain/**/*.test.js'
+    '**/src/**/*.test.js'
   ],
 
   collectCoverageFrom: [
-    'src/domain/**/*.js',
-    '!src/domain/**/*.test.js'
+    'src/**/*.js',
+    '!src/**/*.test.js'
   ],
 
   coverageDirectory: 'coverage',
