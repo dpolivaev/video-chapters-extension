@@ -39,57 +39,7 @@ This document contains development-related information for the Video Chapters Ge
 
 ## Architecture
 
-### File Structure
-
-```
-timecodes-browser-extension/
-├── manifest.chrome.json
-├── manifest.firefox.json
-├── background/
-│   ├── background.js           # Main service worker
-│   ├── BaseLLM.js              # Base class for all LLM providers
-│   ├── prompt-generator.js     # Centralized prompt building
-│   ├── gemini-api.js           # Direct Google Gemini API integration
-│   └── openrouter-api.js       # OpenRouter API with multiple models
-├── content/
-│   ├── content.js
-│   └── content.css
-├── popup/
-│   ├── popup.html
-│   ├── popup.css
-│   ├── popup.js
-│   └── instruction-history.js
-├── results/
-│   ├── results.html
-│   ├── results.css
-│   └── results.js
-├── options/
-│   ├── options.html
-│   ├── options.css
-│   └── options.js
-├── icons/
-├── scripts/
-│   ├── build.js
-│   ├── generate-icons.js
-│   ├── package.js
-│   ├── clean.js
-│   └── validate.js
-└── vendor/
-    └── browser-polyfill.js
-```
-
-- Chrome build uses `manifest.chrome.json` (Manifest V3)
-- Firefox build uses `manifest.firefox.json` (Manifest V2)
-
-### Modular LLM Architecture
-
-The extension uses a modular architecture for AI provider integration:
-
-* **`BaseLLM.js`**: Base class with shared functionality (error handling, response parsing, token estimation)
-* **`prompt-generator.js`**: Centralized prompt building for different use cases and output formats  
-* **`gemini-api.js`**: Direct Google Gemini API integration (extends BaseLLM)
-* **`openrouter-api.js`**: OpenRouter API integration with 8+ models (extends BaseLLM)
-* **Dynamic routing**: Background script automatically routes requests to the appropriate API based on selected model
+Cross-browser extension with modular AI provider integration. Chrome uses Manifest V3, Firefox uses Manifest V2.
 
 ### Cross-Browser Compatibility
 
