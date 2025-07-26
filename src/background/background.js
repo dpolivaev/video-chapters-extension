@@ -52,7 +52,6 @@ const settingsRepository = new SettingsRepository();
 
 class BackgroundService {
   constructor() {
-    console.log("BACKGROUND SCRIPT: BackgroundService constructor called");
     this.geminiAPI = new GeminiAPI;
     this.openRouterAPI = new OpenRouterAPI;
     
@@ -62,7 +61,6 @@ class BackgroundService {
     this.setupMessageListeners();
     this.setupContextMenus();
     this.setupTabListeners();
-    console.log("BACKGROUND SCRIPT: BackgroundService initialized successfully");
   }
   setupTabListeners() {
     if (browser.tabs && browser.tabs.onRemoved) {
@@ -76,9 +74,7 @@ class BackgroundService {
     }
   }
   setupMessageListeners() {
-    console.log("BACKGROUND SCRIPT: Setting up message listeners...");
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      console.log("BACKGROUND SCRIPT: Received message:", request.action, "from:", sender);
       switch (request.action) {
        case "processWithGemini":
         this.handleGeminiProcessing(request, sendResponse, sender);
@@ -101,7 +97,6 @@ class BackgroundService {
         return true;
 
        case "loadSettings":
-        console.log("BACKGROUND SCRIPT: Handling loadSettings request");
         this.handleLoadSettings(request, sendResponse);
         return true;
 
@@ -113,9 +108,7 @@ class BackgroundService {
         {
           if (request.resultId && request.results) {
             const session = ChapterGeneration.fromSessionResults(request.results);
-            console.log(`BACKGROUND: Creating session - requestId: ${request.resultId}, sessionId: ${session.id}`);
             sessionRepository.save(session);
-            console.log(`BACKGROUND: Session saved, repository now has ${sessionRepository.sessions.size} sessions`);
           }
           sendResponse({
             success: true
@@ -153,18 +146,7 @@ class BackgroundService {
        case "getGenerationStatus":
         {
           const resultId = request.resultId;
-          console.log(`BACKGROUND: Repository state - total sessions: ${sessionRepository.sessions.size}`);
-          const allKeys = Array.from(sessionRepository.sessions.keys());
-          console.log(`BACKGROUND: All session IDs:`, allKeys);
-          console.log(`BACKGROUND: Search ID type:`, typeof resultId, "value:", resultId);
-          console.log(`BACKGROUND: Stored ID types:`, allKeys.map(k => typeof k));
-          
-          const session = sessionRepository.findById(resultId);
           const status = sessionRepository.getGenerationStatus(resultId);
-          console.log(`BACKGROUND: getGenerationStatus for ${resultId} - session exists:`, !!session, "status:", status);
-          if (session) {
-            console.log("BACKGROUND: Session details - status:", session.status, "isPending:", session.isPending(), "isCompleted:", session.isCompleted());
-          }
           sendResponse({
             success: true,
             status: status
@@ -175,8 +157,11 @@ class BackgroundService {
        case "openResultsTab":
         {
           const {resultId: resultId, videoTabId: vidTabId, videoUrl: vidUrl} = request;
-          if (vidTabId && vidUrl) {
-            tabRegistry.registerVideoTab(vidTabId, vidUrl);
+          
+          const shouldRegisterNewMapping = this.shouldRegisterVideoTabMapping(resultId, vidTabId, vidUrl);
+          
+          if (shouldRegisterNewMapping) {
+            this.registerNewVideoTabMapping(resultId, vidTabId, vidUrl);
           }
           const existingResultsTab = tabRegistry.getResultsTab(resultId);
           if (existingResultsTab) {
@@ -233,41 +218,8 @@ class BackgroundService {
 
        case "getResultsTabStatus":
         {
-          const allResultsTabIds = tabRegistry.getAllResultsTabIds();
-          if (allResultsTabIds.length === 0) {
-            sendResponse({ open: false });
-            return true;
-          }
-          
-          const validateTab = async (tabId) => {
-            try {
-              await browser.tabs.get(tabId);
-              return tabId;
-            } catch (error) {
-              tabRegistry.cleanupResultsTab(tabId);
-              return null;
-            }
-          };
-          
-          Promise.all(allResultsTabIds.map(validateTab))
-            .then(validTabIds => {
-              const firstValidTab = validTabIds.find(id => id !== null);
-              if (firstValidTab) {
-                // Find the resultId for this tabId
-                const resultId = tabRegistry.getResultIdForTab(firstValidTab);
-                sendResponse({
-                  open: true,
-                  tabId: firstValidTab,
-                  resultId: resultId
-                });
-              } else {
-                sendResponse({ open: false });
-              }
-            })
-            .catch(err => {
-              console.error("Error validating results tabs:", err);
-              sendResponse({ open: false });
-            });
+          const currentVideoTabId = request.currentVideoTabId;
+          this.handleGetResultsTabStatus(currentVideoTabId, sendResponse);
           return true;
         }
 
@@ -283,26 +235,18 @@ class BackgroundService {
 
        case "goBackToVideo":
         {
-          const videoTabInfo = tabRegistry.getActiveVideoTab();
-          if (videoTabInfo) {
-            return this.focusOrCreateVideoTab(videoTabInfo.tabId, videoTabInfo.url, sendResponse);
-          } else {
-            sendResponse({ success: false });
-            return true;
-          }
+          const resultId = request.resultId;
+          this.handleGoBackToVideo(resultId, sendResponse);
+          return true;
         }
 
        default:
-        console.log("Unknown action:", request.action);
       }
     });
-    console.log("BACKGROUND SCRIPT: Message listeners set up successfully");
   }
   setupContextMenus() {
     try {
-      console.log("BACKGROUND SCRIPT: Setting up context menus...");
       if (!browser.contextMenus) {
-        console.log("BACKGROUND SCRIPT: contextMenus API not available");
         return;
       }
       browser.runtime.onInstalled.addListener(() => {
@@ -312,7 +256,6 @@ class BackgroundService {
           contexts: [ "page" ],
           documentUrlPatterns: [ "https://www.youtube.com/watch*" ]
         });
-        console.log("BACKGROUND SCRIPT: Context menu created");
       });
       browser.contextMenus.onClicked.addListener((info, tab) => {
         if (info.menuItemId === "generateChapters") {
@@ -321,10 +264,8 @@ class BackgroundService {
           });
         }
       });
-      console.log("BACKGROUND SCRIPT: Context menus set up successfully");
     } catch (error) {
-      console.error("BACKGROUND SCRIPT: Error setting up context menus:", error);
-      console.log("BACKGROUND SCRIPT: Continuing without context menus");
+      // Context menus not available
     }
   }
   async handleGeminiProcessing(request, sendResponse, sender) {
@@ -346,11 +287,6 @@ class BackgroundService {
         tabId
       );
       sessionRepository.save(completedSession);
-      console.log(`BACKGROUND: Session ${resultId} saved with status:`, completedSession.status);
-      console.log(`BACKGROUND: Session ID in completedSession:`, completedSession.id);
-      console.log(`BACKGROUND: Repository has ${sessionRepository.sessions.size} sessions`);
-      const verifySession = sessionRepository.findById(resultId);
-      console.log(`BACKGROUND: Verification - session exists:`, !!verifySession);
       
       sendResponse({
         success: true,
@@ -444,18 +380,14 @@ class BackgroundService {
     }
   }
   async handleLoadSettings(request, sendResponse) {
-    console.log("BACKGROUND SCRIPT: handleLoadSettings called");
     try {
       const settings = await settingsRepository.loadSettings();
-      console.log("BACKGROUND SCRIPT: Settings loaded:", settings);
       
       sendResponse({
         success: true,
         data: settings
       });
-      console.log("BACKGROUND SCRIPT: Response sent successfully");
     } catch (error) {
-      console.error("BACKGROUND SCRIPT: Error loading settings:", error);
       sendResponse({
         success: false,
         error: error.message
@@ -480,16 +412,151 @@ class BackgroundService {
     }
   }
   
+  shouldRegisterVideoTabMapping(resultId, vidTabId, vidUrl) {
+    const normalizedResultId = typeof resultId === 'string' ? parseInt(resultId, 10) : resultId;
+    const existingMapping = tabRegistry.resultToVideoMapping.get(normalizedResultId);
+    return !existingMapping && vidTabId && vidUrl && resultId;
+  }
+
+  registerNewVideoTabMapping(resultId, vidTabId, vidUrl) {
+    tabRegistry.registerVideoTabForResult(resultId, vidTabId, vidUrl);
+  }
+
+  async handleGoBackToVideo(resultId, sendResponse) {
+    try {
+      const videoTabInfo = await this.findVideoTabForResult(resultId);
+      
+      if (this.shouldFocusExistingTab(videoTabInfo)) {
+        return this.focusOrCreateVideoTab(videoTabInfo.tabId, videoTabInfo.url, sendResponse);
+      } else if (this.shouldCreateNewTab(videoTabInfo)) {
+        return this.createNewVideoTabWithResponse(videoTabInfo.url, sendResponse);
+      } else {
+        this.handleNoVideoTabAvailable(sendResponse);
+      }
+    } catch (error) {
+      this.handleGoBackToVideoError(error, sendResponse);
+    }
+  }
+
+  async findVideoTabForResult(resultId) {
+    let videoTabInfo = null;
+    
+    if (resultId) {
+      videoTabInfo = await tabRegistry.getVideoTabForResult(resultId);
+    }
+    
+    if (!videoTabInfo) {
+      videoTabInfo = tabRegistry.getActiveVideoTab();
+    }
+    
+    return videoTabInfo;
+  }
+
+  shouldFocusExistingTab(videoTabInfo) {
+    return videoTabInfo && videoTabInfo.tabId;
+  }
+
+  shouldCreateNewTab(videoTabInfo) {
+    return videoTabInfo && videoTabInfo.url && videoTabInfo.method === "create_new";
+  }
+
+  async createNewVideoTabWithResponse(url, sendResponse) {
+    try {
+      const newTab = await browser.tabs.create({ url: url });
+      sendResponse({ success: true, method: "create_new", tabId: newTab.id });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  handleNoVideoTabAvailable(sendResponse) {
+    sendResponse({ success: false, error: "No video tab registered" });
+  }
+
+  handleGoBackToVideoError(error, sendResponse) {
+    sendResponse({ success: false, error: error.message });
+  }
+
+  async handleGetResultsTabStatus(currentVideoTabId, sendResponse) {
+    try {
+      const resultsForCurrentVideo = await this.findResultsForVideoTab(currentVideoTabId);
+      if (resultsForCurrentVideo) {
+        sendResponse({
+          open: true,
+          tabId: resultsForCurrentVideo.tabId,
+          resultId: resultsForCurrentVideo.resultId
+        });
+      } else {
+        sendResponse({ open: false });
+      }
+    } catch (error) {
+      console.error("Error checking results tab status:", error);
+      sendResponse({ open: false });
+    }
+  }
+
+  async findResultsForVideoTab(currentVideoTabId) {
+    if (!currentVideoTabId) {
+      return this.findAnyValidResultsTab();
+    }
+
+    const currentVideoTab = await this.getCurrentVideoTabInfo(currentVideoTabId);
+    if (!currentVideoTab) {
+      return null;
+    }
+
+    const resultsForThisVideo = this.findResultsMatchingVideoUrl(currentVideoTab.url);
+    return resultsForThisVideo;
+  }
+
+  async findAnyValidResultsTab() {
+    const allResultsTabIds = tabRegistry.getAllResultsTabIds();
+    if (allResultsTabIds.length === 0) {
+      return null;
+    }
+
+    for (const tabId of allResultsTabIds) {
+      try {
+        await browser.tabs.get(tabId);
+        const resultId = tabRegistry.getResultIdForTab(tabId);
+        return { tabId, resultId };
+      } catch (error) {
+        tabRegistry.cleanupResultsTab(tabId);
+      }
+    }
+    return null;
+  }
+
+  async getCurrentVideoTabInfo(tabId) {
+    try {
+      const tab = await browser.tabs.get(tabId);
+      return tab;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  findResultsMatchingVideoUrl(videoUrl) {
+    const cleanedVideoUrl = cleanVideoURL(videoUrl);
+    
+    for (const [resultId, storedCleanedUrl] of tabRegistry.resultToVideoMapping.entries()) {
+      if (storedCleanedUrl === cleanedVideoUrl) {
+        const resultsTabId = tabRegistry.getResultsTab(resultId);
+        if (resultsTabId) {
+          return { tabId: resultsTabId, resultId };
+        }
+      }
+    }
+    return null;
+  }
+
   async focusOrCreateVideoTab(videoTabId, videoUrl, sendResponse) {
     try {
       const tab = await browser.tabs.get(videoTabId);
-      // Compare cleaned URLs to ignore timestamp parameters
-      const cleanedTabUrl = cleanVideoURL(tab.url);
-      const cleanedStoredUrl = cleanVideoURL(videoUrl);
+      const urlsMatch = this.doCleanedUrlsMatch(tab.url, videoUrl);
       
-      if (cleanedTabUrl === cleanedStoredUrl) {
-        await browser.tabs.update(videoTabId, { active: true });
-        await browser.windows.update(tab.windowId, { focused: true });
+      if (urlsMatch) {
+        await this.focusExistingTab(videoTabId, tab.windowId);
         sendResponse({ success: true, method: "focusOriginal" });
       } else {
         return this.findOrCreateVideoTab(videoUrl, sendResponse);
@@ -499,32 +566,54 @@ class BackgroundService {
     }
     return true;
   }
+
+  doCleanedUrlsMatch(tabUrl, storedUrl) {
+    const cleanedTabUrl = cleanVideoURL(tabUrl);
+    const cleanedStoredUrl = cleanVideoURL(storedUrl);
+    return cleanedTabUrl === cleanedStoredUrl;
+  }
+
+  async focusExistingTab(tabId, windowId) {
+    await browser.tabs.update(tabId, { active: true });
+    await browser.windows.update(windowId, { focused: true });
+  }
   
   async findOrCreateVideoTab(videoUrl, sendResponse) {
     try {
-      // Get all tabs and find ones with matching cleaned URLs
       const allTabs = await browser.tabs.query({});
-      const cleanedTargetUrl = cleanVideoURL(videoUrl);
-      
-      const matchingTabs = allTabs.filter(tab => {
-        if (!tab.url) return false;
-        const cleanedTabUrl = cleanVideoURL(tab.url);
-        return cleanedTabUrl === cleanedTargetUrl;
-      });
+      const matchingTabs = this.findTabsWithMatchingUrl(allTabs, videoUrl);
       
       if (matchingTabs.length > 0) {
-        const tab = matchingTabs[0];
-        await browser.tabs.update(tab.id, { active: true });
-        await browser.windows.update(tab.windowId, { focused: true });
+        await this.focusFirstMatchingTab(matchingTabs);
         sendResponse({ success: true, method: "focusOther" });
       } else {
-        await browser.tabs.create({ url: videoUrl });
+        await this.createNewVideoTab(videoUrl);
         sendResponse({ success: true, method: "openNew" });
       }
     } catch (error) {
       sendResponse({ success: false, error: error.message });
     }
     return true;
+  }
+
+  findTabsWithMatchingUrl(allTabs, videoUrl) {
+    const cleanedTargetUrl = cleanVideoURL(videoUrl);
+    
+    return allTabs.filter(tab => {
+      if (!tab.url) return false;
+      const cleanedTabUrl = cleanVideoURL(tab.url);
+      return cleanedTabUrl === cleanedTargetUrl;
+    });
+  }
+
+  async focusFirstMatchingTab(matchingTabs) {
+    const tab = matchingTabs[0];
+    await browser.tabs.update(tab.id, { active: true });
+    await browser.windows.update(tab.windowId, { focused: true });
+  }
+
+  async createNewVideoTab(videoUrl) {
+    await browser.tabs.create({ url: videoUrl });
   }
 }
 
@@ -644,13 +733,10 @@ const settingsManager = new SettingsManager;
 
 browser.runtime.onInstalled.addListener(details => {
   if (details.reason === "install") {
-    console.log("Video Chapters Generator installed");
     settingsManager.saveSettings({});
-  } else if (details.reason === "update") {
-    console.log("Video Chapters Generator updated");
   }
 });
 
 browser.runtime.onStartup.addListener(() => {
-  console.log("Video Chapters Generator started");
+  // Extension started
 });

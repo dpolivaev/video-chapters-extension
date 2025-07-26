@@ -725,12 +725,13 @@ class PopupView {
   async updateUI() {
     this.updateGenerateButtonState();
     try {
+      const currentVideoTabId = this.currentVideo?.tabId || null;
       const response = await browser.runtime.sendMessage({
-        action: "getResultsTabStatus"
+        action: "getResultsTabStatus",
+        currentVideoTabId: currentVideoTabId
       });
       if (response && response.open) {
         document.getElementById("viewResultsBtn").style.display = "inline-block";
-        // Store the resultId for the view results button
         if (response.resultId) {
           this._lastResultId = response.resultId;
         }

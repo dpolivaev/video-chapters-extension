@@ -11,6 +11,8 @@ class TabRegistry {
     this.tabs = new Map();
     this.currentVideoTab = null;
     this.sessionTabMapping = new Map(); // sessionId -> tabId
+    this.videoUrlToTabMapping = new Map(); // cleanedVideoUrl -> {tabId, url, lastSeen}
+    this.resultToVideoMapping = new Map(); // resultId -> cleanedVideoUrl
   }
   
   register(browserTab) {
@@ -95,6 +97,8 @@ class TabRegistry {
     this.tabs.clear();
     this.currentVideoTab = null;
     this.sessionTabMapping.clear();
+    this.videoUrlToTabMapping.clear();
+    this.resultToVideoMapping.clear();
   }
   
   getCount() {
@@ -134,6 +138,44 @@ class TabRegistry {
     }
   }
   
+  registerVideoTabForResult(resultId, tabId, url) {
+    const cleanedUrl = this.cleanVideoURL(url);
+    const normalizedResultId = this.ensureNumericResultId(resultId);
+    
+    this.storeVideoTabMapping(cleanedUrl, tabId, url);
+    this.storeResultToVideoMapping(normalizedResultId, cleanedUrl);
+    
+    this.registerVideoTab(tabId, url);
+  }
+
+  ensureNumericResultId(resultId) {
+    return typeof resultId === 'string' ? parseInt(resultId, 10) : resultId;
+  }
+
+  storeVideoTabMapping(cleanedUrl, tabId, url) {
+    this.videoUrlToTabMapping.set(cleanedUrl, {
+      tabId: tabId,
+      url: url,
+      lastSeen: Date.now()
+    });
+  }
+
+  storeResultToVideoMapping(normalizedResultId, cleanedUrl) {
+    this.resultToVideoMapping.set(normalizedResultId, cleanedUrl);
+  }
+  
+  cleanVideoURL(url) {
+    if (!url || typeof url !== 'string') return url;
+    
+    try {
+      const urlObj = new URL(url);
+      urlObj.searchParams.delete('t');
+      return urlObj.toString();
+    } catch (e) {
+      return url;
+    }
+  }
+  
   registerResultsTab(resultId, tabId) {
     this.resultsTabs = this.resultsTabs || new Map();
     this.resultsTabs.set(resultId, tabId);
@@ -151,6 +193,126 @@ class TabRegistry {
     return {
       tabId: videoTab.id,
       url: videoTab.url?.toString()
+    };
+  }
+  
+  async getVideoTabForResult(resultId) {
+    const normalizedResultId = this.ensureNumericResultId(resultId);
+    const cleanedUrl = this.findCleanedUrlForResult(normalizedResultId);
+    
+    if (!cleanedUrl) {
+      return null;
+    }
+    
+    const videoTabInfo = this.findVideoTabInfoForUrl(cleanedUrl);
+    if (!videoTabInfo) {
+      return null;
+    }
+    
+    const validatedTabInfo = await this.validateExistingTab(videoTabInfo, cleanedUrl);
+    if (validatedTabInfo) {
+      return validatedTabInfo;
+    }
+    
+    return await this.findTabByCleanedUrl(cleanedUrl);
+  }
+
+  findCleanedUrlForResult(normalizedResultId) {
+    return this.resultToVideoMapping.get(normalizedResultId);
+  }
+
+  findVideoTabInfoForUrl(cleanedUrl) {
+    return this.videoUrlToTabMapping.get(cleanedUrl);
+  }
+
+  async validateExistingTab(videoTabInfo, expectedCleanedUrl) {
+    try {
+      if (this.isBrowserTabsApiAvailable()) {
+        const currentTab = await browser.tabs.get(videoTabInfo.tabId);
+        const currentCleanedUrl = this.cleanVideoURL(currentTab.url);
+        
+        if (this.urlsMatch(currentCleanedUrl, expectedCleanedUrl)) {
+          return this.createDirectTabResult(videoTabInfo);
+        }
+      }
+    } catch (error) {
+      // Tab no longer exists
+    }
+    return null;
+  }
+
+  isBrowserTabsApiAvailable() {
+    return typeof browser !== 'undefined' && browser.tabs && browser.tabs.get;
+  }
+
+  urlsMatch(url1, url2) {
+    return url1 === url2;
+  }
+
+  createDirectTabResult(videoTabInfo) {
+    videoTabInfo.lastSeen = Date.now();
+    return {
+      tabId: videoTabInfo.tabId,
+      url: videoTabInfo.url,
+      method: "direct"
+    };
+  }
+  
+  async findTabByCleanedUrl(targetCleanedUrl) {
+    try {
+      if (this.isBrowserTabQueryApiAvailable()) {
+        const allTabs = await browser.tabs.query({});
+        const matchingTab = this.searchForMatchingTab(allTabs, targetCleanedUrl);
+        
+        if (matchingTab) {
+          this.updateMappingWithDiscoveredTab(targetCleanedUrl, matchingTab);
+          return this.createDiscoveredTabResult(matchingTab);
+        }
+      }
+    } catch (error) {
+      // Tab search failed
+    }
+    
+    return this.createNewTabFallbackResult(targetCleanedUrl);
+  }
+
+  isBrowserTabQueryApiAvailable() {
+    return typeof browser !== 'undefined' && browser.tabs && browser.tabs.query;
+  }
+
+  searchForMatchingTab(allTabs, targetCleanedUrl) {
+    for (const tab of allTabs) {
+      if (!tab.url) continue;
+      
+      const tabCleanedUrl = this.cleanVideoURL(tab.url);
+      if (tabCleanedUrl === targetCleanedUrl) {
+        return tab;
+      }
+    }
+    return null;
+  }
+
+  updateMappingWithDiscoveredTab(targetCleanedUrl, tab) {
+    this.videoUrlToTabMapping.set(targetCleanedUrl, {
+      tabId: tab.id,
+      url: tab.url,
+      lastSeen: Date.now()
+    });
+  }
+
+  createDiscoveredTabResult(tab) {
+    return {
+      tabId: tab.id,
+      url: tab.url,
+      method: "discovered"
+    };
+  }
+
+  createNewTabFallbackResult(targetCleanedUrl) {
+    return {
+      tabId: null,
+      url: targetCleanedUrl,
+      method: "create_new"
     };
   }
   

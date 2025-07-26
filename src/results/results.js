@@ -117,45 +117,36 @@ class ResultsView {
     msg.textContent = message || chrome.i18n.getMessage('progress_generating_chapters');
   }
   hideProgress() {
-    console.log("RESULTS: Hiding progress and cleaning up timeouts");
     const section = document.getElementById("progressSection");
     section.style.display = "none";
     if (this.progressTimeout) {
       clearTimeout(this.progressTimeout);
       this.progressTimeout = null;
-      console.log("RESULTS: Progress timeout cleared");
     }
     if (this.pollingTimeout) {
       clearTimeout(this.pollingTimeout);
       this.pollingTimeout = null;
-      console.log("RESULTS: Polling timeout cleared via hideProgress");
     }
   }
   async pollForCompletion() {
     if (this.status === "done" || this.status === "error") {
-      console.log("RESULTS: Polling not started - status already:", this.status);
       return;
     }
     
     if (this.pollingTimeout) {
-      console.log("RESULTS: Clearing existing polling timeout");
       clearTimeout(this.pollingTimeout);
       this.pollingTimeout = null;
     }
     
-    console.log("RESULTS: Starting polling for completion");
     let elapsed = 0;
     const poll = async () => {
       if (this.status === "done" || this.status === "error") {
-        console.log("RESULTS: Polling stopped - status changed externally to:", this.status);
         return;
       }
       
       const status = await this.getGenerationStatus();
-      console.log("RESULTS: Polling check - status:", status, "elapsed:", elapsed + "s");
       
       if (status === "done") {
-        console.log("RESULTS: ✅ Generation completed - stopping polling");
         this.status = "done";
         await this.loadResults();
         this.updateDisplay();
@@ -164,11 +155,9 @@ class ResultsView {
         if (this.pollingTimeout) {
           clearTimeout(this.pollingTimeout);
           this.pollingTimeout = null;
-          console.log("RESULTS: Polling timeout cleared on completion");
         }
         return;
       } else if (status === "error") {
-        console.log("RESULTS: ❌ Generation failed - stopping polling");
         this.status = "error";
         this.hideProgress();
         await this.loadResults();
@@ -176,7 +165,6 @@ class ResultsView {
         if (this.pollingTimeout) {
           clearTimeout(this.pollingTimeout);
           this.pollingTimeout = null;
-          console.log("RESULTS: Polling timeout cleared on error");
         }
         return;
       } else {
@@ -186,7 +174,6 @@ class ResultsView {
         } else if (elapsed >= 60) {
           this.showProgress(chrome.i18n.getMessage('still_generating_chapters_please_wait'), 60);
         }
-        console.log("RESULTS: Continuing polling - next check in 2s");
         this.pollingTimeout = setTimeout(poll, 2e3);
       }
     };
@@ -231,7 +218,8 @@ class ResultsView {
     });
     document.getElementById("backBtn").addEventListener("click", async () => {
       await browser.runtime.sendMessage({
-        action: "goBackToVideo"
+        action: "goBackToVideo",
+        resultId: this.resultId
       });
     });
     document.addEventListener("keydown", e => {
@@ -312,9 +300,7 @@ class ResultsView {
     if (!pageTitle) return;
     let title = chrome.i18n.getMessage('results_page_title');
     if (this.results && this.results.model) {
-      console.log('🔍 MODEL_DEBUG: Stored model ID:', this.results.model);
       const modelName = this.getModelDisplayName(this.results.model);
-      console.log('🔍 MODEL_DEBUG: Display name:', modelName);
       title += ` (${modelName})`;
     }
     pageTitle.textContent = title;
