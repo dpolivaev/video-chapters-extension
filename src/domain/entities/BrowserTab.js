@@ -6,16 +6,6 @@
  * Licensed under GPL3 or later
  */
 
-let VideoUrl;
-
-function isNodeJsEnvironment() {
-  return typeof require !== 'undefined' && typeof module !== 'undefined';
-}
-
-if (isNodeJsEnvironment()) {
-  VideoUrl = require('../values/VideoUrl');
-}
-
 class BrowserTab {
   constructor(id, url, type = 'unknown') {
     this.id = this.validateId(id);

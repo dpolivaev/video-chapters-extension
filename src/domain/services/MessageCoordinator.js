@@ -6,20 +6,6 @@
  * Licensed under GPL3 or later
  */
 
-let VideoTranscript, ModelId, ApiCredentials, ChapterGeneration, BrowserTab;
-
-function isNodeJsEnvironment() {
-  return typeof require !== 'undefined' && typeof module !== 'undefined';
-}
-
-if (isNodeJsEnvironment()) {
-  VideoTranscript = require('../entities/VideoTranscript');
-  ModelId = require('../values/ModelId');
-  ApiCredentials = require('../values/ApiCredentials');
-  ChapterGeneration = require('../entities/ChapterGeneration');
-  BrowserTab = require('../entities/BrowserTab');
-}
-
 class MessageCoordinator {
   constructor(chapterGenerator, transcriptExtractor, sessionRepository, settingsRepository, instructionHistory) {
     this.chapterGenerator = chapterGenerator;

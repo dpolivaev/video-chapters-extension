@@ -9,6 +9,37 @@
 const path = require('path');
 const fs = require('fs');
 
+global.JsModuleImporter = require('./src/lang/JsModuleImporter');
+
+// Bootstrap all domain classes globally for Jest/Node.js
+const domainClasses = {
+  // Values
+  VideoUrl: './src/domain/values/VideoUrl',
+  ModelId: './src/domain/values/ModelId', 
+  ApiCredentials: './src/domain/values/ApiCredentials',
+  GenerationProgress: './src/domain/values/GenerationProgress',
+  
+  // Entities
+  VideoTranscript: './src/domain/entities/VideoTranscript',
+  ChapterGeneration: './src/domain/entities/ChapterGeneration',
+  BrowserTab: './src/domain/entities/BrowserTab',
+  
+  // Services (that don't have complex dependencies)
+  NetworkCommunicator: './src/domain/services/NetworkCommunicator',
+  GeminiChapterGenerator: './src/domain/services/GeminiChapterGenerator',
+  OpenRouterChapterGenerator: './src/domain/services/OpenRouterChapterGenerator'
+};
+
+for (const [className, path] of Object.entries(domainClasses)) {
+  if (!global[className]) {
+    try {
+      global[className] = require(path);
+    } catch (error) {
+      console.warn(`Could not load ${className} from ${path}:`, error.message);
+    }
+  }
+}
+
 function loadClassFromFile(filePath) {
   const fullPath = path.join(__dirname, filePath);
   const content = fs.readFileSync(fullPath, 'utf8');

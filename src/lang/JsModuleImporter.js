@@ -7,6 +7,7 @@
  */
 
 class JsModuleImporter {
+
   static require(dependencies) {
     if (this.isNodeJsEnvironment()) {
       return this.loadFromNodeJsModules(dependencies);
@@ -15,27 +16,52 @@ class JsModuleImporter {
     }
   }
 
+  static importScriptsIfNeeded(scripts, checkClasses = []) {
+    if (typeof importScripts === 'undefined') {
+      return;
+    }
+
+    const globalScope = typeof global !== 'undefined' ? global : 
+                       typeof window !== 'undefined' ? window : self;
+    
+    const allClassesLoaded = checkClasses.every(className => 
+      typeof globalScope[className] !== 'undefined'
+    );
+
+    if (!allClassesLoaded) {
+      try {
+        importScripts(...scripts);
+      } catch (error) {
+        console.warn('ImportScripts failed (likely Firefox with manifest loading):', error.message);
+      }
+    }
+  }
+
   static isNodeJsEnvironment() {
     return typeof require !== 'undefined' && typeof module !== 'undefined';
   }
 
   static loadFromNodeJsModules(dependencies) {
+    const globalScope = typeof global !== 'undefined' ? global : 
+                       typeof window !== 'undefined' ? window : self;
     const loaded = {};
     for (const [name, path] of Object.entries(dependencies)) {
-      if (typeof global[name] === 'undefined') {
+      if (typeof globalScope[name] === 'undefined') {
         loaded[name] = require(path);
-        global[name] = loaded[name];
+        globalScope[name] = loaded[name];
       } else {
-        loaded[name] = global[name];
+        loaded[name] = globalScope[name];
       }
     }
     return loaded;
   }
 
   static loadFromBrowserGlobals(dependencies) {
+    const globalScope = typeof global !== 'undefined' ? global : 
+                       typeof window !== 'undefined' ? window : self;
     const loaded = {};
     for (const name of Object.keys(dependencies)) {
-      loaded[name] = global[name] || window[name];
+      loaded[name] = globalScope[name];
     }
     return loaded;
   }

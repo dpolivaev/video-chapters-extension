@@ -6,17 +6,6 @@
  * Licensed under GPL3 or later
  */
 
-let VideoTranscript, ModelId;
-
-function isNodeJsEnvironment() {
-  return typeof require !== 'undefined' && typeof module !== 'undefined';
-}
-
-if (isNodeJsEnvironment()) {
-  VideoTranscript = require('./VideoTranscript');
-  ModelId = require('../values/ModelId');
-}
-
 class ChapterGeneration {
   constructor(videoTranscript, modelId, customInstructions = '') {
     this.id = this.generateId();

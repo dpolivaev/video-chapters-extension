@@ -6,16 +6,6 @@
  * Licensed under GPL3 or later
  */
 
-let VideoTranscript;
-
-function isNodeJsEnvironment() {
-  return typeof require !== 'undefined' && typeof module !== 'undefined';
-}
-
-if (isNodeJsEnvironment()) {
-  VideoTranscript = require('../entities/VideoTranscript');
-}
-
 class TranscriptExtractor {
   constructor(browserAPI = browser) {
     this.browser = browserAPI;

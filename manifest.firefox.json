@@ -11,10 +11,12 @@
     "contextMenus",
     "https://www.youtube.com/*",
     "https://youtubei.googleapis.com/*",
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://openrouter.ai/*"
   ],
   "background": {
     "scripts": [
+      "lang/JsModuleImporter.js",
       "utils/url-utils.js",
       "background/errorhandler.js",
       "domain/values/VideoUrl.js",
@@ -27,12 +29,19 @@
       "infrastructure/repositories/SessionRepository.js",
       "infrastructure/repositories/TabRegistry.js",
       "infrastructure/repositories/SettingsRepository.js",
+      "infrastructure/adapters/BrowserHttpAdapter.js",
+      "domain/services/NetworkCommunicator.js",
+      "domain/services/GeminiChapterGenerator.js",
+      "domain/services/OpenRouterChapterGenerator.js",
+      "domain/services/MessageCoordinator.js",
       "domain/services/TranscriptExtractor.js",
       "domain/services/ChapterGenerator.js",
       "background/prompt-generator.js",
       "background/llm.js", 
       "background/gemini-api.js",
       "background/openrouter-api.js",
+      "infrastructure/adapters/GeminiApiAdapter.js",
+      "infrastructure/adapters/OpenRouterApiAdapter.js",
       "background/background.js"
     ],
     "persistent": true

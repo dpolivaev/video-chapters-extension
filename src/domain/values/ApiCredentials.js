@@ -6,16 +6,6 @@
  * Licensed under GPL3 or later
  */
 
-let ModelId;
-
-function isNodeJsEnvironment() {
-  return typeof require !== 'undefined' && typeof module !== 'undefined';
-}
-
-if (isNodeJsEnvironment()) {
-  ModelId = require('./ModelId');
-}
-
 class ApiCredentials {
   constructor(geminiKey = '', openRouterKey = '') {
     this.geminiKey = this.validateKey(geminiKey, 'Gemini');

@@ -20,34 +20,34 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 
-if (typeof importScripts !== "undefined") {
-  if (typeof SessionRepository === "undefined") {
-    importScripts(
-      "../utils/url-utils.js",
-      "errorhandler.js",
-      "../domain/values/VideoUrl.js",
-      "../domain/values/ModelId.js", 
-      "../domain/values/ApiCredentials.js",
-      "../domain/values/GenerationProgress.js",
-      "../domain/entities/VideoTranscript.js",
-      "../domain/entities/ChapterGeneration.js",
-      "../domain/entities/BrowserTab.js",
-      "../infrastructure/repositories/SessionRepository.js",
-      "../infrastructure/repositories/TabRegistry.js",
-      "../infrastructure/repositories/SettingsRepository.js",
-      "../domain/services/TranscriptExtractor.js",
-      "../domain/services/ChapterGenerator.js",
-      "prompt-generator.js", 
-      "llm.js",
-      "../infrastructure/adapters/BrowserHttpAdapter.js",
-      "../domain/services/NetworkCommunicator.js",
-      "../domain/services/GeminiChapterGenerator.js",
-      "../domain/services/OpenRouterChapterGenerator.js", 
-      "../infrastructure/adapters/GeminiApiAdapter.js",
-      "../infrastructure/adapters/OpenRouterApiAdapter.js"
-    );
-  }
+if (typeof importScripts !== 'undefined') {
+  importScripts('../lang/JsModuleImporter.js');
 }
+
+JsModuleImporter.importScriptsIfNeeded([
+  "../utils/url-utils.js",
+  "errorhandler.js",
+  "../domain/values/VideoUrl.js",
+  "../domain/values/ModelId.js", 
+  "../domain/values/ApiCredentials.js",
+  "../domain/values/GenerationProgress.js",
+  "../domain/entities/VideoTranscript.js",
+  "../domain/entities/ChapterGeneration.js",
+  "../domain/entities/BrowserTab.js",
+  "../infrastructure/repositories/SessionRepository.js",
+  "../infrastructure/repositories/TabRegistry.js",
+  "../infrastructure/repositories/SettingsRepository.js",
+  "../domain/services/TranscriptExtractor.js",
+  "../domain/services/ChapterGenerator.js",
+  "prompt-generator.js", 
+  "llm.js",
+  "../infrastructure/adapters/BrowserHttpAdapter.js",
+  "../domain/services/NetworkCommunicator.js",
+  "../domain/services/GeminiChapterGenerator.js",
+  "../domain/services/OpenRouterChapterGenerator.js", 
+  "../infrastructure/adapters/GeminiApiAdapter.js",
+  "../infrastructure/adapters/OpenRouterApiAdapter.js"
+], ['SessionRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration', 'TranscriptExtractor']);
 
 
 const sessionRepository = new SessionRepository();
