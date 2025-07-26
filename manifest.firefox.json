@@ -37,7 +37,7 @@
       "domain/services/TranscriptExtractor.js",
       "domain/services/ChapterGenerator.js",
       "background/prompt-generator.js",
-      "background/llm.js", 
+      "background/BaseLLM.js", 
       "background/gemini-api.js",
       "background/openrouter-api.js",
       "infrastructure/adapters/GeminiApiAdapter.js",

@@ -47,7 +47,7 @@ timecodes-browser-extension/
 ├── manifest.firefox.json
 ├── background/
 │   ├── background.js           # Main service worker
-│   ├── llm.js                  # Base class for all LLM providers
+│   ├── BaseLLM.js              # Base class for all LLM providers
 │   ├── prompt-generator.js     # Centralized prompt building
 │   ├── gemini-api.js           # Direct Google Gemini API integration
 │   └── openrouter-api.js       # OpenRouter API with multiple models
@@ -85,7 +85,7 @@ timecodes-browser-extension/
 
 The extension uses a modular architecture for AI provider integration:
 
-* **`llm.js`**: Base class with shared functionality (error handling, response parsing, token estimation)
+* **`BaseLLM.js`**: Base class with shared functionality (error handling, response parsing, token estimation)
 * **`prompt-generator.js`**: Centralized prompt building for different use cases and output formats  
 * **`gemini-api.js`**: Direct Google Gemini API integration (extends BaseLLM)
 * **`openrouter-api.js`**: OpenRouter API integration with 8+ models (extends BaseLLM)

@@ -40,7 +40,7 @@ JsModuleImporter.importScriptsIfNeeded([
   '../domain/services/TranscriptExtractor.js',
   '../domain/services/ChapterGenerator.js',
   'prompt-generator.js',
-  'llm.js',
+  'BaseLLM.js',
   '../infrastructure/adapters/BrowserHttpAdapter.js',
   '../domain/services/NetworkCommunicator.js',
   '../domain/services/GeminiChapterGenerator.js',
