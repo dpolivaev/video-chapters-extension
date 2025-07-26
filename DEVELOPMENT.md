@@ -85,9 +85,9 @@ npm run package:firefox
 ### Validation
 
 ```bash
-npm run validate
-npm run validate:chrome
-npm run validate:firefox
+npm run validate  # Runs lint + test + build
+npm run ci        # Same as validate (CI alias)
+npm run lint      # Code quality checks
 ```
 
 ### Testing
