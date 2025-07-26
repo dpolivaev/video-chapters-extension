@@ -21,18 +21,13 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 const fs = require('fs-extra');
-
 const path = require('path');
-
 const chalk = require('chalk');
-
 const ora = require('ora');
-
 const {program: program} = require('commander');
-
 const Jimp = require('jimp');
-
 const {minify: minify} = require('terser');
+const { glob } = require('glob');
 
 const config = {
   srcDir: path.join(process.cwd(), 'src'),
@@ -79,38 +74,20 @@ class ExtensionBuilder {
     this.spinner = null;
   }
 
-  // Helper method to recursively discover files by extension in src/
   async discoverFiles(extension) {
     const files = [];
 
-    // Add manifest file (lives in root, not src/)
     if (extension === '.json') {
       files.push(config.manifestFile);
     }
 
-    // Recursively scan src/ directory
-    const scanDirectory = async (dir, relativePath = '') => {
-      if (!(await fs.pathExists(dir))) {
-        return;
-      }
+    const srcFiles = await glob(`src/**/*${extension}`, { 
+      ignore: ['**/*.test.js', '**/*.spec.js'],
+      cwd: process.cwd() 
+    });
+    
+    files.push(...srcFiles.map(file => path.relative('src', file)));
 
-      const entries = await fs.readdir(dir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        const relPath = path.join(relativePath, entry.name);
-
-        if (entry.isDirectory()) {
-          await scanDirectory(fullPath, relPath);
-        } else if (entry.isFile() && path.extname(entry.name) === extension) {
-          files.push(relPath);
-        }
-      }
-    };
-
-    await scanDirectory(config.srcDir);
-
-    // Add special files from root directory
     for (const fileList of Object.values(config.specialFiles)) {
       for (const file of fileList) {
         if (path.extname(file) === extension) {
@@ -122,7 +99,6 @@ class ExtensionBuilder {
     return files;
   }
 
-  // Helper method to get all required files
   async getAllRequiredFiles() {
     const jsFiles = await this.discoverFiles('.js');
     const cssFiles = await this.discoverFiles('.css');
