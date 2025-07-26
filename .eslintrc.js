@@ -32,7 +32,7 @@ module.exports = {
     ChapterGenerator: 'readonly',
     MessageCoordinator: 'readonly',
     PromptGenerator: 'readonly',
-    BaseLLM: 'readonly',
+    BaseLLM: 'writable',
     BrowserHttpAdapter: 'readonly',
     NetworkCommunicator: 'readonly',
     GeminiChapterGenerator: 'readonly',

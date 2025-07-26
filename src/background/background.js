@@ -275,7 +275,7 @@ class BackgroundService {
   }
   async handleGeminiProcessing(request, sendResponse, sender) {
     try {
-      const {customInstructions, apiKey, model, resultId, newResultId} = request;
+      const {customInstructions, apiKey, model, resultId} = request;
       const tabId = sender?.tab?.id || null;
 
       if (!model || typeof model !== 'string' || model.trim() === '') {

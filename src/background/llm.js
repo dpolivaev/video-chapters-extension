@@ -26,13 +26,13 @@ class BaseLLM {
     this.availableModels = [];
     this.baseUrl = '';
   }
-  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model) {
+  async processSubtitles(subtitleContent, _customInstructions = '', _apiKey, _model) {
     throw new Error('processSubtitles must be implemented by subclass');
   }
-  async makeAPICall(prompt, apiKey, model) {
+  async makeAPICall(_prompt, _apiKey, _model) {
     throw new Error('makeAPICall must be implemented by subclass');
   }
-  parseResponse(response) {
+  parseResponse(_response) {
     throw new Error('parseResponse must be implemented by subclass');
   }
   validateAPIKey(apiKey) {
