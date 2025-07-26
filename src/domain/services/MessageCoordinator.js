@@ -16,7 +16,7 @@ class MessageCoordinator {
   }
 
   async handleGeminiProcessing(request) {
-    const { videoId, subtitles, customInstructions, apiKey, model } = request;
+    const { videoId, subtitles, videoTitle, videoAuthor, customInstructions, apiKey, model } = request;
 
     if (!videoId) {
       throw new Error('Video ID is required');
@@ -31,7 +31,12 @@ class MessageCoordinator {
     }
 
     const youtubeUrl = videoId.includes('youtube.com') ? videoId : `https://www.youtube.com/watch?v=${videoId}`;
-    const videoTranscript = new VideoTranscript(subtitles, 'Video Title', 'Video Author', youtubeUrl);
+    const videoTranscript = new VideoTranscript(
+      subtitles, 
+      videoTitle || 'Unknown Title', 
+      videoAuthor || 'Unknown Author', 
+      youtubeUrl
+    );
     const credentials = new ApiCredentials(apiKey, '');
 
     const chapterGeneration = new ChapterGeneration(

@@ -389,6 +389,39 @@ describe('MessageCoordinator', () => {
       expect(result.chapters).toBe('Test chapters');
     });
 
+    test('AI should receive same formatted content as subtitle tab displays', async () => {
+      const rawSubtitles = '(0:00) Я только что прошла невероятную игру\n(0:02) Берлога.\n(0:02) Пришёл и поиграл немного в видеоигры';
+      const videoTitle = 'Как российских школьников вовлекли в разработку военных дронов под видом кружков';
+      const videoAuthor = 'Test Author';
+      
+      const request = {
+        videoId: 'test123',
+        subtitles: rawSubtitles,
+        videoTitle: videoTitle,
+        videoAuthor: videoAuthor,
+        customInstructions: '',
+        apiKey: 'test-key',
+        model: 'gemini-2.5-pro'
+      };
+
+      let capturedChapterGeneration = null;
+      mockChapterGenerator.generateChapters.mockImplementation((chapterGeneration) => {
+        capturedChapterGeneration = chapterGeneration;
+        return Promise.resolve({ id: 'test', chapters: 'test chapters' });
+      });
+
+      await messageCoordinator.processMessage('processWithGemini', request);
+
+      const VideoTranscript = require('../entities/VideoTranscript');
+      const expectedVideoTranscript = new VideoTranscript(rawSubtitles, videoTitle, videoAuthor, `https://www.youtube.com/watch?v=test123`);
+      const expectedSubtitleTabContent = expectedVideoTranscript.toSubtitleContent();
+      const aiReceivedContent = capturedChapterGeneration.videoTranscript.toSubtitleContent();
+
+      expect(aiReceivedContent).toBe(expectedSubtitleTabContent);
+      expect(aiReceivedContent).toContain(`Title: ${videoTitle}`);
+      expect(aiReceivedContent).toContain('\n\nTranscript Content:\n');
+    });
+
     test('should route saveInstruction action', async () => {
       const request = { instruction: 'Test instruction' };
 
