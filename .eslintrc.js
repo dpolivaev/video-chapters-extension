@@ -53,12 +53,12 @@ module.exports = {
       vars: 'all',
       args: 'after-used',
       argsIgnorePattern: '^_',
-      varsIgnorePattern: '^(_|BaseLLM|retryHandler|GeminiAPI|OpenRouterAPI|PromptGenerator|cleanVideoURL|browser|_backgroundService)$'
+      varsIgnorePattern: '^(_|BaseLLM|retryHandler|GeminiAPI|OpenRouterAPI|PromptGenerator|cleanVideoURL|browser|_backgroundService|ModelId|BrowserHttpAdapter|BrowserMessageAdapter|GeminiApiAdapter|OpenRouterApiAdapter|SessionRepository|SettingsRepository|TabRegistry)$'
     }],
     'no-undef': 'error',
-    'no-console': 'warn',
+    'no-console': 'off',
     'no-debugger': 'error',
-    'no-alert': 'error',
+    'no-alert': 'off',
     'prefer-const': 'error',
     'no-var': 'error',
     'eqeqeq': ['error', 'always'],

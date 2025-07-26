@@ -461,8 +461,8 @@ if (document.readyState === 'loading') {
           });
         }
       } catch (e) {
-      // Ignore errors in status check
-    }
+        // Ignore errors in status check
+      }
     }
     new ResultsView(resultId);
   });
@@ -479,8 +479,8 @@ if (document.readyState === 'loading') {
           });
         }
       } catch (e) {
-      // Ignore errors in status check
-    }
+        // Ignore errors in status check
+      }
     }
     new ResultsView(resultId);
   })();

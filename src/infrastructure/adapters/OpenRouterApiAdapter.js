@@ -32,16 +32,16 @@ class OpenRouterApiAdapter extends BaseLLM {
     this.availableModels = this.openRouterChapterGenerator.getAvailableModels();
   }
 
-  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'deepseek/deepseek-r1-0528:free', tabId = null) {
+  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'deepseek/deepseek-r1-0528:free') {
     return this.openRouterChapterGenerator.processSubtitles(subtitleContent, customInstructions, apiKey, model);
   }
 
-  async makeAPICall(prompt, apiKey, model, tabId = null) {
+  async makeAPICall(prompt, apiKey, model) {
     const url = this.openRouterChapterGenerator.buildRequestUrl();
     const headers = this.openRouterChapterGenerator.buildHttpHeaders(apiKey, model);
     const body = this.openRouterChapterGenerator.buildRequestBody(prompt, model);
 
-    return this.openRouterChapterGenerator.networkCommunicator.post(url, headers, body, tabId);
+    return this.openRouterChapterGenerator.networkCommunicator.post(url, headers, body);
   }
 
   parseResponse(response) {

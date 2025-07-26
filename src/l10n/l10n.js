@@ -6,7 +6,7 @@
 
 const l10n = {
   updateString(string) {
-    return string.replace(/__MSG_([-@\.\w]+)__/g, (matched, key) => {
+    return string.replace(/__MSG_([-@.\w]+)__/g, (matched, key) => {
       return chrome.i18n.getMessage(key) || matched;
     });
   },
@@ -14,7 +14,7 @@ const l10n = {
   $log(message, ...args) {
     message = `l10s: ${message}`;
     if (typeof window.log === 'function') {
-      log(message, ...args);
+      window.log(message, ...args);
     } else {
       console.log(message, ...args);
     }

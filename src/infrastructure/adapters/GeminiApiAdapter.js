@@ -32,16 +32,16 @@ class GeminiApiAdapter extends BaseLLM {
     this.availableModels = this.geminiChapterGenerator.getAvailableModels();
   }
 
-  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro', tabId = null) {
+  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro') {
     return this.geminiChapterGenerator.processSubtitles(subtitleContent, customInstructions, apiKey, model);
   }
 
-  async makeAPICall(prompt, apiKey, model, tabId = null) {
+  async makeAPICall(prompt, apiKey, model) {
     const url = this.geminiChapterGenerator.buildRequestUrl(model, apiKey);
     const headers = this.geminiChapterGenerator.buildHttpHeaders();
     const body = this.geminiChapterGenerator.buildRequestBody(prompt);
 
-    return this.geminiChapterGenerator.networkCommunicator.post(url, headers, body, tabId);
+    return this.geminiChapterGenerator.networkCommunicator.post(url, headers, body);
   }
 
   parseResponse(response) {

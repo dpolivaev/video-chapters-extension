@@ -109,7 +109,7 @@ class InstructionHistoryView {
       this.historyList.appendChild(entryElement);
     });
   }
-  createHistoryEntry(entry, originalIndex) {
+  createHistoryEntry(entry) {
     const entryDiv = document.createElement('div');
     entryDiv.className = 'history-entry';
     let timestampStr = 'Unknown time';
