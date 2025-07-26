@@ -15,7 +15,7 @@
     "build": "npm run build:chrome && npm run build:firefox",
     "package:chrome": "node scripts/package.js --output dist/chrome",
     "package:firefox": "node scripts/package.js --output dist/firefox",
-    "package": "npm run package:chrome && npm run package:firefox && npm run package:source",
+    "package": "npm run clean && npm run validate && npm run package:chrome && npm run package:firefox && npm run package:source",
     "package:source": "node scripts/package.js --source",
     "validate": "npm run lint && npm run test && npm run build",
     "ci": "npm run validate",
