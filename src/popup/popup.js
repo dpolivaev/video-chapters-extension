@@ -516,7 +516,7 @@ class PopupView {
       const newResultId = ChapterGeneration.generateRandomId();
 
       browser.runtime.sendMessage({
-        action: 'processWithGemini',
+        action: 'generateChapters',
         subtitleContent,
         customInstructions,
         apiKey,

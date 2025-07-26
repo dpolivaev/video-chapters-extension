@@ -147,7 +147,7 @@ Add specific instructions to customize chapter generation:
 
 ## Privacy & Security
 
-* **Local Storage Only**: All your data is stored solely in your browser's local storage and never leaves your device except when explicitly sent to Gemini (Google's LLM).
+* **Local Storage Only**: All your data is stored solely in your browser's local storage and never leaves your device except when explicitly sent to your chosen AI provider for chapter generation.
 * **No External Data Collection**: The extension does not send any data to external servers, except to your selected AI provider for processing the transcript.
 * **No DOM Parsing**: Subtitles are not extracted from the webpage DOM.
 * **Transcript Retrieval**: The extension retrieves subtitles from YouTube by issuing the same requests the browser makes when the user opens the transcript panel, and sends them to your selected AI provider for processing.

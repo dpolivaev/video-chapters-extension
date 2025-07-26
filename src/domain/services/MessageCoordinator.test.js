@@ -67,8 +67,8 @@ describe('MessageCoordinator', () => {
     });
   });
 
-  describe('Gemini processing', () => {
-    test('should handle Gemini processing successfully', async () => {
+  describe('chapter generation', () => {
+    test('should handle chapter generation successfully', async () => {
       const request = {
         videoId: 'test123',
         subtitles: 'Test subtitle content',
@@ -86,7 +86,7 @@ describe('MessageCoordinator', () => {
 
       mockChapterGenerator.generateChapters.mockResolvedValue(completedGeneration);
 
-      const result = await messageCoordinator.handleGeminiProcessing(request);
+      const result = await messageCoordinator.handleChapterGeneration(request);
 
       expect(result.success).toBe(true);
       expect(result.videoId).toBe('test123');
@@ -102,7 +102,7 @@ describe('MessageCoordinator', () => {
         model: 'gemini-2.5-pro'
       };
 
-      await expect(messageCoordinator.handleGeminiProcessing(request))
+      await expect(messageCoordinator.handleChapterGeneration(request))
         .rejects.toThrow('Video ID is required');
     });
 
@@ -114,7 +114,7 @@ describe('MessageCoordinator', () => {
         model: 'gemini-2.5-pro'
       };
 
-      await expect(messageCoordinator.handleGeminiProcessing(request))
+      await expect(messageCoordinator.handleChapterGeneration(request))
         .rejects.toThrow('No subtitles found for this video');
     });
 
@@ -127,7 +127,7 @@ describe('MessageCoordinator', () => {
         model: 'gemini-2.5-pro'
       };
 
-      await expect(messageCoordinator.handleGeminiProcessing(request))
+      await expect(messageCoordinator.handleChapterGeneration(request))
         .rejects.toThrow('No subtitles found for this video');
     });
   });
@@ -367,7 +367,7 @@ describe('MessageCoordinator', () => {
   });
 
   describe('message processing coordination', () => {
-    test('should route processWithGemini action', async () => {
+    test('should route generateChapters action', async () => {
       const request = {
         videoId: 'test123',
         subtitles: 'Test content',
@@ -383,7 +383,7 @@ describe('MessageCoordinator', () => {
 
       mockChapterGenerator.generateChapters.mockResolvedValue(mockResult);
 
-      const result = await messageCoordinator.processMessage('processWithGemini', request);
+      const result = await messageCoordinator.processMessage('generateChapters', request);
 
       expect(result.success).toBe(true);
       expect(result.chapters).toBe('Test chapters');
@@ -393,12 +393,12 @@ describe('MessageCoordinator', () => {
       const rawSubtitles = '(0:00) Я только что прошла невероятную игру\n(0:02) Берлога.\n(0:02) Пришёл и поиграл немного в видеоигры';
       const videoTitle = 'Как российских школьников вовлекли в разработку военных дронов под видом кружков';
       const videoAuthor = 'Test Author';
-      
+
       const request = {
         videoId: 'test123',
         subtitles: rawSubtitles,
-        videoTitle: videoTitle,
-        videoAuthor: videoAuthor,
+        videoTitle,
+        videoAuthor,
         customInstructions: '',
         apiKey: 'test-key',
         model: 'gemini-2.5-pro'
@@ -410,10 +410,10 @@ describe('MessageCoordinator', () => {
         return Promise.resolve({ id: 'test', chapters: 'test chapters' });
       });
 
-      await messageCoordinator.processMessage('processWithGemini', request);
+      await messageCoordinator.processMessage('generateChapters', request);
 
       const VideoTranscript = require('../entities/VideoTranscript');
-      const expectedVideoTranscript = new VideoTranscript(rawSubtitles, videoTitle, videoAuthor, `https://www.youtube.com/watch?v=test123`);
+      const expectedVideoTranscript = new VideoTranscript(rawSubtitles, videoTitle, videoAuthor, 'https://www.youtube.com/watch?v=test123');
       const expectedSubtitleTabContent = expectedVideoTranscript.toSubtitleContent();
       const aiReceivedContent = capturedChapterGeneration.videoTranscript.toSubtitleContent();
 
@@ -504,7 +504,7 @@ describe('MessageCoordinator', () => {
         model: 'gemini-2.5-pro'
       };
 
-      const result = await messageCoordinator.processMessage('processWithGemini', request);
+      const result = await messageCoordinator.processMessage('generateChapters', request);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('API error');

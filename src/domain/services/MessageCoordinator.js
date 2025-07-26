@@ -15,7 +15,7 @@ class MessageCoordinator {
     this.instructionHistory = instructionHistory;
   }
 
-  async handleGeminiProcessing(request) {
+  async handleChapterGeneration(request) {
     const { videoId, subtitles, videoTitle, videoAuthor, customInstructions, apiKey, model } = request;
 
     if (!videoId) {
@@ -32,9 +32,9 @@ class MessageCoordinator {
 
     const youtubeUrl = videoId.includes('youtube.com') ? videoId : `https://www.youtube.com/watch?v=${videoId}`;
     const videoTranscript = new VideoTranscript(
-      subtitles, 
-      videoTitle || 'Unknown Title', 
-      videoAuthor || 'Unknown Author', 
+      subtitles,
+      videoTitle || 'Unknown Title',
+      videoAuthor || 'Unknown Author',
       youtubeUrl
     );
     const credentials = new ApiCredentials(apiKey, '');
@@ -190,8 +190,8 @@ class MessageCoordinator {
   async processMessage(action, request) {
     try {
       switch (action) {
-        case 'processWithGemini':
-          return await this.handleGeminiProcessing(request);
+        case 'generateChapters':
+          return await this.handleChapterGeneration(request);
 
         case 'saveInstruction':
           return await this.handleSaveInstruction(request);

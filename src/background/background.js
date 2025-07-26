@@ -81,8 +81,8 @@ class BackgroundService {
   setupMessageListeners() {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       switch (request.action) {
-        case 'processWithGemini':
-          this.handleGeminiProcessing(request, sendResponse, sender);
+        case 'generateChapters':
+          this.handleChapterGeneration(request, sendResponse, sender);
           return true;
 
         case 'saveInstruction':
@@ -274,7 +274,7 @@ class BackgroundService {
       // Context menus not available
     }
   }
-  async handleGeminiProcessing(request, sendResponse, sender) {
+  async handleChapterGeneration(request, sendResponse, sender) {
     try {
       const {customInstructions, apiKey, model, resultId} = request;
       const tabId = sender?.tab?.id || null;
