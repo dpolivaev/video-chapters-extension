@@ -6,6 +6,16 @@
  * Licensed under GPL3 or later
  */
 
+let ModelId;
+
+function isNodeJsEnvironment() {
+  return typeof require !== 'undefined' && typeof module !== 'undefined';
+}
+
+if (isNodeJsEnvironment()) {
+  ModelId = require('./ModelId');
+}
+
 class ApiCredentials {
   constructor(geminiKey = '', openRouterKey = '') {
     this.geminiKey = this.validateKey(geminiKey, 'Gemini');
@@ -68,12 +78,8 @@ class ApiCredentials {
     return new ApiCredentials(this.geminiKey, key);
   }
   
-  equals(other) {
-    return other instanceof ApiCredentials && 
-           this.geminiKey === other.geminiKey && 
-           this.openRouterKey === other.openRouterKey;
-  }
 }
 
-
-
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ApiCredentials;
+}

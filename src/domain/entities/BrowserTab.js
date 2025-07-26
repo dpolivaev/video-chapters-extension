@@ -6,12 +6,32 @@
  * Licensed under GPL3 or later
  */
 
+let VideoUrl;
+
+function isNodeJsEnvironment() {
+  return typeof require !== 'undefined' && typeof module !== 'undefined';
+}
+
+if (isNodeJsEnvironment()) {
+  VideoUrl = require('../values/VideoUrl');
+}
+
 class BrowserTab {
   constructor(id, url, type = 'unknown') {
     this.id = this.validateId(id);
-    this.url = url ? new VideoUrl(url) : null;
+    this.url = this.createVideoUrlIfValid(url);
     this.type = this.validateType(type);
     this.createdAt = new Date();
+  }
+  
+  createVideoUrlIfValid(url) {
+    if (!url) return null;
+    
+    if (url.includes('youtube.com/watch') || url.includes('youtube.com/shorts')) {
+      return new VideoUrl(url);
+    }
+    
+    return null;
   }
   
   validateId(id) {
@@ -72,16 +92,14 @@ class BrowserTab {
     return new BrowserTab(tab.id, tab.url, type);
   }
   
-  equals(other) {
-    return other instanceof BrowserTab &&
-           this.id === other.id &&
-           this.type === other.type &&
-           (this.url ? this.url.equals(other.url) : !other.url);
-  }
   
   toString() {
     return `BrowserTab(id=${this.id}, type=${this.type}, url=${this.url?.toString() || 'null'})`;
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = BrowserTab;
 }
 
 

@@ -41,9 +41,6 @@ class ModelId {
     return this.value;
   }
   
-  equals(other) {
-    return other instanceof ModelId && this.value === other.value;
-  }
   
   isGemini() {
     return this.provider === 'Gemini';
@@ -87,4 +84,8 @@ class ModelId {
   formatModelName(modelPart) {
     return modelPart.replace(/:free$/, ' (Free)');
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ModelId;
 }

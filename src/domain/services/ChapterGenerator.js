@@ -6,6 +6,19 @@
  * Licensed under GPL3 or later
  */
 
+let ChapterGeneration, ApiCredentials, ModelId, VideoTranscript;
+
+function isNodeJsEnvironment() {
+  return typeof require !== 'undefined' && typeof module !== 'undefined';
+}
+
+if (isNodeJsEnvironment()) {
+  ChapterGeneration = require('../entities/ChapterGeneration');
+  ApiCredentials = require('../values/ApiCredentials');
+  ModelId = require('../values/ModelId');
+  VideoTranscript = require('../entities/VideoTranscript');
+}
+
 class ChapterGenerator {
   constructor(geminiAPI, openRouterAPI) {
     this.geminiAPI = geminiAPI;
@@ -118,5 +131,9 @@ class ChapterGenerator {
       };
     }
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ChapterGenerator;
 }
 

@@ -38,9 +38,13 @@ if (typeof importScripts !== "undefined") {
       "../domain/services/TranscriptExtractor.js",
       "../domain/services/ChapterGenerator.js",
       "prompt-generator.js", 
-      "llm.js", 
-      "gemini-api.js", 
-      "openrouter-api.js"
+      "llm.js",
+      "../infrastructure/adapters/BrowserHttpAdapter.js",
+      "../domain/services/NetworkCommunicator.js",
+      "../domain/services/GeminiChapterGenerator.js",
+      "../domain/services/OpenRouterChapterGenerator.js", 
+      "../infrastructure/adapters/GeminiApiAdapter.js",
+      "../infrastructure/adapters/OpenRouterApiAdapter.js"
     );
   }
 }
@@ -52,8 +56,8 @@ const settingsRepository = new SettingsRepository();
 
 class BackgroundService {
   constructor() {
-    this.geminiAPI = new GeminiAPI;
-    this.openRouterAPI = new OpenRouterAPI;
+    this.geminiAPI = new GeminiApiAdapter();
+    this.openRouterAPI = new OpenRouterApiAdapter();
     
     this.chapterGenerator = new ChapterGenerator(this.geminiAPI, this.openRouterAPI);
     this.transcriptExtractor = new TranscriptExtractor();

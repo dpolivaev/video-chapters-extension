@@ -56,9 +56,6 @@ class VideoUrl {
     return this.value;
   }
   
-  equals(other) {
-    return other instanceof VideoUrl && this.value === other.value;
-  }
   
   isWatchUrl() {
     return this.value.includes('/watch?v=');
@@ -80,5 +77,9 @@ class VideoUrl {
     
     return null;
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = VideoUrl;
 }
 

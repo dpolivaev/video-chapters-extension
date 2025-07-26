@@ -51,16 +51,12 @@ class GenerationProgress {
     return !this.isComplete;
   }
   
-  equals(other) {
-    return other instanceof GenerationProgress &&
-           this.percent === other.percent &&
-           this.message === other.message &&
-           this.isComplete === other.isComplete;
-  }
   
   toString() {
     return `${this.percent}% - ${this.message}`;
   }
 }
 
-
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = GenerationProgress;
+}
