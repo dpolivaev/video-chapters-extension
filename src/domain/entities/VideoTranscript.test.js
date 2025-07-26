@@ -151,7 +151,7 @@ describe('VideoTranscript', () => {
       const subtitleContent = transcript.toSubtitleContent();
 
       expect(subtitleContent).toContain(`Video Title: ${validTitle}`);
-      expect(subtitleContent).toContain(`Transcript Content:`);
+      expect(subtitleContent).toContain('Transcript Content:');
       expect(subtitleContent).toContain(validContent);
     });
 

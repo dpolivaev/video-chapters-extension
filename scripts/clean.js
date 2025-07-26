@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
-const fs = require("fs-extra");
+const fs = require('fs-extra');
 
-const path = require("path");
+const path = require('path');
 
-const distDir = path.join(__dirname, "..", "dist");
+const distDir = path.join(__dirname, '..', 'dist');
 
 fs.removeSync(distDir);
 
-console.log("dist directory cleaned.");
+console.log('dist directory cleaned.');

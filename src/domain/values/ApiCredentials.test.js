@@ -52,7 +52,7 @@ describe('ApiCredentials', () => {
     test('should detect presence of Gemini key', () => {
       const withGemini = new ApiCredentials('gemini-key', '');
       const withoutGemini = new ApiCredentials('', 'openrouter-key');
-      
+
       expect(withGemini.hasGeminiKey()).toBe(true);
       expect(withoutGemini.hasGeminiKey()).toBe(false);
     });
@@ -60,7 +60,7 @@ describe('ApiCredentials', () => {
     test('should detect presence of OpenRouter key', () => {
       const withOpenRouter = new ApiCredentials('', 'openrouter-key');
       const withoutOpenRouter = new ApiCredentials('gemini-key', '');
-      
+
       expect(withOpenRouter.hasOpenRouterKey()).toBe(true);
       expect(withoutOpenRouter.hasOpenRouterKey()).toBe(false);
     });
@@ -68,7 +68,7 @@ describe('ApiCredentials', () => {
     test('should handle empty and whitespace-only keys', () => {
       const emptyKeys = new ApiCredentials('', '');
       const whitespaceKeys = new ApiCredentials('   ', '   ');
-      
+
       expect(emptyKeys.hasGeminiKey()).toBe(false);
       expect(emptyKeys.hasOpenRouterKey()).toBe(false);
       expect(whitespaceKeys.hasGeminiKey()).toBe(false);
@@ -128,7 +128,7 @@ describe('ApiCredentials', () => {
     test('should create new instance with updated Gemini key', () => {
       const original = new ApiCredentials('old-gemini', 'openrouter-key');
       const updated = original.withGeminiKey('new-gemini');
-      
+
       expect(original.geminiKey).toBe('old-gemini');
       expect(updated.geminiKey).toBe('new-gemini');
       expect(updated.openRouterKey).toBe('openrouter-key');
@@ -138,7 +138,7 @@ describe('ApiCredentials', () => {
     test('should create new instance with updated OpenRouter key', () => {
       const original = new ApiCredentials('gemini-key', 'old-openrouter');
       const updated = original.withOpenRouterKey('new-openrouter');
-      
+
       expect(original.openRouterKey).toBe('old-openrouter');
       expect(updated.openRouterKey).toBe('new-openrouter');
       expect(updated.geminiKey).toBe('gemini-key');
@@ -150,7 +150,7 @@ describe('ApiCredentials', () => {
     test('should always allow free model usage', () => {
       const emptyCredentials = new ApiCredentials();
       expect(emptyCredentials.canUseFreeModel()).toBe(true);
-      
+
       const withKeys = new ApiCredentials('gemini', 'openrouter');
       expect(withKeys.canUseFreeModel()).toBe(true);
     });
@@ -160,13 +160,13 @@ describe('ApiCredentials', () => {
     test('should be immutable after creation', () => {
       const credentials = new ApiCredentials('gemini-key', 'openrouter-key');
       expect(Object.isFrozen(credentials)).toBe(true);
-      
+
       const originalGemini = credentials.geminiKey;
       const originalOpenRouter = credentials.openRouterKey;
-      
+
       credentials.geminiKey = 'changed';
       credentials.openRouterKey = 'changed';
-      
+
       expect(credentials.geminiKey).toBe(originalGemini);
       expect(credentials.openRouterKey).toBe(originalOpenRouter);
     });

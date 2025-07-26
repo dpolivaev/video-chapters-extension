@@ -23,16 +23,16 @@ if (typeof importScripts !== 'undefined') {
 
 class OpenRouterApiAdapter extends BaseLLM {
   constructor() {
-    super("OpenRouter");
-    
+    super('OpenRouter');
+
     const httpAdapter = new BrowserHttpAdapter();
     const networkCommunicator = new NetworkCommunicator(httpAdapter, retryHandler);
-    
+
     this.openRouterChapterGenerator = new OpenRouterChapterGenerator(networkCommunicator, this.promptGenerator);
     this.availableModels = this.openRouterChapterGenerator.getAvailableModels();
   }
 
-  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "deepseek/deepseek-r1-0528:free", tabId = null) {
+  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'deepseek/deepseek-r1-0528:free', tabId = null) {
     return this.openRouterChapterGenerator.processSubtitles(subtitleContent, customInstructions, apiKey, model);
   }
 
@@ -40,7 +40,7 @@ class OpenRouterApiAdapter extends BaseLLM {
     const url = this.openRouterChapterGenerator.buildRequestUrl();
     const headers = this.openRouterChapterGenerator.buildHttpHeaders(apiKey, model);
     const body = this.openRouterChapterGenerator.buildRequestBody(prompt, model);
-    
+
     return this.openRouterChapterGenerator.networkCommunicator.post(url, headers, body, tabId);
   }
 

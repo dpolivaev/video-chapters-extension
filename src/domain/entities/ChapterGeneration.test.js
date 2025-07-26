@@ -127,7 +127,7 @@ describe('ChapterGeneration Entity', () => {
   describe('duration calculations', () => {
     test('should calculate duration correctly', () => {
       const generation = new ChapterGeneration(mockVideoTranscript, 'gemini-2.5-pro');
-      
+
       const durationMs = generation.getDurationMs();
       const durationSeconds = generation.getDurationSeconds();
 

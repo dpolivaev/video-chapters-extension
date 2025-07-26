@@ -20,7 +20,7 @@ describe('GenerationProgress', () => {
     test('should clamp percent to valid range', () => {
       const tooLow = new GenerationProgress(-10, 'message');
       const tooHigh = new GenerationProgress(150, 'message');
-      
+
       expect(tooLow.percent).toBe(0);
       expect(tooHigh.percent).toBe(100);
     });
@@ -33,7 +33,7 @@ describe('GenerationProgress', () => {
     test('should handle empty or null message', () => {
       const noMessage = new GenerationProgress(50);
       const nullMessage = new GenerationProgress(50, null);
-      
+
       expect(noMessage.message).toBe('');
       expect(nullMessage.message).toBe('');
     });
@@ -41,7 +41,7 @@ describe('GenerationProgress', () => {
     test('should convert isComplete to boolean', () => {
       const truthy = new GenerationProgress(100, 'done', 'truthy');
       const falsy = new GenerationProgress(50, 'processing', 0);
-      
+
       expect(truthy.isComplete).toBe(true);
       expect(falsy.isComplete).toBe(false);
     });
@@ -118,7 +118,7 @@ describe('GenerationProgress', () => {
       const successful = GenerationProgress.completed();
       const failed = GenerationProgress.failed('error');
       const pending = GenerationProgress.pending();
-      
+
       expect(successful.isSuccessful()).toBe(true);
       expect(failed.isSuccessful()).toBe(false);
       expect(pending.isSuccessful()).toBe(false);
@@ -129,7 +129,7 @@ describe('GenerationProgress', () => {
       const timedOut = GenerationProgress.timedOut();
       const successful = GenerationProgress.completed();
       const pending = GenerationProgress.pending();
-      
+
       expect(failed.isFailed()).toBe(true);
       expect(timedOut.isFailed()).toBe(true);
       expect(successful.isFailed()).toBe(false);
@@ -141,7 +141,7 @@ describe('GenerationProgress', () => {
       const inProgress = GenerationProgress.inProgress();
       const completed = GenerationProgress.completed();
       const failed = GenerationProgress.failed('error');
-      
+
       expect(pending.isPending()).toBe(true);
       expect(inProgress.isPending()).toBe(true);
       expect(completed.isPending()).toBe(false);
@@ -165,15 +165,15 @@ describe('GenerationProgress', () => {
     test('should be immutable after creation', () => {
       const progress = new GenerationProgress(50, 'Processing...', false);
       expect(Object.isFrozen(progress)).toBe(true);
-      
+
       const originalPercent = progress.percent;
       const originalMessage = progress.message;
       const originalComplete = progress.isComplete;
-      
+
       progress.percent = 100;
       progress.message = 'Changed';
       progress.isComplete = true;
-      
+
       expect(progress.percent).toBe(originalPercent);
       expect(progress.message).toBe(originalMessage);
       expect(progress.isComplete).toBe(originalComplete);
@@ -184,7 +184,7 @@ describe('GenerationProgress', () => {
     test('should handle extreme percent values', () => {
       const veryNegative = new GenerationProgress(-1000, 'test');
       const veryPositive = new GenerationProgress(5000, 'test');
-      
+
       expect(veryNegative.percent).toBe(0);
       expect(veryPositive.percent).toBe(100);
     });
@@ -196,7 +196,7 @@ describe('GenerationProgress', () => {
 
     test('should handle various falsy completion values', () => {
       const testCases = [false, 0, '', null, undefined];
-      
+
       testCases.forEach(value => {
         const progress = new GenerationProgress(50, 'test', value);
         expect(progress.isComplete).toBe(false);
@@ -205,7 +205,7 @@ describe('GenerationProgress', () => {
 
     test('should handle various truthy completion values', () => {
       const testCases = [true, 1, 'true', {}, []];
-      
+
       testCases.forEach(value => {
         const progress = new GenerationProgress(50, 'test', value);
         expect(progress.isComplete).toBe(true);

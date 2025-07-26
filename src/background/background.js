@@ -1,21 +1,21 @@
 /**
  * Background Service Worker for Video Chapters Generator
  * Handles AI API calls, storage management, and communication between components
- * 
+ *
  * Copyright (C) 2025 Dimitry Polivaev
- * 
+ *
  * This file is part of Video Chapters Generator.
- * 
+ *
  * Video Chapters Generator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Video Chapters Generator is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -25,28 +25,28 @@ if (typeof importScripts !== 'undefined') {
 }
 
 JsModuleImporter.importScriptsIfNeeded([
-  "../utils/url-utils.js",
-  "errorhandler.js",
-  "../domain/values/VideoUrl.js",
-  "../domain/values/ModelId.js", 
-  "../domain/values/ApiCredentials.js",
-  "../domain/values/GenerationProgress.js",
-  "../domain/entities/VideoTranscript.js",
-  "../domain/entities/ChapterGeneration.js",
-  "../domain/entities/BrowserTab.js",
-  "../infrastructure/repositories/SessionRepository.js",
-  "../infrastructure/repositories/TabRegistry.js",
-  "../infrastructure/repositories/SettingsRepository.js",
-  "../domain/services/TranscriptExtractor.js",
-  "../domain/services/ChapterGenerator.js",
-  "prompt-generator.js", 
-  "llm.js",
-  "../infrastructure/adapters/BrowserHttpAdapter.js",
-  "../domain/services/NetworkCommunicator.js",
-  "../domain/services/GeminiChapterGenerator.js",
-  "../domain/services/OpenRouterChapterGenerator.js", 
-  "../infrastructure/adapters/GeminiApiAdapter.js",
-  "../infrastructure/adapters/OpenRouterApiAdapter.js"
+  '../utils/url-utils.js',
+  'errorhandler.js',
+  '../domain/values/VideoUrl.js',
+  '../domain/values/ModelId.js',
+  '../domain/values/ApiCredentials.js',
+  '../domain/values/GenerationProgress.js',
+  '../domain/entities/VideoTranscript.js',
+  '../domain/entities/ChapterGeneration.js',
+  '../domain/entities/BrowserTab.js',
+  '../infrastructure/repositories/SessionRepository.js',
+  '../infrastructure/repositories/TabRegistry.js',
+  '../infrastructure/repositories/SettingsRepository.js',
+  '../domain/services/TranscriptExtractor.js',
+  '../domain/services/ChapterGenerator.js',
+  'prompt-generator.js',
+  'llm.js',
+  '../infrastructure/adapters/BrowserHttpAdapter.js',
+  '../domain/services/NetworkCommunicator.js',
+  '../domain/services/GeminiChapterGenerator.js',
+  '../domain/services/OpenRouterChapterGenerator.js',
+  '../infrastructure/adapters/GeminiApiAdapter.js',
+  '../infrastructure/adapters/OpenRouterApiAdapter.js'
 ], ['SessionRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration', 'TranscriptExtractor']);
 
 
@@ -58,10 +58,10 @@ class BackgroundService {
   constructor() {
     this.geminiAPI = new GeminiApiAdapter();
     this.openRouterAPI = new OpenRouterApiAdapter();
-    
+
     this.chapterGenerator = new ChapterGenerator(this.geminiAPI, this.openRouterAPI);
     this.transcriptExtractor = new TranscriptExtractor();
-    
+
     this.setupMessageListeners();
     this.setupContextMenus();
     this.setupTabListeners();
@@ -74,41 +74,42 @@ class BackgroundService {
         if (sessionId) {
           sessionRepository.remove(sessionId);
         }
+        return true;
       });
     }
   }
   setupMessageListeners() {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       switch (request.action) {
-       case "processWithGemini":
-        this.handleGeminiProcessing(request, sendResponse, sender);
-        return true;
+        case 'processWithGemini':
+          this.handleGeminiProcessing(request, sendResponse, sender);
+          return true;
 
-       case "saveInstruction":
-        this.handleSaveInstruction(request, sendResponse);
-        return true;
+        case 'saveInstruction':
+          this.handleSaveInstruction(request, sendResponse);
+          return true;
 
-       case "getInstructionHistory":
-        this.handleGetInstructionHistory(request, sendResponse);
-        return true;
+        case 'getInstructionHistory':
+          this.handleGetInstructionHistory(request, sendResponse);
+          return true;
 
-       case "deleteInstruction":
-        this.handleDeleteInstruction(request, sendResponse);
-        return true;
+        case 'deleteInstruction':
+          this.handleDeleteInstruction(request, sendResponse);
+          return true;
 
-       case "saveSettings":
-        this.handleSaveSettings(request, sendResponse);
-        return true;
+        case 'saveSettings':
+          this.handleSaveSettings(request, sendResponse);
+          return true;
 
-       case "loadSettings":
-        this.handleLoadSettings(request, sendResponse);
-        return true;
+        case 'loadSettings':
+          this.handleLoadSettings(request, sendResponse);
+          return true;
 
-       case "getAllModels":
-        this.handleGetAllModels(request, sendResponse);
-        return true;
+        case 'getAllModels':
+          this.handleGetAllModels(request, sendResponse);
+          return true;
 
-       case "setSessionResults":
+        case 'setSessionResults':
         {
           if (request.resultId && request.results) {
             const session = ChapterGeneration.fromSessionResults(request.results);
@@ -120,7 +121,7 @@ class BackgroundService {
           return true;
         }
 
-       case "getSessionResults":
+        case 'getSessionResults':
         {
           const resultId = request.resultId;
           if (resultId) {
@@ -147,23 +148,23 @@ class BackgroundService {
           return true;
         }
 
-       case "getGenerationStatus":
+        case 'getGenerationStatus':
         {
           const resultId = request.resultId;
           const status = sessionRepository.getGenerationStatus(resultId);
           sendResponse({
             success: true,
-            status: status
+            status
           });
           return true;
         }
 
-       case "openResultsTab":
+        case 'openResultsTab':
         {
           const {resultId: resultId, videoTabId: vidTabId, videoUrl: vidUrl} = request;
-          
+
           const shouldRegisterNewMapping = this.shouldRegisterVideoTabMapping(resultId, vidTabId, vidUrl);
-          
+
           if (shouldRegisterNewMapping) {
             this.registerNewVideoTabMapping(resultId, vidTabId, vidUrl);
           }
@@ -179,11 +180,11 @@ class BackgroundService {
               });
               sendResponse({
                 success: true,
-                tabId: tabId
+                tabId
               });
             }, async () => {
               const tab = await browser.tabs.create({
-                url: browser.runtime.getURL("results/results.html") + "?resultId=" + resultId
+                url: browser.runtime.getURL('results/results.html') + '?resultId=' + resultId
               });
               tabRegistry.registerResultsTab(resultId, tab.id);
               sendResponse({
@@ -194,7 +195,7 @@ class BackgroundService {
             return true;
           } else {
             const tab = browser.tabs.create({
-              url: browser.runtime.getURL("results/results.html") + "?resultId=" + resultId
+              url: browser.runtime.getURL('results/results.html') + '?resultId=' + resultId
             });
             tab.then(t => {
               tabRegistry.registerResultsTab(resultId, t.id);
@@ -207,10 +208,10 @@ class BackgroundService {
           }
         }
 
-       case "setResultsTabId":
+        case 'setResultsTabId':
         {
           const url = sender.tab && sender.tab.url;
-          const resultId = url && url.includes("resultId=") ? url.split("resultId=")[1].split("&")[0] : null;
+          const resultId = url && url.includes('resultId=') ? url.split('resultId=')[1].split('&')[0] : null;
           if (resultId && sender.tab && sender.tab.id) {
             tabRegistry.registerResultsTab(resultId, sender.tab.id);
           }
@@ -220,14 +221,14 @@ class BackgroundService {
           return true;
         }
 
-       case "getResultsTabStatus":
+        case 'getResultsTabStatus':
         {
           const currentVideoTabId = request.currentVideoTabId;
           this.handleGetResultsTabStatus(currentVideoTabId, sendResponse);
           return true;
         }
 
-       case "getVideoTabInfo":
+        case 'getVideoTabInfo':
         {
           const videoTabInfo = tabRegistry.getActiveVideoTab();
           sendResponse({
@@ -237,14 +238,14 @@ class BackgroundService {
           return true;
         }
 
-       case "goBackToVideo":
+        case 'goBackToVideo':
         {
           const resultId = request.resultId;
           this.handleGoBackToVideo(resultId, sendResponse);
           return true;
         }
 
-       default:
+        default:
       }
     });
   }
@@ -255,16 +256,16 @@ class BackgroundService {
       }
       browser.runtime.onInstalled.addListener(() => {
         browser.contextMenus.create({
-          id: "generateChapters",
-          title: "Generate Chapters for this Video",
-          contexts: [ "page" ],
-          documentUrlPatterns: [ "https://www.youtube.com/watch*" ]
+          id: 'generateChapters',
+          title: 'Generate Chapters for this Video',
+          contexts: [ 'page' ],
+          documentUrlPatterns: [ 'https://www.youtube.com/watch*' ]
         });
       });
       browser.contextMenus.onClicked.addListener((info, tab) => {
-        if (info.menuItemId === "generateChapters") {
+        if (info.menuItemId === 'generateChapters') {
           browser.tabs.sendMessage(tab.id, {
-            action: "triggerChapterGeneration"
+            action: 'triggerChapterGeneration'
           });
         }
       });
@@ -274,44 +275,43 @@ class BackgroundService {
   }
   async handleGeminiProcessing(request, sendResponse, sender) {
     try {
-      const {subtitleContent, customInstructions, apiKey, model, resultId, newResultId} = request;
+      const {customInstructions, apiKey, model, resultId, newResultId} = request;
       const tabId = sender?.tab?.id || null;
-      
+
       if (!model || typeof model !== 'string' || model.trim() === '') {
         throw new Error(`Model parameter is required and must be a non-empty string. Received: ${JSON.stringify(model)}`);
       }
-      
+
       const existingSession = sessionRepository.findById(resultId);
       if (!existingSession) {
         throw new Error(`Session ${resultId} not found`);
       }
-      
+
       const newGenerationSession = this.createNewGenerationSession(existingSession, model, customInstructions);
-      
-      if (newResultId) {
-        newGenerationSession.id = newResultId;
+
+      if (request.newResultId) {
+        newGenerationSession.id = request.newResultId;
       }
-      
+
       sessionRepository.save(newGenerationSession);
-      
+
       const modelId = new ModelId(model);
-      const credentials = modelId.isGemini() 
+      const credentials = modelId.isGemini()
         ? new ApiCredentials(apiKey, '')
         : new ApiCredentials('', apiKey);
       const completedSession = await this.chapterGenerator.generateChapters(
-        newGenerationSession, 
-        credentials, 
+        newGenerationSession,
+        credentials,
         tabId
       );
       sessionRepository.save(completedSession);
-      
+
       sendResponse({
         success: true,
         data: { chapters: completedSession.chapters, resultId: completedSession.id }
       });
-      
+
     } catch (error) {
-      console.error("AI processing error:", error);
       const sessionIdToFail = newResultId || request.resultId;
       if (sessionIdToFail) {
         const session = sessionRepository.findById(sessionIdToFail);
@@ -320,7 +320,7 @@ class BackgroundService {
           sessionRepository.save(session);
         }
       }
-      
+
       sendResponse({
         success: false,
         error: error.message
@@ -335,7 +335,6 @@ class BackgroundService {
         success: true
       });
     } catch (error) {
-      console.error("Error saving instruction:", error);
       sendResponse({
         success: false,
         error: error.message
@@ -344,7 +343,7 @@ class BackgroundService {
   }
   async handleGetInstructionHistory(request, sendResponse) {
     try {
-      const result = await browser.storage.local.get([ "instructionHistory", "historyLimit" ]);
+      const result = await browser.storage.local.get([ 'instructionHistory', 'historyLimit' ]);
       sendResponse({
         success: true,
         data: {
@@ -353,7 +352,6 @@ class BackgroundService {
         }
       });
     } catch (error) {
-      console.error("Error getting instruction history:", error);
       sendResponse({
         success: false,
         error: error.message
@@ -363,7 +361,7 @@ class BackgroundService {
   async handleDeleteInstruction(request, sendResponse) {
     try {
       const {id: id} = request;
-      const result = await browser.storage.local.get("instructionHistory");
+      const result = await browser.storage.local.get('instructionHistory');
       const history = result.instructionHistory || [];
       const updatedHistory = history.filter(instruction => instruction.id !== id);
       await browser.storage.local.set({
@@ -373,7 +371,6 @@ class BackgroundService {
         success: true
       });
     } catch (error) {
-      console.error("Error deleting instruction:", error);
       sendResponse({
         success: false,
         error: error.message
@@ -383,14 +380,13 @@ class BackgroundService {
   async handleSaveSettings(request, sendResponse) {
     try {
       const {settings} = request;
-      
+
       await settingsRepository.saveSettings(settings);
-      
+
       sendResponse({
         success: true
       });
     } catch (error) {
-      console.error("Error saving settings:", error);
       sendResponse({
         success: false,
         error: error.message
@@ -400,7 +396,7 @@ class BackgroundService {
   async handleLoadSettings(request, sendResponse) {
     try {
       const settings = await settingsRepository.loadSettings();
-      
+
       sendResponse({
         success: true,
         data: settings
@@ -422,14 +418,13 @@ class BackgroundService {
         data: allModels
       });
     } catch (error) {
-      console.error("Error getting all models:", error);
       sendResponse({
         success: false,
         error: error.message
       });
     }
   }
-  
+
   shouldRegisterVideoTabMapping(resultId, vidTabId, vidUrl) {
     const normalizedResultId = typeof resultId === 'string' ? parseInt(resultId, 10) : resultId;
     const existingMapping = tabRegistry.resultToVideoMapping.get(normalizedResultId);
@@ -441,13 +436,17 @@ class BackgroundService {
   }
 
   async handleGoBackToVideo(resultId, sendResponse) {
+    if (!resultId) {
+      sendResponse({ success: false, error: 'Result ID is required' });
+      return;
+    }
     try {
       const videoTabInfo = await this.findVideoTabForResult(resultId);
-      
+
       if (this.shouldFocusExistingTab(videoTabInfo)) {
-        return this.focusOrCreateVideoTab(videoTabInfo.tabId, videoTabInfo.url, sendResponse);
+        await this.focusOrCreateVideoTab(videoTabInfo.tabId, videoTabInfo.url, sendResponse);
       } else if (this.shouldCreateNewTab(videoTabInfo)) {
-        return this.createNewVideoTabWithResponse(videoTabInfo.url, sendResponse);
+        await this.createNewVideoTabWithResponse(videoTabInfo.url, sendResponse);
       } else {
         this.handleNoVideoTabAvailable(sendResponse);
       }
@@ -458,15 +457,15 @@ class BackgroundService {
 
   async findVideoTabForResult(resultId) {
     let videoTabInfo = null;
-    
+
     if (resultId) {
       videoTabInfo = await tabRegistry.getVideoTabForResult(resultId);
     }
-    
+
     if (!videoTabInfo) {
       videoTabInfo = tabRegistry.getActiveVideoTab();
     }
-    
+
     return videoTabInfo;
   }
 
@@ -475,20 +474,20 @@ class BackgroundService {
   }
 
   shouldCreateNewTab(videoTabInfo) {
-    return videoTabInfo && videoTabInfo.url && videoTabInfo.method === "create_new";
+    return videoTabInfo && videoTabInfo.url && videoTabInfo.method === 'create_new';
   }
 
   async createNewVideoTabWithResponse(url, sendResponse) {
     try {
-      const newTab = await browser.tabs.create({ url: url });
-      sendResponse({ success: true, method: "create_new", tabId: newTab.id });
+      const newTab = await browser.tabs.create({ url });
+      sendResponse({ success: true, method: 'create_new', tabId: newTab.id });
     } catch (error) {
       sendResponse({ success: false, error: error.message });
     }
   }
 
   handleNoVideoTabAvailable(sendResponse) {
-    sendResponse({ success: false, error: "No video tab registered" });
+    sendResponse({ success: false, error: 'No video tab registered' });
   }
 
   handleGoBackToVideoError(error, sendResponse) {
@@ -497,13 +496,13 @@ class BackgroundService {
 
   createNewGenerationSession(baseSession, model, customInstructions) {
     const videoTranscript = baseSession.videoTranscript;
-    
+
     const newSession = new ChapterGeneration(
       videoTranscript,
       model,
       customInstructions || ''
     );
-    
+
     return newSession;
   }
 
@@ -520,7 +519,6 @@ class BackgroundService {
         sendResponse({ open: false });
       }
     } catch (error) {
-      console.error("Error checking results tab status:", error);
       sendResponse({ open: false });
     }
   }
@@ -568,7 +566,7 @@ class BackgroundService {
 
   findResultsMatchingVideoUrl(videoUrl) {
     const cleanedVideoUrl = cleanVideoURL(videoUrl);
-    
+
     for (const [resultId, storedCleanedUrl] of tabRegistry.resultToVideoMapping.entries()) {
       if (storedCleanedUrl === cleanedVideoUrl) {
         const resultsTabId = tabRegistry.getResultsTab(resultId);
@@ -584,10 +582,10 @@ class BackgroundService {
     try {
       const tab = await browser.tabs.get(videoTabId);
       const urlsMatch = this.doCleanedUrlsMatch(tab.url, videoUrl);
-      
+
       if (urlsMatch) {
         await this.focusExistingTab(videoTabId, tab.windowId);
-        sendResponse({ success: true, method: "focusOriginal" });
+        sendResponse({ success: true, method: 'focusOriginal' });
       } else {
         return this.findOrCreateVideoTab(videoUrl, sendResponse);
       }
@@ -607,18 +605,18 @@ class BackgroundService {
     await browser.tabs.update(tabId, { active: true });
     await browser.windows.update(windowId, { focused: true });
   }
-  
+
   async findOrCreateVideoTab(videoUrl, sendResponse) {
     try {
       const allTabs = await browser.tabs.query({});
       const matchingTabs = this.findTabsWithMatchingUrl(allTabs, videoUrl);
-      
+
       if (matchingTabs.length > 0) {
         await this.focusFirstMatchingTab(matchingTabs);
-        sendResponse({ success: true, method: "focusOther" });
+        sendResponse({ success: true, method: 'focusOther' });
       } else {
         await this.createNewVideoTab(videoUrl);
-        sendResponse({ success: true, method: "openNew" });
+        sendResponse({ success: true, method: 'openNew' });
       }
     } catch (error) {
       sendResponse({ success: false, error: error.message });
@@ -628,9 +626,11 @@ class BackgroundService {
 
   findTabsWithMatchingUrl(allTabs, videoUrl) {
     const cleanedTargetUrl = cleanVideoURL(videoUrl);
-    
+
     return allTabs.filter(tab => {
-      if (!tab.url) return false;
+      if (!tab.url) {
+        return false;
+      }
       const cleanedTabUrl = cleanVideoURL(tab.url);
       return cleanedTabUrl === cleanedTargetUrl;
     });
@@ -653,7 +653,7 @@ class InstructionHistoryManager {
   }
   async addInstruction(content) {
     const trimmedContent = content.trim();
-    const result = await browser.storage.local.get([ "instructionHistory", "historyLimit" ]);
+    const result = await browser.storage.local.get([ 'instructionHistory', 'historyLimit' ]);
     const history = result.instructionHistory || [];
     const limit = result.historyLimit || this.defaultLimit;
     const existingIndex = history.findIndex(instruction => instruction.content.trim() === trimmedContent);
@@ -680,11 +680,11 @@ class InstructionHistoryManager {
     return instructionToAdd;
   }
   async getHistory() {
-    const result = await browser.storage.local.get("instructionHistory");
+    const result = await browser.storage.local.get('instructionHistory');
     return result.instructionHistory || [];
   }
   async deleteInstruction(id) {
-    const result = await browser.storage.local.get("instructionHistory");
+    const result = await browser.storage.local.get('instructionHistory');
     const history = result.instructionHistory || [];
     const filteredHistory = history.filter(instruction => instruction.id !== id);
     await browser.storage.local.set({
@@ -696,7 +696,7 @@ class InstructionHistoryManager {
     await browser.storage.local.set({
       historyLimit: limit
     });
-    const result = await browser.storage.local.get("instructionHistory");
+    const result = await browser.storage.local.get('instructionHistory');
     const history = result.instructionHistory || [];
     if (history.length > limit) {
       history.splice(limit);
@@ -706,7 +706,7 @@ class InstructionHistoryManager {
     }
   }
   async getHistoryLimit() {
-    const result = await browser.storage.local.get("historyLimit");
+    const result = await browser.storage.local.get('historyLimit');
     return result.historyLimit || this.defaultLimit;
   }
 }
@@ -714,12 +714,12 @@ class InstructionHistoryManager {
 class SettingsManager {
   constructor() {
     this.defaultSettings = {
-      apiKey: "",
-      openRouterApiKey: "",
-      model: "deepseek/deepseek-r1-0528:free",
+      apiKey: '',
+      openRouterApiKey: '',
+      model: 'deepseek/deepseek-r1-0528:free',
       historyLimit: 10,
       autoSaveInstructions: true,
-      theme: "auto"
+      theme: 'auto'
     };
   }
   async saveSettings(settings) {
@@ -734,7 +734,7 @@ class SettingsManager {
     return updatedSettings;
   }
   async loadSettings() {
-    const result = await browser.storage.sync.get("userSettings");
+    const result = await browser.storage.sync.get('userSettings');
     return {
       ...this.defaultSettings,
       ...result.userSettings || {}
@@ -754,7 +754,7 @@ class SettingsManager {
   }
 }
 
-const backgroundService = new BackgroundService;
+const _backgroundService = new BackgroundService();
 
 const instructionHistory = new InstructionHistoryManager;
 
@@ -762,7 +762,7 @@ const settingsManager = new SettingsManager;
 
 
 browser.runtime.onInstalled.addListener(details => {
-  if (details.reason === "install") {
+  if (details.reason === 'install') {
     settingsManager.saveSettings({});
   }
 });

@@ -250,7 +250,7 @@ describe('MessageCoordinator', () => {
       const geminiModels = [
         { id: 'gemini-2.5-pro', displayName: 'Gemini 2.5 Pro' }
       ];
-      
+
       const openRouterModels = [
         { id: 'deepseek/deepseek-r1-0528', displayName: 'DeepSeek R1' }
       ];

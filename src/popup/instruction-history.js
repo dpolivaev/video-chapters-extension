@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
-if (typeof browser === "undefined") {
+if (typeof browser === 'undefined') {
   var browser = chrome;
 }
 
@@ -33,34 +33,34 @@ class InstructionHistoryView {
     this.init();
   }
   async init() {
-    this.modal = document.getElementById("historyModal");
-    this.historyList = document.getElementById("historyList");
-    this.limitInput = document.getElementById("historyLimitInput");
-    this.instructionsTextarea = document.getElementById("instructionsTextarea");
-    this.instructionsPlaceholder = document.getElementById("instructionsPlaceholder");
+    this.modal = document.getElementById('historyModal');
+    this.historyList = document.getElementById('historyList');
+    this.limitInput = document.getElementById('historyLimitInput');
+    this.instructionsTextarea = document.getElementById('instructionsTextarea');
+    this.instructionsPlaceholder = document.getElementById('instructionsPlaceholder');
     this.setupEventListeners();
     await this.loadHistoryLimit();
   }
   setupEventListeners() {
-    document.getElementById("historyBtn").addEventListener("click", () => {
+    document.getElementById('historyBtn').addEventListener('click', () => {
       this.showDialog();
     });
-    document.getElementById("closeHistoryModal").addEventListener("click", () => {
+    document.getElementById('closeHistoryModal').addEventListener('click', () => {
       this.hideDialog();
     });
-    this.modal.addEventListener("click", e => {
+    this.modal.addEventListener('click', e => {
       if (e.target === this.modal) {
         this.hideDialog();
       }
     });
-    this.limitInput.addEventListener("change", () => {
+    this.limitInput.addEventListener('change', () => {
       this.onLimitChange();
     });
-    this.instructionsTextarea.addEventListener("input", () => {
+    this.instructionsTextarea.addEventListener('input', () => {
       this.onInstructionsChange();
     });
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && this.modal.style.display === "block") {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && this.modal.style.display === 'block') {
         this.hideDialog();
       }
     });
@@ -68,39 +68,39 @@ class InstructionHistoryView {
   async showDialog() {
     try {
       await this.loadHistory();
-      this.modal.style.display = "block";
+      this.modal.style.display = 'block';
       this.modal.focus();
     } catch (error) {
-      console.error("Error showing history dialog:", error);
-      this.showNotification("Error loading instruction history", "error");
+      console.error('Error showing history dialog:', error);
+      this.showNotification('Error loading instruction history', 'error');
     }
   }
   hideDialog() {
-    this.modal.style.display = "none";
+    this.modal.style.display = 'none';
   }
   async loadHistory() {
     try {
       const response = await browser.runtime.sendMessage({
-        action: "getInstructionHistory"
+        action: 'getInstructionHistory'
       });
       if (response && response.success) {
         this.displayHistory(response.data.history);
         this.limitInput.value = response.data.limit;
         return;
       } else {
-        throw new Error(response?.error || "Failed to load history");
+        throw new Error(response?.error || 'Failed to load history');
       }
     } catch (error) {
-      console.error("Error loading history:", error);
+      console.error('Error loading history:', error);
       throw error;
     }
   }
   displayHistory(history) {
-    this.historyList.innerHTML = "";
+    this.historyList.innerHTML = '';
     if (!history || history.length === 0) {
-      const noHistoryDiv = document.createElement("div");
-      noHistoryDiv.className = "no-history";
-      noHistoryDiv.textContent = "No previous instructions found.\nInstructions will be saved when you process a video.";
+      const noHistoryDiv = document.createElement('div');
+      noHistoryDiv.className = 'no-history';
+      noHistoryDiv.textContent = 'No previous instructions found.\nInstructions will be saved when you process a video.';
       this.historyList.appendChild(noHistoryDiv);
       return;
     }
@@ -110,49 +110,49 @@ class InstructionHistoryView {
     });
   }
   createHistoryEntry(entry, originalIndex) {
-    const entryDiv = document.createElement("div");
-    entryDiv.className = "history-entry";
-    let timestampStr = "Unknown time";
+    const entryDiv = document.createElement('div');
+    entryDiv.className = 'history-entry';
+    let timestampStr = 'Unknown time';
     try {
       const date = new Date(entry.timestamp);
-      timestampStr = date.toLocaleDateString() + " " + date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
+      timestampStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } catch (e) {
-      console.warn("Failed to parse timestamp:", entry.timestamp);
+      console.warn('Failed to parse timestamp:', entry.timestamp);
     }
-    const headerDiv = document.createElement("div");
-    headerDiv.className = "history-entry-header";
-    const timestampDiv = document.createElement("div");
-    timestampDiv.className = "history-timestamp";
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'history-entry-header';
+    const timestampDiv = document.createElement('div');
+    timestampDiv.className = 'history-timestamp';
     timestampDiv.textContent = timestampStr;
     headerDiv.appendChild(timestampDiv);
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "history-content";
-    const textDiv = document.createElement("div");
-    textDiv.className = "history-text";
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'history-content';
+    const textDiv = document.createElement('div');
+    textDiv.className = 'history-text';
     textDiv.textContent = entry.content;
     contentDiv.appendChild(textDiv);
-    const actionsDiv = document.createElement("div");
-    actionsDiv.className = "history-actions";
-    const selectBtn = document.createElement("button");
-    selectBtn.className = "btn-select";
-    selectBtn.textContent = "Select";
-    selectBtn.setAttribute("data-content", entry.content);
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn-delete";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.setAttribute("data-id", entry.id);
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'history-actions';
+    const selectBtn = document.createElement('button');
+    selectBtn.className = 'btn-select';
+    selectBtn.textContent = 'Select';
+    selectBtn.setAttribute('data-content', entry.content);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-delete';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.setAttribute('data-id', entry.id);
     actionsDiv.appendChild(selectBtn);
     actionsDiv.appendChild(deleteBtn);
     entryDiv.appendChild(headerDiv);
     entryDiv.appendChild(contentDiv);
     entryDiv.appendChild(actionsDiv);
-    selectBtn.addEventListener("click", () => {
+    selectBtn.addEventListener('click', () => {
       this.selectInstruction(entry.content);
     });
-    deleteBtn.addEventListener("click", () => {
+    deleteBtn.addEventListener('click', () => {
       this.deleteInstruction(entry.id, entryDiv);
     });
     return entryDiv;
@@ -162,28 +162,28 @@ class InstructionHistoryView {
     this.onInstructionsChange();
     this.hideDialog();
     this.instructionsTextarea.focus();
-    this.showNotification("Instruction loaded", "success");
+    this.showNotification('Instruction loaded', 'success');
   }
   async deleteInstruction(id, entryElement) {
-    if (!confirm("Are you sure you want to delete this instruction?")) {
+    if (!confirm('Are you sure you want to delete this instruction?')) {
       return;
     }
     try {
       const response = await browser.runtime.sendMessage({
-        action: "deleteInstruction",
-        id: id
+        action: 'deleteInstruction',
+        id
       });
       if (!response || !response.success) {
-        throw new Error(response?.error || "Failed to delete instruction");
+        throw new Error(response?.error || 'Failed to delete instruction');
       }
       entryElement.remove();
       if (this.historyList.children.length === 0) {
         this.displayHistory([]);
       }
-      this.showNotification("Instruction deleted", "success");
+      this.showNotification('Instruction deleted', 'success');
     } catch (error) {
-      console.error("Error deleting instruction:", error);
-      this.showNotification("Error deleting instruction", "error");
+      console.error('Error deleting instruction:', error);
+      this.showNotification('Error deleting instruction', 'error');
     }
   }
   async onLimitChange() {
@@ -194,40 +194,40 @@ class InstructionHistoryView {
         return;
       }
       const response = await browser.runtime.sendMessage({
-        action: "saveSettings",
+        action: 'saveSettings',
         settings: {
           historyLimit: newLimit
         }
       });
       if (!response || !response.success) {
-        throw new Error(response?.error || "Failed to save settings");
+        throw new Error(response?.error || 'Failed to save settings');
       }
       await this.loadHistory();
     } catch (error) {
-      console.error("Error updating history limit:", error);
-      this.showNotification("Error updating history limit", "error");
+      console.error('Error updating history limit:', error);
+      this.showNotification('Error updating history limit', 'error');
     }
   }
   onInstructionsChange() {
     const content = this.instructionsTextarea.value.trim();
     if (content) {
-      this.instructionsPlaceholder.style.display = "none";
+      this.instructionsPlaceholder.style.display = 'none';
     } else {
-      this.instructionsPlaceholder.style.display = "block";
+      this.instructionsPlaceholder.style.display = 'block';
     }
   }
   async loadHistoryLimit() {
     try {
       const response = await browser.runtime.sendMessage({
-        action: "loadSettings"
+        action: 'loadSettings'
       });
       if (response && response.success) {
         this.limitInput.value = response.data.historyLimit || 10;
       } else {
-        throw new Error(response?.error || "Failed to load settings");
+        throw new Error(response?.error || 'Failed to load settings');
       }
     } catch (error) {
-      console.error("Error loading history limit:", error);
+      console.error('Error loading history limit:', error);
       this.limitInput.value = 10;
     }
   }
@@ -237,23 +237,23 @@ class InstructionHistoryView {
     }
     try {
       const response = await browser.runtime.sendMessage({
-        action: "saveInstruction",
+        action: 'saveInstruction',
         content: content.trim()
       });
       if (!response || !response.success) {
-        throw new Error(response?.error || "Failed to save instruction");
+        throw new Error(response?.error || 'Failed to save instruction');
       }
     } catch (error) {
-      console.error("Error saving instruction:", error);
+      console.error('Error saving instruction:', error);
       throw error;
     }
   }
   escapeHtml(text) {
-    const div = document.createElement("div");
+    const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-  showNotification(message, type = "info") {
+  showNotification(message, type = 'info') {
     if (window.showNotification) {
       window.showNotification(message, type);
     } else {
@@ -262,8 +262,8 @@ class InstructionHistoryView {
   }
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
     window.instructionHistory = new InstructionHistoryView;
   });
 } else {

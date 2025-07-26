@@ -26,7 +26,7 @@ class BrowserMessageAdapter {
   async broadcastMessage(message) {
     const tabs = await browser.tabs.query({});
     return Promise.all(
-      tabs.map(tab => 
+      tabs.map(tab =>
         browser.tabs.sendMessage(tab.id, message).catch(() => {})
       )
     );

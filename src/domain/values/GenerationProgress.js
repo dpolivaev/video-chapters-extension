@@ -13,45 +13,45 @@ class GenerationProgress {
     this.isComplete = Boolean(isComplete);
     Object.freeze(this);
   }
-  
+
   static pending() {
     return new GenerationProgress(30, 'Generating chapters...');
   }
-  
+
   static inProgress(message = 'Still generating chapters...') {
     return new GenerationProgress(60, message);
   }
-  
+
   static longRunning(message = 'Generation is taking longer than expected...') {
     return new GenerationProgress(90, message);
   }
-  
+
   static completed() {
     return new GenerationProgress(100, 'Chapters generated successfully!', true);
   }
-  
+
   static failed(error) {
     const message = error instanceof Error ? error.message : String(error);
     return new GenerationProgress(0, `Generation failed: ${message}`, true);
   }
-  
+
   static timedOut() {
     return new GenerationProgress(0, 'Generation timed out. Please try again.', true);
   }
-  
+
   isSuccessful() {
     return this.isComplete && this.percent === 100;
   }
-  
+
   isFailed() {
     return this.isComplete && this.percent === 0;
   }
-  
+
   isPending() {
     return !this.isComplete;
   }
-  
-  
+
+
   toString() {
     return `${this.percent}% - ${this.message}`;
   }

@@ -15,15 +15,15 @@ global.JsModuleImporter = require('./src/lang/JsModuleImporter');
 const domainClasses = {
   // Values
   VideoUrl: './src/domain/values/VideoUrl',
-  ModelId: './src/domain/values/ModelId', 
+  ModelId: './src/domain/values/ModelId',
   ApiCredentials: './src/domain/values/ApiCredentials',
   GenerationProgress: './src/domain/values/GenerationProgress',
-  
+
   // Entities
   VideoTranscript: './src/domain/entities/VideoTranscript',
   ChapterGeneration: './src/domain/entities/ChapterGeneration',
   BrowserTab: './src/domain/entities/BrowserTab',
-  
+
   // Services (that don't have complex dependencies)
   NetworkCommunicator: './src/domain/services/NetworkCommunicator',
   GeminiChapterGenerator: './src/domain/services/GeminiChapterGenerator',
@@ -43,11 +43,11 @@ for (const [className, path] of Object.entries(domainClasses)) {
 function loadClassFromFile(filePath) {
   const fullPath = path.join(__dirname, filePath);
   const content = fs.readFileSync(fullPath, 'utf8');
-  
+
   const licenseHeaderEnd = content.indexOf('*/');
   const startIndex = licenseHeaderEnd !== -1 ? licenseHeaderEnd + 2 : 0;
   const classCode = content.substring(startIndex);
-  
+
   global.eval(classCode);
 }
 

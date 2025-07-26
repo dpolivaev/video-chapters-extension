@@ -26,10 +26,10 @@ describe('API Error Handling', () => {
     expect(categorizeApiError(401, {}).message).toContain('Invalid API key');
     expect(categorizeApiError(403, {}).message).toContain('API access forbidden');
     expect(categorizeApiError(429, {}).message).toContain('Rate limit exceeded');
-    
+
     const badRequestError = categorizeApiError(400, { error: { message: 'Custom error' } });
     expect(badRequestError.message).toContain('Custom error');
-    
+
     expect(categorizeApiError(500, {}).message).toContain('API request failed: 500');
   });
 });

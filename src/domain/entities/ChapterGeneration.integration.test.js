@@ -26,7 +26,7 @@ const calculateDuration = (startTime, endTime = new Date()) => {
 const generateSessionId = () => {
   const RANDOM_BITS = 17;
   const TIMESTAMP_SEPARATION_BITS = 35;
-  
+
   const timestamp = Date.now();
   const randomBits = Math.floor(Math.random() * Math.pow(2, RANDOM_BITS));
   return timestamp + (randomBits * Math.pow(2, TIMESTAMP_SEPARATION_BITS));
@@ -51,9 +51,9 @@ describe('ChapterGeneration Integration', () => {
     test('should calculate durations correctly', () => {
       const startTime = new Date('2025-01-01T10:00:00Z');
       const endTime = new Date('2025-01-01T10:00:05Z');
-      
+
       expect(calculateDuration(startTime, endTime)).toBe(5000);
-      
+
       const currentDuration = calculateDuration(startTime);
       expect(currentDuration).toBeGreaterThan(0);
     });
@@ -62,7 +62,7 @@ describe('ChapterGeneration Integration', () => {
       const id1 = generateSessionId();
       const id2 = generateSessionId();
       const id3 = generateSessionId();
-      
+
       expect(typeof id1).toBe('number');
       expect(id1).not.toBe(id2);
       expect(id2).not.toBe(id3);
@@ -75,7 +75,7 @@ describe('ChapterGeneration Integration', () => {
       const veryOldDate = new Date('1970-01-01');
       const duration = calculateDuration(veryOldDate);
       expect(duration).toBeGreaterThan(0);
-      
+
       const futureDate = new Date('2030-01-01');
       const negativeDuration = calculateDuration(futureDate);
       expect(negativeDuration).toBeLessThan(0);

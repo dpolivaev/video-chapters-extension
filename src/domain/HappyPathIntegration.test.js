@@ -33,7 +33,7 @@ describe('Happy Path Integration', () => {
     test('should validate settings objects', () => {
       const validSettings = { apiKey: 'test', theme: 'dark' };
       expect(validateSettings(validSettings)).toBe(validSettings);
-      
+
       expect(() => validateSettings(null)).toThrow('Invalid settings object');
       expect(() => validateSettings('string')).toThrow('Invalid settings object');
       expect(() => validateSettings(123)).toThrow('Invalid settings object');
@@ -69,7 +69,7 @@ describe('Happy Path Integration', () => {
       const sessionStart = new Date();
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const chapters = '1. Introduction\n2. Main Content\n3. Conclusion';
-      
+
       expect(sessionId).toMatch(/^session_\d+_[a-z0-9]{9}$/);
       expect(chapters.length).toBeGreaterThan(0);
       expect(sessionStart).toBeInstanceOf(Date);

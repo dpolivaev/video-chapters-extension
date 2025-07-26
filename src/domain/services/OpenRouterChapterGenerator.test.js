@@ -38,7 +38,7 @@ describe('OpenRouterChapterGenerator', () => {
     test('should provide available models including free models', () => {
       const models = openRouterGenerator.getAvailableModels();
       expect(models.length).toBeGreaterThan(0);
-      
+
       const freeModel = models.find(m => m.isFree === true);
       expect(freeModel).toBeDefined();
       expect(freeModel.id).toBe('deepseek/deepseek-r1-0528:free');
@@ -47,7 +47,7 @@ describe('OpenRouterChapterGenerator', () => {
     test('should include various model categories', () => {
       const models = openRouterGenerator.getAvailableModels();
       const categories = models.map(m => m.category);
-      
+
       expect(categories).toContain('reasoning');
       expect(categories).toContain('fast');
       expect(categories).toContain('premium');
@@ -56,7 +56,7 @@ describe('OpenRouterChapterGenerator', () => {
     test('should return immutable copy of models', () => {
       const models1 = openRouterGenerator.getAvailableModels();
       const models2 = openRouterGenerator.getAvailableModels();
-      
+
       expect(models1).not.toBe(models2);
       expect(models1).toEqual(models2);
     });
@@ -146,7 +146,7 @@ describe('OpenRouterChapterGenerator', () => {
   describe('request headers', () => {
     test('should build headers for free models without API key', () => {
       const headers = openRouterGenerator.buildHttpHeaders('', 'deepseek/deepseek-r1-0528:free');
-      
+
       expect(headers).toEqual({
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
@@ -157,7 +157,7 @@ describe('OpenRouterChapterGenerator', () => {
     test('should build headers for paid models with API key', () => {
       const apiKey = 'sk-or-v1-test-key-123';
       const headers = openRouterGenerator.buildHttpHeaders(apiKey, 'anthropic/claude-3.5-sonnet');
-      
+
       expect(headers).toEqual({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
@@ -168,7 +168,7 @@ describe('OpenRouterChapterGenerator', () => {
 
     test('should include referer and title for OpenRouter attribution', () => {
       const headers = openRouterGenerator.buildHttpHeaders('', 'deepseek/deepseek-r1-0528:free');
-      
+
       expect(headers['HTTP-Referer']).toBe('https://github.com/dimitry-polivaev/timecodes-browser-extension');
       expect(headers['X-Title']).toBe('Video Chapters Generator');
     });
@@ -178,11 +178,11 @@ describe('OpenRouterChapterGenerator', () => {
     test('should build OpenAI-compatible request body', () => {
       const prompt = 'Generate chapters for this video';
       const model = 'deepseek/deepseek-r1-0528:free';
-      
+
       const body = openRouterGenerator.buildRequestBody(prompt, model);
-      
+
       expect(body).toEqual({
-        model: model,
+        model,
         messages: [{
           role: 'user',
           content: prompt
@@ -195,7 +195,7 @@ describe('OpenRouterChapterGenerator', () => {
 
     test('should use consistent generation parameters', () => {
       const body = openRouterGenerator.buildRequestBody('test prompt', 'test/model');
-      
+
       expect(body.temperature).toBe(0.7);
       expect(body.max_tokens).toBe(8192);
       expect(body.top_p).toBe(0.95);
@@ -220,7 +220,7 @@ describe('OpenRouterChapterGenerator', () => {
       };
 
       const result = openRouterGenerator.parseApiResponse(responseData);
-      
+
       expect(result).toEqual({
         chapters: '1. Introduction\n2. Main Content\n3. Conclusion',
         finishReason: 'stop',
@@ -240,7 +240,7 @@ describe('OpenRouterChapterGenerator', () => {
       };
 
       const result = openRouterGenerator.parseApiResponse(responseData);
-      
+
       expect(result.usage).toBeUndefined();
       expect(result.chapters).toBe('Chapter content');
     });
@@ -261,10 +261,10 @@ describe('OpenRouterChapterGenerator', () => {
     test('should handle malformed responses', () => {
       expect(() => openRouterGenerator.parseApiResponse({ choices: [] }))
         .toThrow('No choices in response');
-      
+
       expect(() => openRouterGenerator.parseApiResponse({ choices: [{}] }))
         .toThrow('No content in response');
-      
+
       expect(() => openRouterGenerator.parseApiResponse(null))
         .toThrow();
     });
@@ -284,7 +284,7 @@ describe('OpenRouterChapterGenerator', () => {
           },
           finish_reason: 'stop'
         }],
-        model: model
+        model
       };
 
       mockPromptGenerator.buildPrompt.mockReturnValue(expectedPrompt);
@@ -310,7 +310,7 @@ describe('OpenRouterChapterGenerator', () => {
           'X-Title': 'Video Chapters Generator'
         },
         {
-          model: model,
+          model,
           messages: [{
             role: 'user',
             content: expectedPrompt
@@ -324,7 +324,7 @@ describe('OpenRouterChapterGenerator', () => {
       expect(result).toEqual({
         chapters: '1. Intro\n2. Technical Overview\n3. Conclusion',
         finishReason: 'stop',
-        model: model
+        model
       });
     });
 
@@ -386,7 +386,7 @@ describe('OpenRouterChapterGenerator', () => {
       });
 
       const result = await openRouterGenerator.processSubtitles('', '', '', 'deepseek/deepseek-r1-0528:free');
-      
+
       expect(result.chapters).toBe('No chapters available');
     });
 
@@ -400,7 +400,7 @@ describe('OpenRouterChapterGenerator', () => {
       });
 
       await openRouterGenerator.processSubtitles('content', null, '', 'deepseek/deepseek-r1-0528:free');
-      
+
       expect(mockPromptGenerator.buildPrompt).toHaveBeenCalledWith('content', null);
     });
 

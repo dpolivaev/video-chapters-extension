@@ -283,7 +283,7 @@ describe('BrowserTab', () => {
     test('should handle URLs with special characters', () => {
       const specialUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s&feature=share';
       const tab = new BrowserTab(validId, specialUrl, 'video');
-      
+
       expect(tab.hasUrl()).toBe(true);
       expect(tab.url.toString()).toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ'); // Cleaned URL
     });

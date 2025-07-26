@@ -28,39 +28,39 @@ if (typeof retryHandler === 'undefined') {
 
 class GeminiAPI extends BaseLLM {
   constructor() {
-    super("Gemini");
-    this.baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+    super('Gemini');
+    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
     this.availableModels = [ {
-      id: "gemini-2.5-pro",
-      displayName: "Gemini 2.5 Pro",
-      description: "Most capable model for complex reasoning and analysis",
+      id: 'gemini-2.5-pro',
+      displayName: 'Gemini 2.5 Pro',
+      description: 'Most capable model for complex reasoning and analysis',
       isFree: false,
-      category: "premium",
-      capabilities: [ "reasoning", "coding", "analysis" ]
+      category: 'premium',
+      capabilities: [ 'reasoning', 'coding', 'analysis' ]
     }, {
-      id: "gemini-2.5-flash",
-      displayName: "Gemini 2.5 Flash",
-      description: "Faster model optimized for speed while maintaining quality",
+      id: 'gemini-2.5-flash',
+      displayName: 'Gemini 2.5 Flash',
+      description: 'Faster model optimized for speed while maintaining quality',
       isFree: false,
-      category: "fast",
-      capabilities: [ "speed", "general" ]
+      category: 'fast',
+      capabilities: [ 'speed', 'general' ]
     } ];
   }
-  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "gemini-2.5-pro", tabId = null) {
+  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro', tabId = null) {
     if (!apiKey) {
-      throw new Error("API key is required");
+      throw new Error('API key is required');
     }
     const modelExists = this.availableModels.some(m => m.id === model);
     if (!modelExists) {
       const availableIds = this.availableModels.map(m => m.id);
-      throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(", ")}`);
+      throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
     try {
       const prompt = this.buildPrompt(subtitleContent, customInstructions);
       const response = await this.makeAPICall(prompt, apiKey, model, tabId);
       return this.parseResponse(response);
     } catch (error) {
-      console.error("Gemini API error:", error);
+      console.error('Gemini API error:', error);
       throw new Error(`AI processing failed: ${error.message}`);
     }
   }
@@ -79,25 +79,25 @@ class GeminiAPI extends BaseLLM {
         maxOutputTokens: 8192
       },
       safetySettings: [ {
-        category: "HARM_CATEGORY_HARASSMENT",
-        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE'
       }, {
-        category: "HARM_CATEGORY_HATE_SPEECH",
-        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        category: 'HARM_CATEGORY_HATE_SPEECH',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE'
       }, {
-        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE'
       }, {
-        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-        threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE'
       } ]
     };
 
     const requestId = retryHandler.generateRequestId();
     const response = await retryHandler.fetchWithRetry(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
     }, requestId, tabId);
@@ -105,13 +105,13 @@ class GeminiAPI extends BaseLLM {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       if (response.status === 401) {
-        throw new Error("Invalid API key. Please check your Gemini API key.");
+        throw new Error('Invalid API key. Please check your Gemini API key.');
       } else if (response.status === 403) {
-        throw new Error("API access forbidden. Please check your API key permissions.");
+        throw new Error('API access forbidden. Please check your API key permissions.');
       } else if (response.status === 429) {
-        throw new Error("Rate limit exceeded. Please try again later.");
+        throw new Error('Rate limit exceeded. Please try again later.');
       } else if (response.status === 400) {
-        const errorMessage = errorData.error?.message || "Bad request";
+        const errorMessage = errorData.error?.message || 'Bad request';
         throw new Error(`Request error: ${errorMessage}`);
       } else {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -119,7 +119,7 @@ class GeminiAPI extends BaseLLM {
     }
     const data = await response.json();
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-      throw new Error("Invalid response from Gemini API");
+      throw new Error('Invalid response from Gemini API');
     }
     return data;
   }
@@ -127,35 +127,35 @@ class GeminiAPI extends BaseLLM {
     try {
       const candidate = response.candidates[0];
       if (!candidate) {
-        throw new Error("No candidates in response");
+        throw new Error('No candidates in response');
       }
-      if (candidate.finishReason === "SAFETY") {
-        throw new Error("Response was blocked by safety filters");
+      if (candidate.finishReason === 'SAFETY') {
+        throw new Error('Response was blocked by safety filters');
       }
-      if (candidate.finishReason === "RECITATION") {
-        throw new Error("Response was blocked due to recitation concerns");
+      if (candidate.finishReason === 'RECITATION') {
+        throw new Error('Response was blocked due to recitation concerns');
       }
       const content = candidate.content;
       if (!content || !content.parts || !content.parts[0]) {
-        throw new Error("No content in response");
+        throw new Error('No content in response');
       }
       const text = content.parts[0].text;
       if (!text) {
-        throw new Error("Empty response from AI");
+        throw new Error('Empty response from AI');
       }
       return {
         chapters: text.trim(),
         finishReason: candidate.finishReason,
         safetyRatings: candidate.safetyRatings,
-        model: response.modelVersion || "unknown"
+        model: response.modelVersion || 'unknown'
       };
     } catch (error) {
-      console.error("Error parsing Gemini response:", error);
+      console.error('Error parsing Gemini response:', error);
       throw new Error(`Failed to parse AI response: ${error.message}`);
     }
   }
   validateAPIKey(apiKey) {
-    if (!apiKey || typeof apiKey !== "string") {
+    if (!apiKey || typeof apiKey !== 'string') {
       return false;
     }
     const apiKeyPattern = /^[A-Za-z0-9_-]+$/;

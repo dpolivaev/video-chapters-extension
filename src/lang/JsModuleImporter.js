@@ -12,10 +12,10 @@ class JsModuleImporter {
       return;
     }
 
-    const globalScope = typeof global !== 'undefined' ? global : 
-                       typeof window !== 'undefined' ? window : self;
-    
-    const allClassesLoaded = checkClasses.every(className => 
+    const globalScope = typeof global !== 'undefined' ? global :
+      typeof window !== 'undefined' ? window : self;
+
+    const allClassesLoaded = checkClasses.every(className =>
       typeof globalScope[className] !== 'undefined'
     );
 

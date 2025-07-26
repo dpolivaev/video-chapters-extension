@@ -12,7 +12,7 @@ describe('ModelId Value Object', () => {
   describe('constructor and validation', () => {
     test('should create ModelId with valid string', () => {
       const modelId = new ModelId('gemini-2.5-pro');
-      
+
       expect(modelId.value).toBe('gemini-2.5-pro');
       expect(modelId.provider).toBe('Gemini');
       expect(modelId.isFree).toBe(false);
@@ -34,9 +34,9 @@ describe('ModelId Value Object', () => {
 
     test('should be immutable', () => {
       const modelId = new ModelId('gemini-2.5-pro');
-      
+
       expect(Object.isFrozen(modelId)).toBe(true);
-      
+
       const originalValue = modelId.value;
       modelId.value = 'changed';
       expect(modelId.value).toBe(originalValue);
@@ -46,7 +46,7 @@ describe('ModelId Value Object', () => {
   describe('provider detection', () => {
     test('should detect Gemini provider', () => {
       const modelId = new ModelId('gemini-2.5-pro');
-      
+
       expect(modelId.provider).toBe('Gemini');
       expect(modelId.isGemini()).toBe(true);
       expect(modelId.isOpenRouter()).toBe(false);
@@ -54,7 +54,7 @@ describe('ModelId Value Object', () => {
 
     test('should detect OpenRouter provider', () => {
       const modelId = new ModelId('anthropic/claude-3.5-sonnet');
-      
+
       expect(modelId.provider).toBe('OpenRouter');
       expect(modelId.isOpenRouter()).toBe(true);
       expect(modelId.isGemini()).toBe(false);
@@ -62,7 +62,7 @@ describe('ModelId Value Object', () => {
 
     test('should detect unknown provider', () => {
       const modelId = new ModelId('custom-model');
-      
+
       expect(modelId.provider).toBe('Unknown');
       expect(modelId.isGemini()).toBe(false);
       expect(modelId.isOpenRouter()).toBe(false);
@@ -72,13 +72,13 @@ describe('ModelId Value Object', () => {
   describe('free model detection', () => {
     test('should detect free models', () => {
       const freeModel = new ModelId('deepseek/deepseek-r1-0528:free');
-      
+
       expect(freeModel.isFree).toBe(true);
     });
 
     test('should detect paid models', () => {
       const paidModel = new ModelId('deepseek/deepseek-r1-0528');
-      
+
       expect(paidModel.isFree).toBe(false);
     });
   });
@@ -87,20 +87,20 @@ describe('ModelId Value Object', () => {
     test('should require API key for Gemini models', () => {
       const geminiPro = new ModelId('gemini-2.5-pro');
       const geminiFlash = new ModelId('gemini-2.5-flash');
-      
+
       expect(geminiPro.requiresApiKey()).toBe(true);
       expect(geminiFlash.requiresApiKey()).toBe(true);
     });
 
     test('should require API key for paid OpenRouter models', () => {
       const paidModel = new ModelId('anthropic/claude-3.5-sonnet');
-      
+
       expect(paidModel.requiresApiKey()).toBe(true);
     });
 
     test('should not require API key for free OpenRouter models', () => {
       const freeModel = new ModelId('deepseek/deepseek-r1-0528:free');
-      
+
       expect(freeModel.requiresApiKey()).toBe(false);
     });
   });
@@ -149,7 +149,7 @@ describe('ModelId Value Object', () => {
   describe('string representation', () => {
     test('should convert to string correctly', () => {
       const modelId = new ModelId('gemini-2.5-pro');
-      
+
       expect(modelId.toString()).toBe('gemini-2.5-pro');
       expect(String(modelId)).toBe('gemini-2.5-pro');
     });

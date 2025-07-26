@@ -45,7 +45,7 @@ describe('GeminiChapterGenerator', () => {
     test('should return immutable copy of models', () => {
       const models1 = geminiGenerator.getAvailableModels();
       const models2 = geminiGenerator.getAvailableModels();
-      
+
       expect(models1).not.toBe(models2);
       expect(models1).toEqual(models2);
     });
@@ -116,9 +116,9 @@ describe('GeminiChapterGenerator', () => {
     test('should build correct request URL', () => {
       const model = 'gemini-2.5-pro';
       const apiKey = 'test-api-key-123';
-      
+
       const url = geminiGenerator.buildRequestUrl(model, apiKey);
-      
+
       expect(url).toBe(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=test-api-key-123'
       );
@@ -126,10 +126,10 @@ describe('GeminiChapterGenerator', () => {
 
     test('should handle different models', () => {
       const apiKey = 'test-key';
-      
+
       const proUrl = geminiGenerator.buildRequestUrl('gemini-2.5-pro', apiKey);
       const flashUrl = geminiGenerator.buildRequestUrl('gemini-2.5-flash', apiKey);
-      
+
       expect(proUrl).toContain('gemini-2.5-pro');
       expect(flashUrl).toContain('gemini-2.5-flash');
     });
@@ -138,7 +138,7 @@ describe('GeminiChapterGenerator', () => {
   describe('request headers', () => {
     test('should build correct headers', () => {
       const headers = geminiGenerator.buildHttpHeaders();
-      
+
       expect(headers).toEqual({
         'Content-Type': 'application/json'
       });
@@ -148,9 +148,9 @@ describe('GeminiChapterGenerator', () => {
   describe('request body building', () => {
     test('should build request body with prompt', () => {
       const prompt = 'Generate chapters for this video';
-      
+
       const body = geminiGenerator.buildRequestBody(prompt);
-      
+
       expect(body).toEqual({
         contents: [{
           parts: [{
@@ -165,20 +165,20 @@ describe('GeminiChapterGenerator', () => {
         },
         safetySettings: [
           {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
           },
           {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
           },
           {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
           },
           {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
           }
         ]
       });
@@ -186,7 +186,7 @@ describe('GeminiChapterGenerator', () => {
 
     test('should use consistent generation config', () => {
       const body = geminiGenerator.buildRequestBody('test prompt');
-      
+
       expect(body.generationConfig.temperature).toBe(0.7);
       expect(body.generationConfig.topK).toBe(40);
       expect(body.generationConfig.topP).toBe(0.95);
@@ -207,7 +207,7 @@ describe('GeminiChapterGenerator', () => {
       };
 
       const result = geminiGenerator.parseApiResponse(responseData);
-      
+
       expect(result).toEqual({
         chapters: '1. Introduction\n2. Main Content\n3. Conclusion',
         finishReason: 'STOP',
@@ -226,7 +226,7 @@ describe('GeminiChapterGenerator', () => {
       };
 
       const result = geminiGenerator.parseApiResponse(responseData);
-      
+
       expect(result.model).toBe('unknown');
     });
 
@@ -255,10 +255,10 @@ describe('GeminiChapterGenerator', () => {
     test('should handle malformed responses', () => {
       expect(() => geminiGenerator.parseApiResponse({ candidates: [] }))
         .toThrow('No candidates in response');
-      
+
       expect(() => geminiGenerator.parseApiResponse({ candidates: [{}] }))
         .toThrow('No content in response');
-      
+
       expect(() => geminiGenerator.parseApiResponse(null))
         .toThrow();
     });
@@ -311,20 +311,20 @@ describe('GeminiChapterGenerator', () => {
           },
           safetySettings: [
             {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              category: 'HARM_CATEGORY_HARASSMENT',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
             },
             {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              category: 'HARM_CATEGORY_HATE_SPEECH',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
             },
             {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
             },
             {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
             }
           ]
         }
@@ -372,7 +372,7 @@ describe('GeminiChapterGenerator', () => {
       });
 
       const result = await geminiGenerator.processSubtitles('', '', 'valid-api-key-123', 'gemini-2.5-pro');
-      
+
       expect(result.chapters).toBe('No chapters available');
     });
 
@@ -386,7 +386,7 @@ describe('GeminiChapterGenerator', () => {
       });
 
       await geminiGenerator.processSubtitles('content', null, 'valid-api-key-123', 'gemini-2.5-pro');
-      
+
       expect(mockPromptGenerator.buildPrompt).toHaveBeenCalledWith('content', null);
     });
 
@@ -400,7 +400,7 @@ describe('GeminiChapterGenerator', () => {
       });
 
       await geminiGenerator.processSubtitles('content', 'instructions', 'valid-api-key-123', 'gemini-2.5-pro');
-      
+
       expect(mockNetworkCommunicator.post).toHaveBeenCalledWith(
         expect.any(String),
         expect.any(Object),

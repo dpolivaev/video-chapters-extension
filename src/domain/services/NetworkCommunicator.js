@@ -14,12 +14,12 @@ class NetworkCommunicator {
 
   async post(url, headers, body, tabId = null) {
     const requestId = this.retryHandler.generateRequestId();
-    
+
     try {
       const response = await this.retryHandler.fetchWithRetry(
         url,
         {
-          method: "POST",
+          method: 'POST',
           headers,
           body: JSON.stringify(body)
         },

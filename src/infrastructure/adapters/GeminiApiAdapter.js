@@ -23,16 +23,16 @@ if (typeof importScripts !== 'undefined') {
 
 class GeminiApiAdapter extends BaseLLM {
   constructor() {
-    super("Gemini");
-    
+    super('Gemini');
+
     const httpAdapter = new BrowserHttpAdapter();
     const networkCommunicator = new NetworkCommunicator(httpAdapter, retryHandler);
-    
+
     this.geminiChapterGenerator = new GeminiChapterGenerator(networkCommunicator, this.promptGenerator);
     this.availableModels = this.geminiChapterGenerator.getAvailableModels();
   }
 
-  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model = "gemini-2.5-pro", tabId = null) {
+  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro', tabId = null) {
     return this.geminiChapterGenerator.processSubtitles(subtitleContent, customInstructions, apiKey, model);
   }
 
@@ -40,7 +40,7 @@ class GeminiApiAdapter extends BaseLLM {
     const url = this.geminiChapterGenerator.buildRequestUrl(model, apiKey);
     const headers = this.geminiChapterGenerator.buildHttpHeaders();
     const body = this.geminiChapterGenerator.buildRequestBody(prompt);
-    
+
     return this.geminiChapterGenerator.networkCommunicator.post(url, headers, body, tabId);
   }
 

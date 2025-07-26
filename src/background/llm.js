@@ -24,19 +24,19 @@ class BaseLLM {
     this.providerName = providerName;
     this.promptGenerator = new PromptGenerator;
     this.availableModels = [];
-    this.baseUrl = "";
+    this.baseUrl = '';
   }
-  async processSubtitles(subtitleContent, customInstructions = "", apiKey, model) {
-    throw new Error("processSubtitles must be implemented by subclass");
+  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model) {
+    throw new Error('processSubtitles must be implemented by subclass');
   }
   async makeAPICall(prompt, apiKey, model) {
-    throw new Error("makeAPICall must be implemented by subclass");
+    throw new Error('makeAPICall must be implemented by subclass');
   }
   parseResponse(response) {
-    throw new Error("parseResponse must be implemented by subclass");
+    throw new Error('parseResponse must be implemented by subclass');
   }
   validateAPIKey(apiKey) {
-    if (!apiKey || typeof apiKey !== "string") {
+    if (!apiKey || typeof apiKey !== 'string') {
       return false;
     }
     return apiKey.length > 10;
@@ -48,7 +48,7 @@ class BaseLLM {
       description: this.getModelDescription(model.id),
       provider: this.providerName,
       isFree: model.isFree || false,
-      category: model.category || "general",
+      category: model.category || 'general',
       capabilities: model.capabilities || []
     }));
   }
@@ -58,7 +58,7 @@ class BaseLLM {
   }
   getModelDescription(modelId) {
     const model = this.availableModels.find(m => m.id === modelId);
-    return model?.description || "AI language model";
+    return model?.description || 'AI language model';
   }
   isModelFree(modelId) {
     const model = this.availableModels.find(m => m.id === modelId);
@@ -68,49 +68,49 @@ class BaseLLM {
     return this.availableModels.find(m => m.id === modelId);
   }
   categorizeError(errorMessage, model) {
-    if (errorMessage.includes("Invalid API key") || errorMessage.includes("Unauthorized")) {
+    if (errorMessage.includes('Invalid API key') || errorMessage.includes('Unauthorized')) {
       return {
-        category: "invalid_api_key",
+        category: 'invalid_api_key',
         suggestion: `Please check your ${this.providerName} API key in the extension options.`
       };
-    } else if (errorMessage.includes("Rate limit") || errorMessage.includes("429")) {
+    } else if (errorMessage.includes('Rate limit') || errorMessage.includes('429')) {
       return {
-        category: "rate_limit",
-        suggestion: "Please wait a moment and try again."
+        category: 'rate_limit',
+        suggestion: 'Please wait a moment and try again.'
       };
-    } else if (errorMessage.includes("Free model access denied") || errorMessage.includes("Free model access forbidden")) {
+    } else if (errorMessage.includes('Free model access denied') || errorMessage.includes('Free model access forbidden')) {
       return {
-        category: "free_model_unavailable",
-        suggestion: this.isModelFree(model) ? "Try switching to a paid model or try again later." : "Model temporarily unavailable."
+        category: 'free_model_unavailable',
+        suggestion: this.isModelFree(model) ? 'Try switching to a paid model or try again later.' : 'Model temporarily unavailable.'
       };
-    } else if (errorMessage.includes("context length") || errorMessage.includes("too long")) {
+    } else if (errorMessage.includes('context length') || errorMessage.includes('too long')) {
       return {
-        category: "content_too_long",
-        suggestion: "The video content is too long. Try with a shorter video or split the content."
+        category: 'content_too_long',
+        suggestion: 'The video content is too long. Try with a shorter video or split the content.'
       };
-    } else if (errorMessage.includes("safety") || errorMessage.includes("blocked")) {
+    } else if (errorMessage.includes('safety') || errorMessage.includes('blocked')) {
       return {
-        category: "content_filtered",
-        suggestion: "Content was filtered by safety systems. Try with different content."
+        category: 'content_filtered',
+        suggestion: 'Content was filtered by safety systems. Try with different content.'
       };
     } else {
       return {
-        category: "general_error",
-        suggestion: "Please try again or switch to a different model."
+        category: 'general_error',
+        suggestion: 'Please try again or switch to a different model.'
       };
     }
   }
-  buildPrompt(subtitleContent, customInstructions = "", promptType = "chapter") {
+  buildPrompt(subtitleContent, customInstructions = '', promptType = 'chapter') {
     const prompt = this.promptGenerator.buildChapterPrompt(subtitleContent, customInstructions);
     return this.promptGenerator.adaptPromptForProvider(prompt, this.providerName.toLowerCase(), null);
   }
   async testAPIKey(apiKey, model = null) {
     const testModel = model || this.availableModels[0]?.id;
     if (!testModel) {
-      throw new Error("No models available for testing");
+      throw new Error('No models available for testing');
     }
     if (!this.validateAPIKey(apiKey)) {
-      throw new Error("Invalid API key format");
+      throw new Error('Invalid API key format');
     }
     try {
       const testPrompt = this.promptGenerator.buildTestPrompt();
@@ -119,7 +119,7 @@ class BaseLLM {
       return {
         valid: true,
         model: result.model || testModel,
-        message: "API key is valid"
+        message: 'API key is valid'
       };
     } catch (error) {
       return {

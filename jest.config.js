@@ -8,28 +8,28 @@
 
 module.exports = {
   testEnvironment: 'node',
-  
+
   testMatch: [
     '**/src/domain/**/*.test.js'
   ],
-  
+
   collectCoverageFrom: [
     'src/domain/**/*.js',
     '!src/domain/**/*.test.js'
   ],
-  
+
   coverageDirectory: 'coverage',
-  
+
   coverageReporters: [
     'text',
     'lcov',
     'html'
   ],
-  
+
   setupFilesAfterEnv: [
     '<rootDir>/jest.setup.js'
   ],
-  
+
   clearMocks: true,
   restoreMocks: true
 };

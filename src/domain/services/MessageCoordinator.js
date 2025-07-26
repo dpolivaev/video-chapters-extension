@@ -33,7 +33,7 @@ class MessageCoordinator {
     const youtubeUrl = videoId.includes('youtube.com') ? videoId : `https://www.youtube.com/watch?v=${videoId}`;
     const videoTranscript = new VideoTranscript(subtitles, 'Video Title', 'Video Author', youtubeUrl);
     const credentials = new ApiCredentials(apiKey, '');
-    
+
     const chapterGeneration = new ChapterGeneration(
       videoTranscript,
       model,
@@ -50,9 +50,9 @@ class MessageCoordinator {
     return {
       success: true,
       resultId: chapterGeneration.id,
-      videoId: videoId,
+      videoId,
       chapters: result.chapters || chapterGeneration.chapters,
-      model: model,
+      model,
       finishReason: result.finishReason || 'completed'
     };
   }
@@ -74,7 +74,7 @@ class MessageCoordinator {
 
     return {
       success: true,
-      instructions: instructions
+      instructions
     };
   }
 
@@ -111,7 +111,7 @@ class MessageCoordinator {
 
     return {
       success: true,
-      settings: settings
+      settings
     };
   }
 
@@ -187,34 +187,34 @@ class MessageCoordinator {
       switch (action) {
         case 'processWithGemini':
           return await this.handleGeminiProcessing(request);
-        
+
         case 'saveInstruction':
           return await this.handleSaveInstruction(request);
-        
+
         case 'getInstructionHistory':
           return await this.handleGetInstructionHistory(request);
-        
+
         case 'deleteInstruction':
           return await this.handleDeleteInstruction(request);
-        
+
         case 'saveSettings':
           return await this.handleSaveSettings(request);
-        
+
         case 'loadSettings':
           return await this.handleLoadSettings(request);
-        
+
         case 'getAllModels':
           return await this.handleGetAllModels(request);
-        
+
         case 'setSessionResults':
           return await this.handleSetSessionResults(request);
-        
+
         case 'getSessionResults':
           return await this.handleGetSessionResults(request);
-        
+
         case 'registerTab':
           return await this.handleTabRegistration(request);
-        
+
         default:
           throw new Error(`Unknown action: ${action}`);
       }

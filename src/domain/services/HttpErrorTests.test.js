@@ -72,8 +72,8 @@ describe('HTTP Error Handling', () => {
       const httpError = new Error('HTTP 400: Bad Request');
       httpError.isHttpError = true;
       httpError.status = 400;
-      httpError.responseData = { 
-        error: { message: 'Invalid request format' } 
+      httpError.responseData = {
+        error: { message: 'Invalid request format' }
       };
 
       mockNetworkCommunicator.post.mockRejectedValue(httpError);
@@ -205,8 +205,8 @@ describe('HTTP Error Handling', () => {
       const httpError = new Error('HTTP 400: Bad Request');
       httpError.isHttpError = true;
       httpError.status = 400;
-      httpError.responseData = { 
-        error: { message: 'Model not supported' } 
+      httpError.responseData = {
+        error: { message: 'Model not supported' }
       };
 
       mockNetworkCommunicator.post.mockRejectedValue(httpError);
@@ -253,12 +253,12 @@ describe('HTTP Error Handling', () => {
   describe('Model Utilities Coverage', () => {
     test('should get model categories for OpenRouter', () => {
       const categories = openRouterGenerator.getModelsByCategory();
-      
+
       expect(categories.free).toBeDefined();
       expect(categories.reasoning).toBeDefined();
       expect(categories.premium).toBeDefined();
       expect(categories.fast).toBeDefined();
-      
+
       // Verify free models are properly categorized
       expect(categories.free.some(m => m.isFree)).toBe(true);
     });

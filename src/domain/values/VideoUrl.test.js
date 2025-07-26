@@ -104,7 +104,7 @@ describe('VideoUrl', () => {
     test('should be immutable after creation', () => {
       const url = new VideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
       expect(Object.isFrozen(url)).toBe(true);
-      
+
       const originalValue = url.value;
       url.value = 'changed';
       expect(url.value).toBe(originalValue);

@@ -13,24 +13,26 @@ class BrowserTab {
     this.type = this.validateType(type);
     this.createdAt = new Date();
   }
-  
+
   createVideoUrlIfValid(url) {
-    if (!url) return null;
-    
+    if (!url) {
+      return null;
+    }
+
     if (url.includes('youtube.com/watch') || url.includes('youtube.com/shorts')) {
       return new VideoUrl(url);
     }
-    
+
     return null;
   }
-  
+
   validateId(id) {
     if (!Number.isInteger(id) || id < 0) {
       throw new Error('Tab ID must be a non-negative integer');
     }
     return id;
   }
-  
+
   validateType(type) {
     const validTypes = ['video', 'results', 'unknown'];
     if (!validTypes.includes(type)) {
@@ -38,39 +40,39 @@ class BrowserTab {
     }
     return type;
   }
-  
+
   isYouTubeVideo() {
     return this.type === 'video';
   }
-  
+
   isResultsPage() {
     return this.type === 'results';
   }
-  
+
   hasUrl() {
     return this.url !== null;
   }
-  
+
   getVideoId() {
     return this.url ? this.url.getVideoId() : null;
   }
-  
+
   matches(tabInfo) {
-    return this.id === tabInfo.id && 
+    return this.id === tabInfo.id &&
            (!tabInfo.url || this.url?.toString() === tabInfo.url);
   }
-  
+
   static createVideoTab(id, url) {
     return new BrowserTab(id, url, 'video');
   }
-  
+
   static createResultsTab(id, url) {
     return new BrowserTab(id, url, 'results');
   }
-  
+
   static fromBrowserTab(tab) {
     let type = 'unknown';
-    
+
     if (tab.url) {
       if ((tab.url.includes('youtube.com/watch') || tab.url.includes('youtube.com/shorts'))) {
         type = 'video';
@@ -78,11 +80,11 @@ class BrowserTab {
         type = 'results';
       }
     }
-    
+
     return new BrowserTab(tab.id, tab.url, type);
   }
-  
-  
+
+
   toString() {
     return `BrowserTab(id=${this.id}, type=${this.type}, url=${this.url?.toString() || 'null'})`;
   }
@@ -91,5 +93,4 @@ class BrowserTab {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = BrowserTab;
 }
-
 

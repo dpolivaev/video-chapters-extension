@@ -14,8 +14,12 @@ const validateModelId = (id) => {
 };
 
 const extractProvider = (id) => {
-  if (id.includes('gemini-')) return 'Gemini';
-  if (id.includes('/')) return 'OpenRouter';
+  if (id.includes('gemini-')) {
+    return 'Gemini';
+  }
+  if (id.includes('/')) {
+    return 'OpenRouter';
+  }
   return 'Unknown';
 };
 
@@ -26,19 +30,33 @@ const checkIfModelIsFree = (id) => {
 const requiresApiKey = (id) => {
   const provider = extractProvider(id);
   const isFree = checkIfModelIsFree(id);
-  
-  if (provider === 'Gemini') return true;
-  if (provider === 'OpenRouter' && !isFree) return true;
+
+  if (provider === 'Gemini') {
+    return true;
+  }
+  if (provider === 'OpenRouter' && !isFree) {
+    return true;
+  }
   return false;
 };
 
 const getModelDisplayName = (id) => {
-  if (id.includes('gemini-2.5-pro')) return 'Gemini 2.5 Pro';
-  if (id.includes('gemini-2.5-flash')) return 'Gemini 2.5 Flash';
-  if (id.includes('deepseek-r1-0528:free')) return 'DeepSeek R1 (Free)';
-  if (id.includes('claude-3.5-sonnet')) return 'Claude 3.5 Sonnet';
-  if (id.includes('gpt-4o')) return 'GPT-4o';
-  
+  if (id.includes('gemini-2.5-pro')) {
+    return 'Gemini 2.5 Pro';
+  }
+  if (id.includes('gemini-2.5-flash')) {
+    return 'Gemini 2.5 Flash';
+  }
+  if (id.includes('deepseek-r1-0528:free')) {
+    return 'DeepSeek R1 (Free)';
+  }
+  if (id.includes('claude-3.5-sonnet')) {
+    return 'Claude 3.5 Sonnet';
+  }
+  if (id.includes('gpt-4o')) {
+    return 'GPT-4o';
+  }
+
   const parts = id.split('/');
   const modelPart = parts[parts.length - 1];
   return modelPart.replace(/:free$/, ' (Free)');

@@ -7,7 +7,7 @@
  */
 
 const geminiValidateApiKey = (apiKey) => {
-  if (!apiKey || typeof apiKey !== "string") {
+  if (!apiKey || typeof apiKey !== 'string') {
     return false;
   }
   const apiKeyPattern = /^[A-Za-z0-9_-]+$/;
@@ -15,7 +15,7 @@ const geminiValidateApiKey = (apiKey) => {
 };
 
 const openRouterValidateApiKey = (apiKey) => {
-  if (!apiKey || typeof apiKey !== "string") {
+  if (!apiKey || typeof apiKey !== 'string') {
     return false;
   }
   const apiKeyPattern = /^sk-or-[A-Za-z0-9_-]+$/;
@@ -25,27 +25,27 @@ const openRouterValidateApiKey = (apiKey) => {
 const parseGeminiResponse = (responseData) => {
   const candidate = responseData.candidates[0];
   if (!candidate) {
-    throw new Error("No candidates in response");
+    throw new Error('No candidates in response');
   }
 
-  if (candidate.finishReason === "SAFETY") {
-    throw new Error("Response was blocked by safety filters");
+  if (candidate.finishReason === 'SAFETY') {
+    throw new Error('Response was blocked by safety filters');
   }
 
   const content = candidate.content;
   if (!content || !content.parts || !content.parts[0]) {
-    throw new Error("No content in response");
+    throw new Error('No content in response');
   }
 
   const text = content.parts[0].text;
   if (!text) {
-    throw new Error("Empty response from AI");
+    throw new Error('Empty response from AI');
   }
 
   return {
     chapters: text.trim(),
     finishReason: candidate.finishReason,
-    model: responseData.modelVersion || "unknown"
+    model: responseData.modelVersion || 'unknown'
   };
 };
 

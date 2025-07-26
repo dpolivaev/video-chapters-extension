@@ -4,7 +4,7 @@
    http://github.com/piroor/webextensions-lib-l10n
 */
 
-var l10n = {
+const l10n = {
   updateString(string) {
     return string.replace(/__MSG_([-@\.\w]+)__/g, (matched, key) => {
       return chrome.i18n.getMessage(key) || matched;
@@ -13,10 +13,11 @@ var l10n = {
 
   $log(message, ...args) {
     message = `l10s: ${message}`;
-    if (typeof window.log === 'function')
+    if (typeof window.log === 'function') {
       log(message, ...args);
-    else
+    } else {
       console.log(message, ...args);
+    }
   },
 
   updateSubtree(node) {

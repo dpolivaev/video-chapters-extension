@@ -122,7 +122,7 @@ class RetryHandler {
           }
 
           lastError = new Error(`Server error: ${response.status} ${response.statusText}`);
-          
+
           if (attempt >= maxRetries) {
             break;
           }
@@ -140,14 +140,14 @@ class RetryHandler {
           }
 
           lastError = error;
-          
+
           if (attempt >= maxRetries) {
             break;
           }
 
           const delay = (attempt + 1) * 5000;
           console.log(`🔄 RETRY: Network/fetch error "${error.message}" - Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms for ${url}`);
-          
+
           try {
             await this.delay(delay, controller.signal);
             attempt++;
@@ -180,7 +180,7 @@ class RetryHandler {
   delay(ms, signal) {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(resolve, ms);
-      
+
       if (signal) {
         signal.addEventListener('abort', () => {
           clearTimeout(timeout);

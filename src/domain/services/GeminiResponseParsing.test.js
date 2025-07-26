@@ -76,7 +76,7 @@ describe('Gemini Response Parsing', () => {
   test('should handle malformed responses', () => {
     expect(() => parseGeminiResponse({ candidates: [] }))
       .toThrow('No candidates in response');
-    
+
     expect(() => parseGeminiResponse({ candidates: [{}] }))
       .toThrow('No content in response');
   });
