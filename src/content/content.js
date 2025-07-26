@@ -115,6 +115,7 @@ if (window.hasYouTubeIntegration) {
           this.extractTranscriptForCopy().then(sendResponse);
           return true;
         }
+        return false;
       });
     }
 
@@ -172,10 +173,7 @@ if (window.hasYouTubeIntegration) {
     }
 
     async getTranscriptDict(videoUrl) {
-      const isShorts = /youtube\.com\/shorts\//.test(videoUrl);
-      const dataType = 'regular';
-
-      const { title, author, ytData, dataKey, resolvedType } = await this.resolveYouTubeData(videoUrl, dataType);
+      const { title, author, ytData, dataKey, resolvedType } = await this.resolveYouTubeData(videoUrl);
       const segments = await this.getTranscriptItems(ytData, dataKey);
 
       if (!segments.length) {
@@ -186,7 +184,7 @@ if (window.hasYouTubeIntegration) {
       return { title, author, transcript };
     }
 
-    async resolveYouTubeData(videoUrl, initialType) {
+    async resolveYouTubeData(videoUrl) {
       const dataKey = 'ytInitialData';
 
       console.log('YouTubeIntegration: Fetching page HTML for:', videoUrl);

@@ -53,7 +53,7 @@ module.exports = {
       vars: 'all',
       args: 'after-used',
       argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_'
+      varsIgnorePattern: '^(_|BaseLLM|retryHandler|GeminiAPI|OpenRouterAPI|PromptGenerator|cleanVideoURL|browser|_backgroundService)$'
     }],
     'no-undef': 'error',
     'no-console': 'warn',

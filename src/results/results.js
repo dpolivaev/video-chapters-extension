@@ -92,7 +92,9 @@ class ResultsView {
       if (response && response.success) {
         return response.status;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Ignore errors in status check
+    }
     return 'pending';
   }
   isGenerationComplete() {
@@ -458,7 +460,9 @@ if (document.readyState === 'loading') {
             tabId: tab.id
           });
         }
-      } catch (e) {}
+      } catch (e) {
+      // Ignore errors in status check
+    }
     }
     new ResultsView(resultId);
   });
@@ -474,7 +478,9 @@ if (document.readyState === 'loading') {
             tabId: tab.id
           });
         }
-      } catch (e) {}
+      } catch (e) {
+      // Ignore errors in status check
+    }
     }
     new ResultsView(resultId);
   })();

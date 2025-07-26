@@ -6,7 +6,7 @@
  * Licensed under GPL3 or later
  */
 
-let BrowserTab, VideoUrl;
+let BrowserTab;
 
 function isNodeJsEnvironment() {
   return typeof require !== 'undefined' && typeof module !== 'undefined';
@@ -14,7 +14,6 @@ function isNodeJsEnvironment() {
 
 if (isNodeJsEnvironment()) {
   BrowserTab = require('./BrowserTab');
-  VideoUrl = require('../values/VideoUrl');
 } else {
   throw new Error('BrowserTab tests require Node.js environment');
 }
@@ -23,7 +22,6 @@ describe('BrowserTab', () => {
   const validId = 123;
   const validVideoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
   const validShortsUrl = 'https://www.youtube.com/shorts/abc123';
-  const validResultsUrl = 'chrome-extension://xyz/results/results.html?resultId=456';
 
   describe('constructor and validation', () => {
     test('should create tab with all parameters', () => {
