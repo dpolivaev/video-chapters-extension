@@ -1,5 +1,7 @@
 # Video Chapters Generator
 
+[![Test](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml/badge.svg)](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml)
+
 A cross-browser extension that automatically generates AI-powered chapter timecodes for YouTube videos using multiple AI providers (Google Gemini, OpenRouter) and subtitle analysis.
 
 
