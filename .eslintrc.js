@@ -31,7 +31,7 @@ module.exports = {
     TranscriptExtractor: 'readonly',
     ChapterGenerator: 'readonly',
     MessageCoordinator: 'readonly',
-    PromptGenerator: 'readonly',
+    PromptGenerator: 'writable',
     BaseLLM: 'writable',
     BrowserHttpAdapter: 'readonly',
     NetworkCommunicator: 'readonly',

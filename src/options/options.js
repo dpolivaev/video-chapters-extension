@@ -20,7 +20,7 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 if (typeof browser === 'undefined') {
-  var browser = chrome;
+  const browser = chrome;
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
