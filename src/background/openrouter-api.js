@@ -135,7 +135,9 @@ class _OpenRouterAPI extends BaseLLM {
       'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
       'X-Title': 'Video Chapters Generator'
     };
-    if (this.isModelFree(model)) {} else if (apiKey) {
+    if (this.isModelFree(model)) {
+      // Free models don't need API key
+    } else if (apiKey) {
       headers['Authorization'] = `Bearer ${apiKey}`;
     }
     const requestBody = {
