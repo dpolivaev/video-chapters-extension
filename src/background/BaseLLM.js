@@ -100,7 +100,7 @@ class BaseLLM {
       };
     }
   }
-  buildPrompt(subtitleContent, customInstructions = '', promptType = 'chapter') {
+  buildPrompt(subtitleContent, customInstructions = '', _promptType = 'chapter') {
     const prompt = this.promptGenerator.buildChapterPrompt(subtitleContent, customInstructions);
     return this.promptGenerator.adaptPromptForProvider(prompt, this.providerName.toLowerCase(), null);
   }

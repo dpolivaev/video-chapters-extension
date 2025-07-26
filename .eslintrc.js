@@ -45,7 +45,8 @@ module.exports = {
     extractVideoIdFromUrl: 'readonly',
     normalizeUrl: 'readonly',
     l10n: 'readonly',
-    cleanVideoURL: 'readonly'
+    cleanVideoURL: 'readonly',
+    retryHandler: 'writable'
   },
   rules: {
     'no-unused-vars': ['error', {

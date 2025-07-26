@@ -246,6 +246,7 @@ class BackgroundService {
         }
 
         default:
+          return false;
       }
     });
   }
@@ -312,7 +313,7 @@ class BackgroundService {
       });
 
     } catch (error) {
-      const sessionIdToFail = newResultId || request.resultId;
+      const sessionIdToFail = request.newResultId || request.resultId;
       if (sessionIdToFail) {
         const session = sessionRepository.findById(sessionIdToFail);
         if (session && session.isPending()) {

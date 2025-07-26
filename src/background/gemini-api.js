@@ -26,7 +26,7 @@ if (typeof retryHandler === 'undefined') {
   }
 }
 
-class GeminiAPI extends BaseLLM {
+class _GeminiAPI extends BaseLLM {
   constructor() {
     super('Gemini');
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';

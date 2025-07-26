@@ -26,7 +26,7 @@ if (typeof retryHandler === 'undefined') {
   }
 }
 
-class OpenRouterAPI extends BaseLLM {
+class _OpenRouterAPI extends BaseLLM {
   constructor() {
     super('OpenRouter');
     this.baseUrl = 'https://openrouter.ai/api/v1';
