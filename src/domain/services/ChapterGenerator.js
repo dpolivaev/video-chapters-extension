@@ -22,7 +22,14 @@ class ChapterGenerator {
     }
     
     if (!chapterGeneration.isPending()) {
-      throw new Error('Chapter generation is not in pending state');
+      const status = chapterGeneration.status;
+      if (status === 'completed') {
+        throw new Error('Chapter generation has already completed');
+      } else if (status === 'failed') {
+        throw new Error('Chapter generation has already failed');  
+      } else {
+        throw new Error(`Chapter generation is not in pending state (current: ${status})`);
+      }
     }
     
     try {

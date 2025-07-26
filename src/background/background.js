@@ -270,19 +270,32 @@ class BackgroundService {
   }
   async handleGeminiProcessing(request, sendResponse, sender) {
     try {
-      const {subtitleContent, customInstructions, apiKey, model, resultId} = request;
+      const {subtitleContent, customInstructions, apiKey, model, resultId, newResultId} = request;
       const tabId = sender?.tab?.id || null;
+      
+      if (!model || typeof model !== 'string' || model.trim() === '') {
+        throw new Error(`Model parameter is required and must be a non-empty string. Received: ${JSON.stringify(model)}`);
+      }
       
       const existingSession = sessionRepository.findById(resultId);
       if (!existingSession) {
         throw new Error(`Session ${resultId} not found`);
       }
+      
+      const newGenerationSession = this.createNewGenerationSession(existingSession, model, customInstructions);
+      
+      if (newResultId) {
+        newGenerationSession.id = newResultId;
+      }
+      
+      sessionRepository.save(newGenerationSession);
+      
       const modelId = new ModelId(model);
       const credentials = modelId.isGemini() 
         ? new ApiCredentials(apiKey, '')
         : new ApiCredentials('', apiKey);
       const completedSession = await this.chapterGenerator.generateChapters(
-        existingSession, 
+        newGenerationSession, 
         credentials, 
         tabId
       );
@@ -290,14 +303,15 @@ class BackgroundService {
       
       sendResponse({
         success: true,
-        data: { chapters: completedSession.chapters }
+        data: { chapters: completedSession.chapters, resultId: completedSession.id }
       });
       
     } catch (error) {
       console.error("AI processing error:", error);
-      if (request.resultId) {
-        const session = sessionRepository.findById(request.resultId);
-        if (session) {
+      const sessionIdToFail = newResultId || request.resultId;
+      if (sessionIdToFail) {
+        const session = sessionRepository.findById(sessionIdToFail);
+        if (session && session.isPending()) {
           session.markFailed(error.message);
           sessionRepository.save(session);
         }
@@ -475,6 +489,18 @@ class BackgroundService {
 
   handleGoBackToVideoError(error, sendResponse) {
     sendResponse({ success: false, error: error.message });
+  }
+
+  createNewGenerationSession(baseSession, model, customInstructions) {
+    const videoTranscript = baseSession.videoTranscript;
+    
+    const newSession = new ChapterGeneration(
+      videoTranscript,
+      model,
+      customInstructions || ''
+    );
+    
+    return newSession;
   }
 
   async handleGetResultsTabStatus(currentVideoTabId, sendResponse) {

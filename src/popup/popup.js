@@ -507,14 +507,18 @@ class PopupView {
         results: sessionResults,
         resultId: resultId
       });
+      const newResultId = ChapterGeneration.generateRandomId();
+      
       browser.runtime.sendMessage({
         action: "processWithGemini",
         subtitleContent: subtitleContent,
         customInstructions: customInstructions,
         apiKey: apiKey,
         model: model,
-        resultId: resultId
+        resultId: resultId,
+        newResultId: newResultId
       });
+      
       const [tab] = await browser.tabs.query({
         active: true,
         currentWindow: true
@@ -531,12 +535,14 @@ class PopupView {
           videoUrl = tab.url;
         }
       }
+      
       await browser.runtime.sendMessage({
         action: "openResultsTab",
         videoTabId: tab.id,
         videoUrl: videoUrl,
-        resultId: resultId
+        resultId: newResultId
       });
+      
       window.close();
     } catch (error) {
       console.error("PopupView: Error generating chapters:", error);
