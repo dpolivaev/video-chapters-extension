@@ -67,12 +67,7 @@ class ChapterGenerator {
         throw new Error('Invalid response from AI provider');
       }
 
-      let chaptersWithUrl = result.chapters;
-      if (chapterGeneration.videoTranscript.hasVideoUrl()) {
-        chaptersWithUrl = chapterGeneration.videoTranscript.videoUrl.toString() + '\n\n' + result.chapters;
-      }
-
-      chapterGeneration.markCompleted(chaptersWithUrl);
+      chapterGeneration.markCompleted(result.chapters);
       return chapterGeneration;
 
     } catch (error) {

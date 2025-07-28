@@ -19,6 +19,30 @@
 */
 /* Video Chapters Generator - Results Page Styles */
 
+.content-html {
+  padding: 12px;
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-family: var(--mono-font);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+
+.content-html a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.content-html a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 :root {
   --primary-color: #4A90E2;
   --primary-dark: #357ABD;

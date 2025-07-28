@@ -124,7 +124,6 @@ describe('ChapterGenerator', () => {
 
       expect(result.isCompleted()).toBe(true);
       expect(result.chapters).toContain('1. Introduction');
-      expect(result.chapters).toContain(videoTranscript.videoUrl.toString());
     });
 
     test('should handle Gemini processing without tabId', async () => {
@@ -273,7 +272,6 @@ describe('ChapterGenerator', () => {
 
       const result = await chapterGenerator.generateChapters(chapterGeneration, credentials);
 
-      expect(result.chapters).toContain('https://www.youtube.com/watch?v=test123');
       expect(result.chapters).toContain('1. Chapter One');
     });
 

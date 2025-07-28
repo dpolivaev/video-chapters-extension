@@ -17,6 +17,13 @@ npm run build:chrome    # Build Chrome extension (Manifest V3)
 npm run build:firefox   # Build Firefox extension (Manifest V2)
 ```
 
+### Development Workflow Rule
+**MANDATORY**: Always run development builds after any code changes:
+```bash
+npm run build:chrome -- --dev && npm run build:firefox -- --dev
+```
+This ensures changes are immediately testable in the browser extension and catches build issues early.
+
 ### Development Commands
 ```bash
 npm run dev             # Start development server with hot reload

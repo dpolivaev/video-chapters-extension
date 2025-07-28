@@ -369,8 +369,30 @@ class ResultsView {
     if (!this.results || !this.results.chapters) {
       return;
     }
-    const chaptersContent = document.getElementById('chaptersContent');
-    chaptersContent.value = this.results.chapters;
+    const chaptersHtml = document.getElementById('chaptersHtml');
+
+    if (this.results.videoMetadata?.url) {
+      const videoId = this.extractVideoId(this.results.videoMetadata.url);
+      if (videoId) {
+        const urlLink = `<a href="${this.results.videoMetadata.url}">${this.escapeHtml(this.results.videoMetadata.url)}</a>`;
+        const chaptersWithLinks = this.convertChaptersToLinkedHtml(this.results.chapters, videoId);
+        chaptersHtml.innerHTML = `${urlLink}<br><br>${chaptersWithLinks}`;
+        return;
+      }
+    }
+
+    chaptersHtml.innerHTML = `${this.escapeHtml(this.results.videoMetadata?.url || '')}<br><br>${this.escapeHtml(this.results.chapters).replace(/\n/g, '<br>')}`;
+  }
+  convertChaptersToLinkedHtml(chapters, videoId) {
+    return chapters.split('\n').map(line => {
+      const match = line.match(/^((?:\d+:)?\d{1,2}:\d{2})\s*-\s*(.+)$/);
+      if (match) {
+        const [, timestamp, title] = match;
+        const ytFormat = this.formatTimestampForYoutube(timestamp);
+        return `<a href="https://youtube.com/watch?v=${videoId}&t=${ytFormat}">${this.escapeHtml(timestamp)}</a> - ${this.escapeHtml(title)}`;
+      }
+      return this.escapeHtml(line);
+    }).join('<br>');
   }
   updateSubtitlesDisplay() {
     if (!this.results || !this.results.subtitles) {
@@ -403,20 +425,51 @@ class ResultsView {
   }
   async copyToClipboard(contentType) {
     try {
-      let content = '';
+      let element;
       let contentName = '';
       if (contentType === 'chapters') {
-        content = document.getElementById('chaptersContent').value;
+        element = document.getElementById('chaptersHtml');
         contentName = 'Chapters';
       } else if (contentType === 'subtitles') {
-        content = document.getElementById('subtitlesContent').value;
+        element = document.getElementById('subtitlesContent');
         contentName = 'Subtitles';
       }
-      if (!content.trim()) {
+
+      if (!element || !element.textContent.trim()) {
         this.showNotification(chrome.i18n.getMessage('no_' + contentName.toLowerCase() + '_to_copy'), 'warning');
         return;
       }
-      await navigator.clipboard.writeText(content);
+
+      const selection = window.getSelection();
+
+      if (selection.rangeCount > 0 && !selection.isCollapsed) {
+        const range = selection.getRangeAt(0);
+        const fragment = range.cloneContents();
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(fragment);
+
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([tempDiv.innerHTML], { type: 'text/html' }),
+            'text/plain': new Blob([selection.toString()], { type: 'text/plain' })
+          })
+        ]);
+      } else {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([element.innerHTML], { type: 'text/html' }),
+            'text/plain': new Blob([selection.toString()], { type: 'text/plain' })
+          })
+        ]);
+
+        selection.removeAllRanges();
+      }
+
       this.showNotification(chrome.i18n.getMessage(contentName.toLowerCase() + '_copied'), 'success');
     } catch (error) {
       console.error('Error copying to clipboard:', error);
@@ -445,6 +498,27 @@ class ResultsView {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+  extractVideoId(url) {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+      /youtube\.com\/embed\/([^&\n?#]+)/
+    ];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+    return null;
+  }
+  formatTimestampForYoutube(timestamp) {
+    const parts = timestamp.split(':');
+    if (parts.length === 3) {
+      return `${parseInt(parts[0])}h${parseInt(parts[1])}m${parseInt(parts[2])}s`;
+    } else {
+      return `${parseInt(parts[0])}m${parseInt(parts[1])}s`;
+    }
   }
 }
 
