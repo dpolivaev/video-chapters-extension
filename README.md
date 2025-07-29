@@ -1,23 +1,30 @@
 # Video Chapters Generator
+*Free • Non-commercial • Open Source*
 
 [![Test](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml/badge.svg)](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml)
 
-A cross-browser extension that automatically generates AI-powered chapter timecodes for YouTube videos using multiple AI providers (Google Gemini, OpenRouter) and subtitle analysis.
+Transform any YouTube video into organized chapters with customizable AI-powered timecode generation using multiple AI providers.
 
 
 ## Features
 
 * **One-Click Chapter Generation**: Generate chapters directly from YouTube video pages
-* **Multiple AI Providers**: Choose from Google Gemini (direct API) or OpenRouter (with access to DeepSeek R1, Claude, GPT-4o, Llama, and more)
+* **Multiple AI Providers**: Google Gemini (direct API) or OpenRouter (DeepSeek R1, Claude, GPT-4o, Llama, and more)
 * **Free Model Options**: Use DeepSeek R1 for free without requiring an API key
-* **Model Selection**: Choose from 11+ different AI models based on your needs and budget
 * **Custom Instructions**: Add personalized instructions to tailor chapter generation to your needs
-* **Instruction History**: Save and reuse successful instruction prompts
-* **Smart Tab Management**: Intelligent handling of results tabs and video navigation
-* **Session-Based Results**: Results are stored only for the current browser session
+* **Direct Video Navigation**: Jump directly to any chapter timestamp from the results page
 * **Cross-Browser Support**: Works on both Chrome (Manifest V3) and Firefox (Manifest V2)
-* **Dynamic API Key Management**: Automatically shows the correct API key field based on selected model
-* **Multiple Export Formats**: Copy chapters in various formats for different use cases
+* **Session-Based Results**: Results are stored only for the current browser session
+* **Open Source**: Full transparency with code available on GitHub
+
+## Perfect For
+
+* **Content creators, vloggers and streamers** organizing their videos
+* **Students** creating study guides from educational content
+* **Researchers** analyzing video content structure
+* **Podcasters** converting video episodes to chapters
+* **Anyone** wanting to make videos more navigable
+* **Educators** creating lesson breakdowns
 
 ---
 
@@ -25,46 +32,19 @@ A cross-browser extension that automatically generates AI-powered chapter timeco
 
 ### Chrome Web Store
 
-*Coming soon*
+*To be published*
+
+### Firefox Web Store
+
+*To be published*
 
 ### Firefox Add-on
 
-Download the latest Firefox add-on (.xpi file) from the [GitHub Releases](https://github.com/dpolivaev/timecodes-browser-extension/releases) section and install it directly in Firefox.
+Download the latest Firefox add-on (.xpi file) from the [GitHub Releases](https://github.com/dpolivaev/video-chapters-extension/releases) section and install it directly in Firefox.
 
 ### Manual Installation
 
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/your-username/timecodes-browser-extension.git
-   cd timecodes-browser-extension
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Build the extension:
-
-   ```bash
-   npm run build
-   ```
-
-4. Load in Chrome:
-
-   * Open `chrome://extensions/`
-   * Enable "Developer mode"
-   * Click "Load unpacked"
-   * Select the `dist/chrome/` directory
-
-5. Load in Firefox:
-
-   * Open `about:debugging`
-   * Click "This Firefox"
-   * Click "Load Temporary Add-on"
-   * Select any file in the `dist/firefox/` directory
+For developers or advanced users, see [DEVELOPMENT.md](DEVELOPMENT.md) for manual installation instructions.
 
 ---
 
@@ -107,28 +87,30 @@ The extension supports multiple AI providers with different models:
 
 **Note**: API keys are stored securely in your browser's local storage and never leave your device except when sent to the respective AI service.
 
+**Disclaimer**: No warranty is provided for external APIs and services. Free AI models may have usage limitations, rate limits, or availability restrictions that are beyond our control.
+
 ---
 
 ## Usage
 
 ### Generating Chapters
 
-1. **Navigate to any YouTube video**
-2. **Open the extension popup** by clicking the extension icon
-3. **Select your preferred AI model** from the dropdown (defaults to free DeepSeek R1)
-4. **Enter API key if required** (automatically shows the correct field based on selected model)
-5. **Add custom instructions** (optional) to guide the AI in generating specific types of chapters
-6. **Click "Generate Chapters"** to start the process
-7. **View results** in the automatically opened results tab with model and prompt information displayed
+1. **Open any YouTube video** with captions
+2. **Click the extension icon**
+3. **Select your preferred AI model**
+4. **Enter your API key** if you select a paid AI model (not required for free models)
+5. **Add custom instructions** to guide chapter generation (optional)
+6. **Click "Generate Chapters"**
+7. **Copy formatted chapters** from the results page
 
-### Custom Instructions
+### Example Custom Instructions
 
-Add specific instructions to customize chapter generation:
+You can also try running without any custom instructions to see the default AI behavior. Use the extension button on the results page to easily modify instructions or change models for the same video.
 
-* "Focus on key topics and main points"
-* "Create chapters for educational content with clear learning objectives"
-* "Generate chapters suitable for tutorial videos"
-* "Emphasize important announcements and updates"
+- "Headlines should be brief yet meaningful, reflect the content, and match the individuality of the video participants. Additionally write a brief summary"
+- "Headlines should be detailed, reflect the content, and match the individuality of the video participants"
+- "For each headline, provide the main thesis in one sentence in [LANGUAGE] without prefixes like 'Thesis:'"
+- "For each headline, provide both thesis and counter-argument"
 
 ### Instruction History
 
@@ -141,20 +123,21 @@ Add specific instructions to customize chapter generation:
 * **View Results**: Opens results in a new tab (or focuses existing tab for the same generation)
 * **Back to Video**: Smart navigation that returns to the original video tab
 * **Copy Chapters**: Copy generated chapters with video URL included
-* **Session Storage**: Results are only available during the current browser session
 
 ---
 
 ## Privacy & Security
 
-* **Local Storage Only**: All your data is stored solely in your browser's local storage and never leaves your device except when explicitly sent to your chosen AI provider for chapter generation.
-* **No External Data Collection**: The extension does not send any data to external servers, except to your selected AI provider for processing the transcript.
-* **No DOM Parsing**: Subtitles are not extracted from the webpage DOM.
-* **Transcript Retrieval**: The extension retrieves subtitles from YouTube by issuing the same requests the browser makes when the user opens the transcript panel, and sends them to your selected AI provider for processing.
-* **Minimal Permissions**: The extension requests only the permissions necessary for integration with YouTube and session storage.
-* **Session-Only Results**: Generated chapters are stored only for the current browser session and are not persisted.
-* **Provider Choice**: You control which AI service processes your data by selecting the model. Data is only sent to the provider of your chosen model.
-* **API Key Security**: API keys are stored locally in your browser and only transmitted to their respective services.
+* **Data Transmission**: The extension sends YouTube video transcripts to your selected AI provider for chapter generation:
+  - **Google Gemini models**: Data sent directly to Google's Gemini API (ai.google.dev)
+  - **OpenRouter models**: Data sent to OpenRouter API (openrouter.ai), which forwards to the selected model provider (Anthropic, OpenAI, Meta, DeepSeek, etc.)
+  - **User Control**: You explicitly choose which AI service processes your data by selecting the model
+* **Local Storage Only**: All your settings and results are stored solely in your browser's local storage
+* **No Extension Server**: The extension does not operate its own servers or collect any user data
+* **Transcript Retrieval**: Subtitles are retrieved from YouTube using the same method the browser uses when users open the transcript panel
+* **Minimal Permissions**: The extension requests only the permissions necessary for YouTube integration and session storage
+* **Session-Only Results**: Generated chapters are stored only for the current browser session and are not persisted
+* **API Key Security**: API keys are stored locally in your browser and only transmitted to their respective AI services
 
 ---
 
@@ -183,6 +166,18 @@ It is licensed under the [GNU General Public License v3.0](https://www.gnu.org/l
 ## Acknowledgments
 
 * Subtitle retrieval logic is based on code by **Hamza Wasim**, used with permission.
+
+---
+
+## Chrome Web Store Distribution
+
+This extension is distributed under GPL v3.0 license, which is compatible with Chrome Web Store distribution. The extension:
+
+* Contains proper copyright notices and attribution
+* Includes complete source code access via GitHub repository
+* **Data Transmission Disclosure**: Sends YouTube video transcripts to user-selected AI providers (Google Gemini API or OpenRouter API) for chapter generation only
+* Uses established YouTube transcript extraction methods with author permission
+* Maintains user privacy with local-only settings and session storage
 
 ---
 

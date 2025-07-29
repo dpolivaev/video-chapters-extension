@@ -48,7 +48,7 @@ const config = {
   // Special files that need individual handling
   specialFiles: {
     vendor: ['vendor/browser-polyfill.js'],
-    legal: ['LICENSE', 'README.md']
+    legal: ['LICENSE', 'README.md', 'NOTICE']
   },
   iconSizes: [ 16, 48, 128 ],
   minifyOptions: {

@@ -2,40 +2,59 @@
 
 This document contains development-related information for the Video Chapters Generator browser extension.
 
-## Installation for Development
+## Manual Installation for Development
 
-1. Clone this repository:
+### Prerequisites
+
+- Node.js 16+ and npm
+- Chrome or Firefox browser
+- Git
+
+### Installation Steps
+
+1. **Clone this repository:**
 
    ```bash
-   git clone https://github.com/your-username/timecodes-browser-extension.git
-   cd timecodes-browser-extension
+   git clone https://github.com/dpolivaev/video-chapters-extension.git
+   cd video-chapters-extension
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 
    ```bash
    npm install
    ```
 
-3. Build the extension:
+3. **Build the extension:**
 
    ```bash
-   npm run build
+   npm run build:chrome -- --dev && npm run build:firefox -- --dev
    ```
 
-4. Load in Chrome:
+4. **Load in Chrome:**
 
    * Open `chrome://extensions/`
    * Enable "Developer mode"
    * Click "Load unpacked"
    * Select the `dist/chrome/` directory
 
-5. Load in Firefox:
+5. **Load in Firefox:**
 
    * Open `about:debugging`
    * Click "This Firefox"
    * Click "Load Temporary Add-on"
    * Select any file in the `dist/firefox/` directory
+
+### Development Workflow
+
+After making changes, rebuild and reload:
+
+```bash
+# Rebuild both versions
+npm run build:chrome -- --dev && npm run build:firefox -- --dev
+
+# Then reload the extension in your browser
+```
 
 ## Architecture
 
