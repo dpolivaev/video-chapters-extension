@@ -5,7 +5,6 @@
 
 Transform any YouTube video into organized chapters with customizable AI-powered timecode generation using multiple AI providers.
 
-
 ## Features
 
 * **One-Click Chapter Generation**: Generate chapters directly from YouTube video pages
@@ -184,3 +183,39 @@ This extension is distributed under GPL v3.0 license, which is compatible with C
 ## Development
 
 For development-related information, please see [DEVELOPMENT.md](DEVELOPMENT.md).
+
+---
+
+## Screenshots
+
+### Extension Interface
+<img src="web-store-submissions/screenshots/popup-interface-custom-instructions.png" width="400" alt="Popup Interface">
+
+*Main extension popup showing custom instructions and API key configuration*
+
+<img src="web-store-submissions/screenshots/popup-model-selection-dropdown.png" width="400" alt="Model Selection">
+
+*Dropdown menu with multiple AI models from different providers*
+
+### Generated Results
+<img src="web-store-submissions/screenshots/results-page-generated-chapters.png" width="600" alt="Generated Chapters">
+
+*Generated chapters with clickable timestamps for direct video navigation*
+
+<img src="web-store-submissions/screenshots/results-page-subtitles-view.png" width="600" alt="Subtitles View">
+
+*Extracted video subtitles with copy functionality*
+
+### Extension Settings
+<img src="web-store-submissions/screenshots/extension-settings-api-keys.png" width="500" alt="Extension Settings">
+
+*Extension settings page for API key management and configuration*
+
+### Advanced Features  
+<img src="web-store-submissions/screenshots/side-by-side-workflow-view.png" width="800" alt="Side-by-Side Workflow">
+
+*Side-by-side workflow showing results page and popup for easy iteration*
+
+<img src="web-store-submissions/screenshots/instruction-history-management.png" width="400" alt="Instruction History">
+
+*Instruction history management for saving and reusing custom prompts*

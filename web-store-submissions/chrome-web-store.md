@@ -85,8 +85,36 @@ youtube, chapters, timecodes, ai, transcripts, video, productivity, content-crea
 
 **background**: Required for the service worker to coordinate between popup, content scripts, and results pages.
 
-## Screenshots Needed
-1. Extension popup showing model selection and custom instructions
-2. YouTube video page with extension in action
-3. Results page with generated chapters
-4. Settings/options page with API key management
+## Screenshots
+
+**NOTE**: Web store submission forms typically require uploaded image files rather than markdown references. Include these screenshots when submitting:
+
+### 1. Extension Popup Interface (Main Screenshot)
+![Popup Interface](screenshots/popup-interface-custom-instructions.png)
+*Main extension popup showing custom instructions and API key configuration for Gemini model*
+
+### 2. Model Selection Dropdown  
+![Model Selection](screenshots/popup-model-selection-dropdown.png)
+*Dropdown menu displaying multiple AI models from different providers (OpenRouter and Gemini)*
+
+### 3. Generated Chapters Results
+![Generated Chapters](screenshots/results-page-generated-chapters.png)
+*Generated chapters with clickable timestamps for direct video navigation*
+
+### 4. Video Subtitles View
+![Subtitles View](screenshots/results-page-subtitles-view.png) 
+*Extracted video subtitles with copy functionality and tab interface*
+
+### 5. Extension Settings Page
+![Extension Settings](screenshots/extension-settings-api-keys.png)
+*Extension settings page for API key management and configuration*
+
+### 6. Side-by-Side Workflow (Advanced Feature)
+![Side-by-Side Workflow](screenshots/side-by-side-workflow-view.png)
+*Side-by-side workflow showing results page and popup for easy iteration and model comparison*
+
+### 7. Instruction History Management
+![Instruction History](screenshots/instruction-history-management.png)
+*Instruction history management for saving and reusing custom prompts*
+
+**Screenshot Files**: All screenshots are available in the `screenshots/` directory with descriptive filenames for easy web store submission.

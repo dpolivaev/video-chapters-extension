@@ -85,5 +85,39 @@ youtube, chapters, timecodes, ai, transcripts, video, productivity, content-crea
 
 **background**: Required for the background script to coordinate between popup, content scripts, and results pages.
 
+## Screenshots
+
+**NOTE**: Firefox Add-on submission may require uploaded image files. Include these screenshots when submitting:
+
+### 1. Extension Popup Interface (Main Screenshot)
+![Popup Interface](screenshots/popup-interface-custom-instructions.png)
+*Main extension popup showing custom instructions and API key configuration for Gemini model*
+
+### 2. Model Selection Dropdown  
+![Model Selection](screenshots/popup-model-selection-dropdown.png)
+*Dropdown menu displaying multiple AI models from different providers (OpenRouter and Gemini)*
+
+### 3. Generated Chapters Results
+![Generated Chapters](screenshots/results-page-generated-chapters.png)
+*Generated chapters with clickable timestamps for direct video navigation*
+
+### 4. Video Subtitles View
+![Subtitles View](screenshots/results-page-subtitles-view.png) 
+*Extracted video subtitles with copy functionality and tab interface*
+
+### 5. Extension Settings Page
+![Extension Settings](screenshots/extension-settings-api-keys.png)
+*Extension settings page for API key management and configuration*
+
+### 6. Side-by-Side Workflow (Advanced Feature)
+![Side-by-Side Workflow](screenshots/side-by-side-workflow-view.png)
+*Side-by-side workflow showing results page and popup for easy iteration and model comparison*
+
+### 7. Instruction History Management
+![Instruction History](screenshots/instruction-history-management.png)
+*Instruction history management for saving and reusing custom prompts*
+
+**Screenshot Files**: All screenshots are available in the `screenshots/` directory with descriptive filenames for easy submission.
+
 ## Developer Comments
 This extension is built with privacy and user control as core principles. All AI processing happens through user-selected providers with explicit consent. The extension uses established YouTube transcript extraction methods and maintains full transparency through open source code availability.
