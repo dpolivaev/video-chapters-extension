@@ -18,11 +18,11 @@ npm run build:firefox   # Build Firefox extension (Manifest V2)
 ```
 
 ### Development Workflow Rule
-**MANDATORY**: Always run development builds after any code changes:
+**MANDATORY**: Always run lint check and development builds after any code changes:
 ```bash
-npm run build:chrome -- --dev && npm run build:firefox -- --dev
+npm run lint && npm run build:chrome -- --dev && npm run build:firefox -- --dev
 ```
-This ensures changes are immediately testable in the browser extension and catches build issues early.
+This ensures code quality standards are met and changes are immediately testable in the browser extension.
 
 ### Development Commands
 ```bash
@@ -139,4 +139,21 @@ This checks if classes are already loaded (Firefox case) before calling `importS
 - Add test coverage for buildPrompt method in PromptGenerator.test.js
 - Implement the missing method
 - Commit fix with proper test coverage
+
+## Code Quality Standards
+
+### Mandatory Pre-Commit Checks
+
+**CRITICAL RULE**: Before any git commit, ALWAYS run:
+```bash
+npm run lint
+```
+
+**Enforcement**: All code changes must pass ESLint validation before being committed. This ensures:
+- Consistent code formatting and style
+- Early detection of potential bugs and code smells
+- Adherence to project coding standards
+- Prevention of trailing spaces and other formatting issues
+
+**Process Integration**: The lint check has been integrated into the mandatory development workflow above. Never skip this step.
 

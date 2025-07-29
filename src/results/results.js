@@ -370,29 +370,75 @@ class ResultsView {
       return;
     }
     const chaptersHtml = document.getElementById('chaptersHtml');
+    chaptersHtml.textContent = '';
 
     if (this.results.videoMetadata?.url) {
       const videoId = this.extractVideoId(this.results.videoMetadata.url);
       if (videoId) {
-        const urlLink = `<a href="${this.results.videoMetadata.url}">${this.escapeHtml(this.results.videoMetadata.url)}</a>`;
-        const chaptersWithLinks = this.convertChaptersToLinkedHtml(this.results.chapters, videoId);
-        chaptersHtml.innerHTML = `${urlLink}<br><br>${chaptersWithLinks}`;
+        this.renderChaptersWithVideoLink(chaptersHtml, videoId);
         return;
       }
     }
 
-    chaptersHtml.innerHTML = `${this.escapeHtml(this.results.videoMetadata?.url || '')}<br><br>${this.escapeHtml(this.results.chapters).replace(/\n/g, '<br>')}`;
+    this.renderChaptersAsPlainText(chaptersHtml);
   }
-  convertChaptersToLinkedHtml(chapters, videoId) {
-    return chapters.split('\n').map(line => {
+  renderChaptersWithVideoLink(container, videoId) {
+    const urlLink = document.createElement('a');
+    urlLink.href = this.results.videoMetadata.url;
+    urlLink.textContent = this.results.videoMetadata.url;
+    container.appendChild(urlLink);
+
+    container.appendChild(document.createElement('br'));
+    container.appendChild(document.createElement('br'));
+
+    this.renderChaptersWithTimestampLinks(container, videoId);
+  }
+
+  renderChaptersWithTimestampLinks(container, videoId) {
+    const chapters = this.results.chapters.split('\n');
+    chapters.forEach((line, index) => {
+      if (index > 0) {
+        container.appendChild(document.createElement('br'));
+      }
+
       const match = line.match(/^((?:\d+:)?\d{1,2}:\d{2})\s*-\s*(.+)$/);
       if (match) {
         const [, timestamp, title] = match;
         const ytFormat = this.formatTimestampForYoutube(timestamp);
-        return `<a href="https://youtube.com/watch?v=${videoId}&t=${ytFormat}">${this.escapeHtml(timestamp)}</a> - ${this.escapeHtml(title)}`;
+
+        const timestampLink = document.createElement('a');
+        timestampLink.href = `https://youtube.com/watch?v=${videoId}&t=${ytFormat}`;
+        timestampLink.textContent = timestamp;
+        container.appendChild(timestampLink);
+
+        const separator = document.createTextNode(' - ');
+        container.appendChild(separator);
+
+        const titleText = document.createTextNode(title);
+        container.appendChild(titleText);
+      } else {
+        const lineText = document.createTextNode(line);
+        container.appendChild(lineText);
       }
-      return this.escapeHtml(line);
-    }).join('<br>');
+    });
+  }
+
+  renderChaptersAsPlainText(container) {
+    if (this.results.videoMetadata?.url) {
+      const urlText = document.createTextNode(this.results.videoMetadata.url);
+      container.appendChild(urlText);
+      container.appendChild(document.createElement('br'));
+      container.appendChild(document.createElement('br'));
+    }
+
+    const chaptersLines = this.results.chapters.split('\n');
+    chaptersLines.forEach((line, index) => {
+      if (index > 0) {
+        container.appendChild(document.createElement('br'));
+      }
+      const lineText = document.createTextNode(line);
+      container.appendChild(lineText);
+    });
   }
   updateSubtitlesDisplay() {
     if (!this.results || !this.results.subtitles) {
