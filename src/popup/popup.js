@@ -296,6 +296,7 @@ class PopupView {
               action: 'getSessionResults',
               resultId
             });
+            console.log('PopupView: Session data found:', !!response?.results);
 
             if (response && response.success && response.results) {
               console.log('PopupView: Found session results for results page');
@@ -331,8 +332,7 @@ class PopupView {
           console.log('PopupView: Error getting session data:', error);
         }
 
-        this.showNoVideoMessage(chrome.i18n.getMessage('no_results_found'));
-        return;
+        console.log('PopupView: No session data found for results page, continuing with normal video detection');
       }
 
       try {
@@ -464,6 +464,7 @@ class PopupView {
       }
     }
     if (!this.currentVideo) {
+      console.log('PopupView: No video detected for chapter generation');
       this.showNotification(chrome.i18n.getMessage('no_video_detected'), 'error');
       return;
     }

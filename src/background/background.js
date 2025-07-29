@@ -114,6 +114,7 @@ class BackgroundService {
           if (request.resultId && request.results) {
             const session = ChapterGeneration.fromSessionResults(request.results);
             sessionRepository.save(session);
+            console.log('BackgroundService: Session saved:', session.id);
           }
           sendResponse({
             success: true
@@ -124,6 +125,7 @@ class BackgroundService {
         case 'getSessionResults':
         {
           const resultId = request.resultId;
+
           if (resultId) {
             const session = sessionRepository.findById(resultId);
             if (session) {
@@ -134,6 +136,7 @@ class BackgroundService {
               return true;
             }
           }
+
           const activeSession = sessionRepository.getActiveSession();
           if (activeSession) {
             sendResponse({
@@ -141,6 +144,7 @@ class BackgroundService {
               results: activeSession.toSessionResults()
             });
           } else {
+            console.log('BackgroundService: No session found for ID:', resultId);
             sendResponse({
               success: false
             });

@@ -19,7 +19,6 @@ class SessionRepository {
     }
 
     this.sessions.set(chapterGeneration.id, chapterGeneration);
-
     this.activeSession = chapterGeneration;
 
     return chapterGeneration.id;

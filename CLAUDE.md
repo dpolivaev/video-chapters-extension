@@ -149,6 +149,14 @@ This checks if classes are already loaded (Firefox case) before calling `importS
 npm run lint
 ```
 
+**MANDATORY USER APPROVAL RULE**: Always wait for explicit user approval before executing ANY git commit operations, unless the user gives different instructions. This includes:
+- `git commit` (any variant)
+- `git commit --amend`  
+- `git push`
+- `git rebase`
+- `git reset --hard`
+- Any other history-modifying git commands
+
 **Enforcement**: All code changes must pass ESLint validation before being committed. This ensures:
 - Consistent code formatting and style
 - Early detection of potential bugs and code smells
