@@ -7,7 +7,7 @@ Generate customizable AI-powered chapter timecodes for YouTube videos using mult
 ## Overview
 Transform any YouTube video into organized chapters with AI-powered timecode generation.
 
-Video Chapters Generator automatically creates professional chapter timecodes for YouTube videos using advanced AI models. 
+Video Chapters Generator automatically creates chapter timecodes for YouTube videos using advanced AI models. 
 Choose from multiple AI providers including free options, add custom instructions, and get perfectly formatted chapters ready to use.
 
 🎯 **MAIN FEATURES:**
