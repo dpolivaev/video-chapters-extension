@@ -91,7 +91,7 @@
   "about_license_link_text": { "message": "Lizenz anzeigen" },
   "help_button_tooltip": { "message": "Hilfe" },
   "help_page_title": { "message": "Hilfe & Beispiele" },
-  "instruction_examples": { "message": "Überschriften sollten kurz und dennoch aussagekräftig sein, den Inhalt widerspiegeln und der Individualität der Videoteilnehmer entsprechen. Zusätzlich eine kurze Zusammenfassung schreiben|Überschriften sollten detailliert sein, den Inhalt widerspiegeln und der Individualität der Videoteilnehmer entsprechen|Für jede Überschrift die Hauptthese in einem Satz auf [SPRACHE] bereitstellen, ohne Präfixe wie 'These:'|Für jede Überschrift sowohl These als auch Gegenargument bereitstellen" },
+  "instruction_examples": { "message": "Überschriften sollten kurz und dennoch aussagekräftig sein, den Inhalt widerspiegeln und der Individualität der Videoteilnehmer entsprechen. Zusätzlich eine kurze Zusammenfassung schreiben|Überschriften sollten detailliert sein, den Inhalt widerspiegeln und der Individualität der Videoteilnehmer entsprechen|Sowohl die Überschrift als auch ihre einsätzige These in [SPRACHE] schreiben, ohne Präfixe wie 'These:' hinzuzufügen|Für jede Überschrift sowohl These als auch Gegenargument bereitstellen" },
   "instruction_categories": { "message": "Grundlegende Anweisungen|Akademisch & Bildung|Content-Erstellung|Professionell & Technisch" },
   "api_help_gemini": { "message": "Kostenlosen Gemini API-Schlüssel erhalten (kostenlose Stufe ist ausreichend)" },
   "api_help_openrouter": { "message": "Kostenloses OpenRouter-Konto für mehrere KI-Modelle erstellen" },

@@ -91,7 +91,7 @@
   "about_license_link_text": { "message": "查看许可证" },
   "help_button_tooltip": { "message": "帮助" },
   "help_page_title": { "message": "帮助和示例" },
-  "instruction_examples": { "message": "标题应该简洁而有意义，反映内容并符合视频参与者的个性。另外写一个简短的摘要|标题应该详细，反映内容并符合视频参与者的个性|对于每个标题，用[语言]提供一句话的主要论点，不要使用“论点：”等前缀|对于每个标题，提供论点和反驳论点" },
+  "instruction_examples": { "message": "标题应该简洁而有意义，反映内容并符合视频参与者的个性。另外写一个简短的摘要|标题应该详细，反映内容并符合视频参与者的个性|用[语言]写标题和其一句话的论点，不要添加“论点：”等前缀|对于每个标题，提供论点和反驳论点" },
   "instruction_categories": { "message": "基本说明|学术和教育|内容创作|专业和技术" },
   "api_help_gemini": { "message": "获取免费的Gemini API密钥（免费层就足够了）" },
   "api_help_openrouter": { "message": "创建免费的OpenRouter账户以使用多个AI模型" },
