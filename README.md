@@ -74,9 +74,11 @@ The extension supports multiple AI providers with different models:
 2. No API key required - start generating chapters immediately!
 
 #### Option 2: Gemini Direct API
-1. Get a free Gemini API key from [Google AI Studio](https://ai.google.dev)
-2. Open extension options page and enter your Gemini API key
-3. Select any Gemini model in the popup
+1. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+2. **Note**: Gemini's free tier is sufficient for most users - no paid plan required
+3. **Availability**: Gemini API is available in most countries. Users in supported regions should register for the free tier, which provides generous usage limits for chapter generation
+4. Open extension options page and enter your Gemini API key
+5. Select any Gemini model in the popup
 
 #### Option 3: OpenRouter (Multiple Models)
 1. Create a free account at [OpenRouter](https://openrouter.ai)

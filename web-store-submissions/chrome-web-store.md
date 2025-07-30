@@ -18,8 +18,8 @@ Choose from multiple AI providers including free options, add custom instruction
 • Direct video navigation from generated chapters page
 
 ⚙️ **AI MODEL OPTIONS:**
-• **Gemini Direct**: Access Google's latest models with your API key
-• **OpenRouter**: Single API key for 8+ models (Claude, GPT-4o, Llama, etc.)
+• **Gemini Direct**: Access Google's latest models with your API key from [Google AI Studio](https://aistudio.google.com/apikey)
+• **OpenRouter**: Single API key for 8+ models (Claude, GPT-4o, Llama, etc.) from [OpenRouter](https://openrouter.ai)
 • **Model Selection**: Choose the best AI for your content type and budget
 • **Free Models**: DeepSeek R1 (completely free, no API key needed)
 • **Custom Instructions**: Guide AI to create chapters matching your needs
@@ -44,6 +44,8 @@ Choose from multiple AI providers including free options, add custom instruction
 2. Click the extension icon
 3. Select your preferred AI model
 4. Enter your API key if you select a paid AI model (not required for free models)
+   - **Gemini users**: Free tier is sufficient - no paid plan needed ([Get API key](https://aistudio.google.com/apikey))
+   - **OpenRouter users**: Create free account for API access ([Sign up](https://openrouter.ai))
 5. Add custom instructions to guide chapter generation (optional)
 6. Click "Generate Chapters"
 7. Copy formatted chapters from the results page
