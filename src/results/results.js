@@ -228,6 +228,9 @@ class ResultsView {
         resultId: this.resultId
       });
     });
+    document.getElementById('helpBtn').addEventListener('click', () => {
+      this.openHelp();
+    });
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.matches('textarea')) {
         e.preventDefault();
@@ -565,6 +568,9 @@ class ResultsView {
     } else {
       return `${parseInt(parts[0])}m${parseInt(parts[1])}s`;
     }
+  }
+  openHelp() {
+    browser.tabs.create({ url: browser.runtime.getURL('help/help.html') });
   }
 }
 

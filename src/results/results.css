@@ -136,6 +136,42 @@ body {
   align-items: center;
 }
 
+.help-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 8px;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.help-btn::before {
+  content: '?';
+  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.help-btn:hover {
+  background: var(--background-light);
+}
+
+.help-btn:hover::before {
+  color: var(--text-secondary);
+  border-color: var(--primary-color);
+}
+
 /* Video Info */
 .video-info {
   padding: 20px 24px;

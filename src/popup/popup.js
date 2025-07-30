@@ -73,6 +73,9 @@ class PopupView {
     document.getElementById('settingsBtn').addEventListener('click', () => {
       this.openOptions();
     });
+    document.getElementById('helpBtn').addEventListener('click', () => {
+      this.openHelp();
+    });
     document.getElementById('viewResultsBtn').addEventListener('click', () => {
       this.viewResults();
     });
@@ -638,6 +641,9 @@ class PopupView {
   }
   openOptions() {
     browser.runtime.openOptionsPage();
+  }
+  openHelp() {
+    browser.tabs.create({ url: browser.runtime.getURL('help/help.html') });
   }
   onSettingsChange() {
     this.updateGenerateButtonState();

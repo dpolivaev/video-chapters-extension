@@ -151,4 +151,12 @@ function setupEventListeners() {
       }
     });
   }
+  const helpButton = document.getElementById('helpBtn');
+  if (helpButton) {
+    helpButton.addEventListener('click', openHelp);
+  }
+}
+
+function openHelp() {
+  browser.tabs.create({ url: browser.runtime.getURL('help/help.html') });
 }

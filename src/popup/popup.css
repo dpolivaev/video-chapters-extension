@@ -65,6 +65,12 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .logo-section {
   display: flex;
   align-items: center;
@@ -82,7 +88,7 @@ body {
   margin: 0;
 }
 
-.settings-btn {
+.settings-btn, .help-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -95,6 +101,43 @@ body {
 .settings-btn:hover {
   background: var(--background-light);
   color: var(--text-primary);
+}
+
+
+.help-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 8px;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.help-btn::before {
+  content: '?';
+  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.help-btn:hover {
+  background: var(--background-light);
+}
+
+.help-btn:hover::before {
+  color: var(--text-secondary);
+  border-color: var(--primary-color);
 }
 
 /* Video Info Section */

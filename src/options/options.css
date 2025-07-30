@@ -17,6 +17,11 @@
   You should have received a copy of the GNU General Public License
   along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
 */
+
+:root {
+  --text-secondary: #666;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: #f9f9f9;
@@ -31,9 +36,52 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
 h1 {
   font-size: 1.4em;
-  margin-bottom: 18px;
+  margin: 0;
+}
+
+.help-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.help-btn::before {
+  content: '?';
+  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border: 2px solid #1976d2;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.help-btn:hover {
+  background: #f0f0f0;
+}
+
+.help-btn:hover::before {
+  color: #666;
+  border-color: #1976d2;
 }
 label {
   display: block;
@@ -81,4 +129,65 @@ button:hover {
 }
 .input-row button {
   margin-left: 8px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-secondary: #b0b0b0;
+  }
+  
+  body {
+    background: #1e1e1e;
+    color: #e0e0e0;
+  }
+  
+  .container {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+  
+  h1, h2 {
+    color: #e0e0e0;
+  }
+  
+  label {
+    color: #e0e0e0;
+  }
+  
+  input[type="text"], input[type="password"] {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #404040;
+  }
+  
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #1976d2;
+    background: #1e1e1e;
+  }
+  
+  button {
+    background: #1976d2;
+    color: white;
+  }
+  
+  button:hover {
+    background: #1565c0;
+  }
+  
+  #status {
+    color: #4A90E2;
+  }
+  
+  a {
+    color: #4A90E2;
+  }
+  
+  a:hover {
+    color: #357ABD;
+  }
+  
+  .help-btn:hover {
+    background: #404040;
+  }
 } 
