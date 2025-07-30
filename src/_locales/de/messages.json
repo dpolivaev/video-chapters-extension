@@ -88,5 +88,16 @@
   "general_error": { "message": "Bitte versuchen Sie es erneut oder wechseln Sie zu einem anderen Modell." },
   "about_github_link_text": { "message": "Projekt auf GitHub" },
   "about_license_text": { "message": "Lizenziert unter GPL3 oder neuer" },
-  "about_license_link_text": { "message": "Lizenz anzeigen" }
+  "about_license_link_text": { "message": "Lizenz anzeigen" },
+  "help_button_tooltip": { "message": "Hilfe" },
+  "help_page_title": { "message": "Hilfe & Beispiele" },
+  "instruction_examples": { "message": "Überschriften sollten kurz und dennoch aussagekräftig sein, den Inhalt widerspiegeln und der Individualität der Videoteilnehmer entsprechen. Zusätzlich eine kurze Zusammenfassung schreiben|Überschriften sollten detailliert sein, den Inhalt widerspiegeln und der Individualität der Videoteilnehmer entsprechen|Für jede Überschrift die Hauptthese in einem Satz auf [SPRACHE] bereitstellen, ohne Präfixe wie 'These:'|Für jede Überschrift sowohl These als auch Gegenargument bereitstellen" },
+  "instruction_categories": { "message": "Grundlegende Anweisungen|Akademisch & Bildung|Content-Erstellung|Professionell & Technisch" },
+  "api_help_gemini": { "message": "Kostenlosen Gemini API-Schlüssel erhalten (kostenlose Stufe ist ausreichend)" },
+  "api_help_openrouter": { "message": "Kostenloses OpenRouter-Konto für mehrere KI-Modelle erstellen" },
+  "help_api_keys_title": { "message": "API-Schlüssel erhalten" },
+  "help_examples_title": { "message": "Beispiele für eigene Anweisungen" },
+  "get_gemini_api_key": { "message": "Kostenlosen Gemini API-Schlüssel erhalten" },
+  "create_openrouter_account": { "message": "Kostenloses OpenRouter-Konto erstellen" },
+  "help_github_title": { "message": "Quellcode & Support" }
 } 

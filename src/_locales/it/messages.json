@@ -88,5 +88,16 @@
   "general_error": { "message": "Per favore riprova o passa a un altro modello." },
   "about_github_link_text": { "message": "Progetto su GitHub" },
   "about_license_text": { "message": "Concesso in licenza GPL3 o successiva" },
-  "about_license_link_text": { "message": "Visualizza licenza" }
+  "about_license_link_text": { "message": "Visualizza licenza" },
+  "help_button_tooltip": { "message": "Aiuto" },
+  "help_page_title": { "message": "Aiuto ed esempi" },
+  "instruction_examples": { "message": "I titoli dovrebbero essere brevi ma significativi, riflettere il contenuto e corrispondere all'individualità dei partecipanti del video. Inoltre scrivere un breve riassunto|I titoli dovrebbero essere dettagliati, riflettere il contenuto e corrispondere all'individualità dei partecipanti del video|Per ogni titolo, fornire la tesi principale in una frase in [LINGUA] senza prefissi come 'Tesi:'|Per ogni titolo, fornire sia la tesi che il controargomento" },
+  "instruction_categories": { "message": "Istruzioni di base|Accademico ed educativo|Creazione di contenuti|Professionale e tecnico" },
+  "api_help_gemini": { "message": "Ottieni una chiave API Gemini gratuita (il livello gratuito è sufficiente)" },
+  "api_help_openrouter": { "message": "Crea un account OpenRouter gratuito per più modelli AI" },
+  "help_api_keys_title": { "message": "Ottenere chiavi API" },
+  "help_examples_title": { "message": "Esempi di istruzioni personalizzate" },
+  "get_gemini_api_key": { "message": "Ottieni chiave API Gemini gratuita" },
+  "create_openrouter_account": { "message": "Crea account OpenRouter gratuito" },
+  "help_github_title": { "message": "Codice sorgente e supporto" }
 } 

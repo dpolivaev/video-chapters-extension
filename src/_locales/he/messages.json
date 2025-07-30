@@ -88,5 +88,16 @@
   "general_error": { "message": "אנא נסה שוב או עבור לדגם אחר." },
   "about_github_link_text": { "message": "הפרויקט ב-GitHub" },
   "about_license_text": { "message": "ברישיון GPL3 או מאוחר יותר" },
-  "about_license_link_text": { "message": "הצג רישיון" }
+  "about_license_link_text": { "message": "הצג רישיון" },
+  "help_button_tooltip": { "message": "עזרה" },
+  "help_page_title": { "message": "עזרה ודוגמאות" },
+  "instruction_examples": { "message": "כותרות צריכות להיות קצרות אך משמעותיות, לשקף את התוכן ולהתאים לאישיות של משתתפי הווידאו. בנוסף לכתוב סיכום קצר|כותרות צריכות להיות מפורטות, לשקף את התוכן ולהתאים לאישיות של משתתפי הווידאו|עבור כל כותרת, לספק את התזה העיקרית במשפט אחד ב[שפה] ללא קידומות כמו 'תזה:'|עבור כל כותרת, לספק הן את התזה והן את הטיעון הנגדי" },
+  "instruction_categories": { "message": "הוראות בסיסיות|אקדמי וחינוכי|יצירת תוכן|מקצועי וטכני" },
+  "api_help_gemini": { "message": "קבל מפתח API חינמי של Gemini (רמה חינמית מספיקה)" },
+  "api_help_openrouter": { "message": "צור חשבון OpenRouter חינמי עבור מודלי בינה מלאכותית מרובים" },
+  "help_api_keys_title": { "message": "קבלת מפתחות API" },
+  "help_examples_title": { "message": "דוגמאות להוראות מותאמות אישית" },
+  "get_gemini_api_key": { "message": "קבל מפתח API חינמי של Gemini" },
+  "create_openrouter_account": { "message": "צור חשבון OpenRouter חינמי" },
+  "help_github_title": { "message": "קוד מקור ותמיכה" }
 } 
