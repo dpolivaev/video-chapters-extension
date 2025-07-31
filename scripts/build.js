@@ -32,7 +32,11 @@ const { glob } = require('glob');
 const config = {
   srcDir: path.join(process.cwd(), 'src'),
   get distDir() {
-    if (process.argv.includes('--firefox')) {
+    if (process.argv.includes('--firefox-store')) {
+      return path.join(process.cwd(), 'dist', 'firefox-store');
+    } else if (process.argv.includes('--firefox-dev')) {
+      return path.join(process.cwd(), 'dist', 'firefox-dev');
+    } else if (process.argv.includes('--firefox')) {
       return path.join(process.cwd(), 'dist', 'firefox');
     } else {
       return path.join(process.cwd(), 'dist', 'chrome');
@@ -40,7 +44,11 @@ const config = {
   },
   tempDir: path.join(process.cwd(), '.tmp'),
   get manifestFile() {
-    return process.argv.includes('--firefox') ? 'manifest.firefox.json' : 'manifest.chrome.json';
+    if (process.argv.includes('--firefox-store') || process.argv.includes('--firefox-dev') || process.argv.includes('--firefox')) {
+      return 'manifest.firefox.json';
+    } else {
+      return 'manifest.chrome.json';
+    }
   },
   get manifestPath() {
     return path.join(process.cwd(), this.manifestFile);
@@ -69,6 +77,8 @@ class ExtensionBuilder {
       dev: options.dev || false,
       production: options.production || false,
       firefox: options.firefox || false,
+      firefoxStore: options.firefoxStore || false,
+      firefoxDev: options.firefoxDev || false,
       verbose: options.verbose || false
     };
     this.spinner = null;
@@ -242,6 +252,19 @@ class ExtensionBuilder {
     const manifest = await fs.readJson(manifestPath);
     manifest.version = version;
     console.log(`  → Replaced version placeholder with ${version}`);
+    
+    // Replace Firefox UUID placeholder if this is a Firefox build
+    if (process.argv.includes('--firefox-store')) {
+      manifest.browser_specific_settings.gecko.id = '{b6e7e2e2-7e2a-4b7e-8e2e-2e2e2e2e2e3e}';
+      console.log('  → Set Firefox store UUID');
+    } else if (process.argv.includes('--firefox-dev')) {
+      manifest.browser_specific_settings.gecko.id = '{b6e7e2e2-7e2a-4b7e-8e2e-2e2e2e2e2e2e}';
+      console.log('  → Set Firefox dev UUID');
+    } else if (process.argv.includes('--firefox')) {
+      manifest.browser_specific_settings.gecko.id = '{b6e7e2e2-7e2a-4b7e-8e2e-2e2e2e2e2e3e}';
+      console.log('  → Set Firefox default UUID');
+    }
+    
     await fs.writeJson(path.join(config.distDir, 'manifest.json'), manifest, {
       spaces: 2
     });
@@ -449,7 +472,8 @@ class ExtensionBuilder {
 }
 
 program.option('-d, --dev', 'Development build').option('-p, --production', 'Production build')
-  .option('-f, --firefox', 'Firefox compatibility').option('-v, --verbose', 'Verbose output').parse();
+  .option('-f, --firefox', 'Firefox compatibility').option('--firefox-store', 'Firefox store variant')
+  .option('--firefox-dev', 'Firefox dev variant').option('-v, --verbose', 'Verbose output').parse();
 
 const builder = new ExtensionBuilder(program.opts());
 
