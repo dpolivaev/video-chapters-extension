@@ -29,10 +29,10 @@ body {
   padding: 0;
 }
 .container {
-  max-width: 400px;
+  max-width: 520px;
   margin: 60px auto;
   background: #fff;
-  padding: 32px 24px 24px 24px;
+  padding: 32px 32px 24px 32px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
@@ -114,21 +114,26 @@ button:hover {
   font-size: 0.95em;
 }
 .input-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  gap: 16px;
   align-items: center;
-  gap: 14px;
   margin-bottom: 18px;
 }
 .input-row label {
-  min-width: 140px;
   margin-bottom: 0;
+  justify-self: start;
 }
 .input-row input[type="password"] {
-  flex: 1 1 auto;
   margin-bottom: 0;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  min-width: 200px;
 }
 .input-row button {
-  margin-left: 8px;
+  justify-self: end;
 }
 
 /* Dark mode support */
