@@ -5,27 +5,27 @@ All notable changes to the Video Chapters Generator extension will be documented
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.3]
-
-### Added
-- **Interactive Linked Timecodes**: Timecodes in results page are now clickable links that jump directly to YouTube video timestamps
-- **Smart Clipboard Functionality**: Copy button now provides both HTML and plain text formats for compatibility with rich text editors
-- **Clickable Video URL**: Video URL at top of results page is now a clickable link
-- **Selection-Aware Copying**: Copy button respects user text selections - copies selected text if any, otherwise copies entire content
-
-### Changed
-- **Results Display**: Replaced plain textarea with HTML display for chapters to enable interactive links
-- **URL Handling**: Video URL now displays separately from AI-generated chapters (cleaner architecture)
-- **Copy Behavior**: Enhanced copy functionality works seamlessly with RTF editors, YouTube descriptions, and plain text applications
+## [1.3.8]
 
 ### Fixed
-- **Line Spacing**: Improved line spacing in results display to match original formatting
-- **Cross-Browser Compatibility**: Modern clipboard API implementation works reliably on Chrome, Firefox, and Edge
+- Fixed instruction history limit setting
 
-### Technical
-- Removed URL prepending from ChapterGenerator (now handled in UI layer)
-- Added development build workflow documentation
-- Updated tests to reflect new architecture
+## [1.3.7]
+
+### Added
+- Interactive linked timecodes - click timecodes in results to jump to video timestamps
+- Comprehensive help page with instruction examples and API key guidance
+- Multi-language support for help system
+
+### Changed
+- Improved copy functionality - works better with rich text editors
+- Enhanced results display with clickable links
+- Clearer instruction examples across all languages
+
+### Fixed
+- Extension settings layout on smaller screens
+- Various clipboard and session data bugs
+- Firefox compatibility issues
 
 ## [1.3.1]
 

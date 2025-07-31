@@ -140,6 +140,38 @@ This checks if classes are already loaded (Firefox case) before calling `importS
 - Implement the missing method
 - Commit fix with proper test coverage
 
+## Changelog Guidelines
+
+### User-Focused Changelog Requirements
+
+**Content Policy**: Changelog entries should only mention changes that directly affect user experience:
+- ✅ **Include**: New features users can see/use, UI improvements, bug fixes affecting functionality
+- ❌ **Exclude**: Internal refactoring, code architecture changes, developer tooling, technical debt fixes
+
+**Format Requirements**:
+- No dates in version headers (use `## [1.3.8]` not `## [1.3.8] - 2025-07-31`)
+- Concise descriptions focused on user impact
+- Group related changes to avoid overwhelming users with details
+- Use clear, non-technical language
+
+**Example**:
+```markdown
+## [1.3.8]
+
+### Fixed
+- Fixed instruction history limit setting not persisting between dialog sessions
+
+## [1.3.7]
+
+### Added
+- Interactive linked timecodes - click timecodes in results to jump to video timestamps
+- Comprehensive help page with instruction examples
+
+### Fixed
+- Extension settings layout on smaller screens
+- Various clipboard and session data bugs
+```
+
 ## Code Quality Standards
 
 ### Mandatory Pre-Commit Checks
