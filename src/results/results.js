@@ -277,8 +277,8 @@ class ResultsView {
         action: 'getSessionResults',
         resultId: this.resultId
       });
-      if (response && response.success && response.results) {
-        this.results = response.results;
+      if (response && response.success && response.session) {
+        this.results = response.session;
         this.updatePageTitle();
         return;
       } else {

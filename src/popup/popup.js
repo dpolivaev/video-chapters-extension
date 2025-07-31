@@ -299,11 +299,11 @@ class PopupView {
               action: 'getSessionResults',
               resultId
             });
-            console.log('PopupView: Session data found:', !!response?.results);
+            console.log('PopupView: Session data found:', !!response?.session);
 
-            if (response && response.success && response.results) {
+            if (response && response.success && response.session) {
               console.log('PopupView: Found session results for results page');
-              const results = response.results;
+              const results = response.session;
 
               this.currentVideo = {
                 title: results.videoMetadata?.title || 'Unknown Title',
