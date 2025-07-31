@@ -407,10 +407,10 @@ describe('MessageCoordinator', () => {
 
       const VideoTranscript = require('../entities/VideoTranscript');
       const expectedVideoTranscript = new VideoTranscript(rawSubtitles, videoTitle, videoAuthor, 'https://www.youtube.com/watch?v=test123');
-      const expectedSubtitleTabContent = expectedVideoTranscript.toSubtitleContent();
-      const aiReceivedContent = capturedChapterGeneration.videoTranscript.toSubtitleContent();
+      const expectedProcessedContent = expectedVideoTranscript.toProcessedContent();
+      const aiReceivedContent = capturedChapterGeneration.videoTranscript.toProcessedContent();
 
-      expect(aiReceivedContent).toBe(expectedSubtitleTabContent);
+      expect(aiReceivedContent).toBe(expectedProcessedContent);
       expect(aiReceivedContent).toContain(`Title: ${videoTitle}`);
       expect(aiReceivedContent).toContain('\n\nTranscript Content:\n');
     });

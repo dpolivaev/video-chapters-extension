@@ -109,7 +109,7 @@ class OpenRouterAPI extends BaseLLM {
       capabilities: [ 'reasoning', 'coding', 'general' ]
     } ];
   }
-  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'deepseek/deepseek-r1-0528:free', tabId = null) {
+  async processSubtitles(processedContent, customInstructions = '', apiKey, model = 'deepseek/deepseek-r1-0528:free', tabId = null) {
     const isFreeModel = this.isModelFree(model);
     if (!isFreeModel && !apiKey) {
       throw new Error('API key is required for paid models');
@@ -120,7 +120,7 @@ class OpenRouterAPI extends BaseLLM {
       throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
     try {
-      const prompt = this.buildPrompt(subtitleContent, customInstructions);
+      const prompt = this.buildPrompt(processedContent, customInstructions);
       const response = await this.makeAPICall(prompt, apiKey, model, tabId);
       return this.parseResponse(response);
     } catch (error) {

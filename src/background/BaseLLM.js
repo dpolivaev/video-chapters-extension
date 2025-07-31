@@ -26,7 +26,7 @@ class BaseLLM {
     this.availableModels = [];
     this.baseUrl = '';
   }
-  async processSubtitles(subtitleContent, _customInstructions = '', _apiKey, _model) {
+  async processSubtitles(processedContent, _customInstructions = '', _apiKey, _model) {
     throw new Error('processSubtitles must be implemented by subclass');
   }
   async makeAPICall(_prompt, _apiKey, _model) {
@@ -100,8 +100,8 @@ class BaseLLM {
       };
     }
   }
-  buildPrompt(subtitleContent, customInstructions = '', _promptType = 'chapter') {
-    const prompt = this.promptGenerator.buildChapterPrompt(subtitleContent, customInstructions);
+  buildPrompt(processedContent, customInstructions = '', _promptType = 'chapter') {
+    const prompt = this.promptGenerator.buildChapterPrompt(processedContent, customInstructions);
     return this.promptGenerator.adaptPromptForProvider(prompt, this.providerName.toLowerCase(), null);
   }
   async testAPIKey(apiKey, model = null) {

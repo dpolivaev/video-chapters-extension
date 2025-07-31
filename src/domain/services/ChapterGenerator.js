@@ -34,7 +34,7 @@ class ChapterGenerator {
 
     try {
       const modelId = chapterGeneration.modelId;
-      const subtitleContent = chapterGeneration.videoTranscript.toSubtitleContent();
+      const processedContent = chapterGeneration.videoTranscript.toProcessedContent();
       const apiKey = credentials.getKeyForModel(modelId.toString());
 
       if (modelId.requiresApiKey() && !apiKey) {
@@ -45,7 +45,7 @@ class ChapterGenerator {
 
       if (modelId.isGemini()) {
         result = await this.geminiAPI.processSubtitles(
-          subtitleContent,
+          processedContent,
           chapterGeneration.customInstructions,
           apiKey,
           modelId.toString(),
@@ -53,7 +53,7 @@ class ChapterGenerator {
         );
       } else if (modelId.isOpenRouter()) {
         result = await this.openRouterAPI.processSubtitles(
-          subtitleContent,
+          processedContent,
           chapterGeneration.customInstructions,
           apiKey,
           modelId.toString(),
@@ -92,9 +92,9 @@ class ChapterGenerator {
     return [...openRouterModels, ...geminiModels];
   }
 
-  async processWithLegacyAPI(subtitleContent, customInstructions, apiKey, modelId, tabId) {
+  async processWithLegacyAPI(processedContent, customInstructions, apiKey, modelId, tabId) {
     try {
-      const videoTranscript = new VideoTranscript(subtitleContent, 'Legacy Video', 'Legacy Author');
+      const videoTranscript = new VideoTranscript(processedContent, 'Legacy Video', 'Legacy Author');
       const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, customInstructions);
       const credentials = modelId.includes('gemini-')
         ? new ApiCredentials(apiKey, '')

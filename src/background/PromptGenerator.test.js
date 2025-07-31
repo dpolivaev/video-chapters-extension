@@ -10,13 +10,13 @@ describe('PromptGenerator', () => {
     test('should delegate to buildChapterPrompt', () => {
       const promptGenerator = new PromptGenerator();
 
-      const subtitleContent = 'Test subtitle content';
+      const processedContent = 'Test subtitle content';
       const customInstructions = 'Custom test instructions';
 
-      const result = promptGenerator.buildPrompt(subtitleContent, customInstructions);
+      const result = promptGenerator.buildPrompt(processedContent, customInstructions);
 
       expect(typeof result).toBe('string');
-      expect(result).toContain(subtitleContent);
+      expect(result).toContain(processedContent);
       expect(result).toContain(customInstructions);
     });
 

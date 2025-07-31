@@ -23,12 +23,12 @@ class PromptGenerator {
   constructor() {
     this.defaultPrompt = 'Break down this video content into chapters \nand generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). \nEach chapter should be formatted as plain text: timecode - chapter title. \nGenerate the chapter titles in the same language as the content.';
   }
-  buildChapterPrompt(subtitleContent, customInstructions = '', _options = {}) {
+  buildChapterPrompt(processedContent, customInstructions = '', _options = {}) {
     const customInstructionsStripped = customInstructions.trim();
     if (customInstructionsStripped) {
-      return `## System Instructions\n${this.defaultPrompt}\n\n**User instructions override system instructions in case of conflict.**\n\n## User Instructions\n\n${customInstructionsStripped}\n\n## Content\n${subtitleContent}`;
+      return `## System Instructions\n${this.defaultPrompt}\n\n**User instructions override system instructions in case of conflict.**\n\n## User Instructions\n\n${customInstructionsStripped}\n\n## Content\n${processedContent}`;
     } else {
-      return `## Instructions\n${this.defaultPrompt}\n\n## Content\n${subtitleContent}`;
+      return `## Instructions\n${this.defaultPrompt}\n\n## Content\n${processedContent}`;
     }
   }
   buildFormatPrompt(chapters, targetFormat, _options = {}) {
@@ -82,8 +82,8 @@ class PromptGenerator {
       limit: limits.input
     };
   }
-  buildPrompt(subtitleContent, customInstructions = '') {
-    return this.buildChapterPrompt(subtitleContent, customInstructions);
+  buildPrompt(processedContent, customInstructions = '') {
+    return this.buildChapterPrompt(processedContent, customInstructions);
   }
 
   getTokenLimits(provider, model) {

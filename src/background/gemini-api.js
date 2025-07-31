@@ -46,7 +46,7 @@ class GeminiAPI extends BaseLLM {
       capabilities: [ 'speed', 'general' ]
     } ];
   }
-  async processSubtitles(subtitleContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro', tabId = null) {
+  async processSubtitles(processedContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro', tabId = null) {
     if (!apiKey) {
       throw new Error('API key is required');
     }
@@ -56,7 +56,7 @@ class GeminiAPI extends BaseLLM {
       throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
     try {
-      const prompt = this.buildPrompt(subtitleContent, customInstructions);
+      const prompt = this.buildPrompt(processedContent, customInstructions);
       const response = await this.makeAPICall(prompt, apiKey, model, tabId);
       return this.parseResponse(response);
     } catch (error) {

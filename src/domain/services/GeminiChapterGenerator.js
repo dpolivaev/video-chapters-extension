@@ -149,7 +149,7 @@ class GeminiChapterGenerator {
     };
   }
 
-  async processSubtitles(subtitleContent, customInstructions, apiKey, model = 'gemini-2.5-pro') {
+  async processSubtitles(processedContent, customInstructions, apiKey, model = 'gemini-2.5-pro') {
     if (!this.validateApiKey(apiKey)) {
       throw new Error('API key is required');
     }
@@ -159,7 +159,7 @@ class GeminiChapterGenerator {
       throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
 
-    const prompt = this.promptGenerator.buildPrompt(subtitleContent, customInstructions);
+    const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
     const url = this.buildRequestUrl(model, apiKey);
     const headers = this.buildHttpHeaders();
     const body = this.buildRequestBody(prompt);

@@ -266,7 +266,7 @@ describe('GeminiChapterGenerator', () => {
 
   describe('full processing workflow', () => {
     test('should process subtitles successfully', async () => {
-      const subtitleContent = 'Video transcript content here';
+      const processedContent = 'Video transcript content here';
       const customInstructions = 'Focus on technical details';
       const apiKey = 'test-api-key-123';
       const model = 'gemini-2.5-pro';
@@ -285,14 +285,14 @@ describe('GeminiChapterGenerator', () => {
       mockNetworkCommunicator.post.mockResolvedValue(expectedResponse);
 
       const result = await geminiGenerator.processSubtitles(
-        subtitleContent,
+        processedContent,
         customInstructions,
         apiKey,
         model
       );
 
       expect(mockPromptGenerator.buildPrompt).toHaveBeenCalledWith(
-        subtitleContent,
+        processedContent,
         customInstructions
       );
 

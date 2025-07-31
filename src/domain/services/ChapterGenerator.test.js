@@ -115,7 +115,7 @@ describe('ChapterGenerator', () => {
       const result = await chapterGenerator.generateChapters(chapterGeneration, credentials, 123);
 
       expect(mockGeminiAPI.processSubtitles).toHaveBeenCalledWith(
-        videoTranscript.toSubtitleContent(),
+        videoTranscript.toProcessedContent(),
         'Focus on technical content',
         'test-gemini-key',
         'gemini-2.5-pro',
@@ -169,7 +169,7 @@ describe('ChapterGenerator', () => {
       const result = await chapterGenerator.generateChapters(chapterGeneration, credentials, 456);
 
       expect(mockOpenRouterAPI.processSubtitles).toHaveBeenCalledWith(
-        videoTranscript.toSubtitleContent(),
+        videoTranscript.toProcessedContent(),
         'Analyze content',
         'test-openrouter-key',
         'deepseek/deepseek-r1-0528',

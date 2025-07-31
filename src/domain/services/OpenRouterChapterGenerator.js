@@ -265,7 +265,7 @@ class OpenRouterChapterGenerator {
     };
   }
 
-  async processSubtitles(subtitleContent, customInstructions, apiKey, model = 'deepseek/deepseek-r1-0528:free') {
+  async processSubtitles(processedContent, customInstructions, apiKey, model = 'deepseek/deepseek-r1-0528:free') {
     const isFreeModel = this.isModelFree(model);
     if (!isFreeModel && !apiKey) {
       throw new Error('API key is required for paid models');
@@ -276,7 +276,7 @@ class OpenRouterChapterGenerator {
       throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
 
-    const prompt = this.promptGenerator.buildPrompt(subtitleContent, customInstructions);
+    const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
     const url = this.buildRequestUrl();
     const headers = this.buildHttpHeaders(apiKey, model);
     const body = this.buildRequestBody(prompt, model);

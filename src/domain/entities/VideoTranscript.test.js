@@ -148,18 +148,18 @@ describe('VideoTranscript', () => {
   describe('subtitle content generation', () => {
     test('should generate formatted subtitle content', () => {
       const transcript = new VideoTranscript(validContent, validTitle, validAuthor);
-      const subtitleContent = transcript.toSubtitleContent();
+      const processedContent = transcript.toProcessedContent();
 
-      expect(subtitleContent).toContain(`Video Title: ${validTitle}`);
-      expect(subtitleContent).toContain('Transcript Content:');
-      expect(subtitleContent).toContain(validContent);
+      expect(processedContent).toContain(`Video Title: ${validTitle}`);
+      expect(processedContent).toContain('Transcript Content:');
+      expect(processedContent).toContain(validContent);
     });
 
     test('should handle unknown title in subtitle content', () => {
       const transcript = new VideoTranscript(validContent);
-      const subtitleContent = transcript.toSubtitleContent();
+      const processedContent = transcript.toProcessedContent();
 
-      expect(subtitleContent).toContain('Video Title: Unknown Title');
+      expect(processedContent).toContain('Video Title: Unknown Title');
     });
   });
 

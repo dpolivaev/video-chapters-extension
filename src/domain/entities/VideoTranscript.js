@@ -30,7 +30,7 @@ class VideoTranscript {
     return content;
   }
 
-  toSubtitleContent() {
+  toProcessedContent() {
     return `Video Title: ${this.title}\nAuthor: ${this.author}\n\nTranscript Content:\n${this.content}`;
   }
 

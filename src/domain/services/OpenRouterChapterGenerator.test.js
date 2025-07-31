@@ -272,7 +272,7 @@ describe('OpenRouterChapterGenerator', () => {
 
   describe('full processing workflow', () => {
     test('should process subtitles with free model successfully', async () => {
-      const subtitleContent = 'Video transcript content here';
+      const processedContent = 'Video transcript content here';
       const customInstructions = 'Focus on technical details';
       const model = 'deepseek/deepseek-r1-0528:free';
 
@@ -291,14 +291,14 @@ describe('OpenRouterChapterGenerator', () => {
       mockNetworkCommunicator.post.mockResolvedValue(expectedResponse);
 
       const result = await openRouterGenerator.processSubtitles(
-        subtitleContent,
+        processedContent,
         customInstructions,
         '', // No API key for free model
         model
       );
 
       expect(mockPromptGenerator.buildPrompt).toHaveBeenCalledWith(
-        subtitleContent,
+        processedContent,
         customInstructions
       );
 

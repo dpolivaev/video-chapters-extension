@@ -309,7 +309,7 @@ class PopupView {
                 title: results.videoMetadata?.title || 'Unknown Title',
                 author: results.videoMetadata?.author || 'Unknown Author',
                 url: results.videoMetadata?.url || '',
-                subtitleContent: results.subtitles?.content || '',
+                processedContent: results.subtitles?.content || '',
                 tabId: tab.id,
                 fromResultsPage: true
               };
@@ -320,7 +320,7 @@ class PopupView {
                 title: this.currentVideo.title,
                 author: this.currentVideo.author,
                 url: this.currentVideo.url,
-                hasSubtitleContent: !!this.currentVideo.subtitleContent
+                hasProcessedContent: !!this.currentVideo.processedContent
               });
 
               this.displayVideoInfo();
@@ -371,7 +371,7 @@ class PopupView {
             title: videoTranscript.title,
             author: videoTranscript.author,
             url: videoTranscript.videoUrl.toString(),
-            subtitleContent: videoTranscript.toSubtitleContent(),
+            processedContent: videoTranscript.toProcessedContent(),
             tabId: tab.id,
             videoTranscript // Store the entity
           };
@@ -381,7 +381,7 @@ class PopupView {
             author: this.currentVideo.author,
             url: this.currentVideo.url,
             wordCount: videoTranscript.getWordCount(),
-            hasSubtitleContent: !!this.currentVideo.subtitleContent
+            hasProcessedContent: !!this.currentVideo.processedContent
           });
           this.displayVideoInfo();
           return;
@@ -475,10 +475,10 @@ class PopupView {
       if (customInstructions && window.instructionHistory) {
         await window.instructionHistory.saveInstruction(customInstructions);
       }
-      if (!this.currentVideo.subtitleContent) {
+      if (!this.currentVideo.processedContent) {
         throw new Error(chrome.i18n.getMessage('no_transcript_available'));
       }
-      const subtitleContent = this.currentVideo.subtitleContent;
+      const processedContent = this.currentVideo.processedContent;
       let sessionResults;
       let resultId;
 
@@ -499,7 +499,7 @@ class PopupView {
         sessionResults = {
           resultId,
           subtitles: {
-            content: subtitleContent
+            content: processedContent
           },
           chapters: videoUrl + '\n\n',
           timestamp: resultId,
@@ -521,7 +521,7 @@ class PopupView {
 
       browser.runtime.sendMessage({
         action: 'generateChapters',
-        subtitleContent,
+        processedContent,
         customInstructions,
         apiKey,
         model,
