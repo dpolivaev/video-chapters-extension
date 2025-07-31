@@ -23,6 +23,7 @@ if (typeof browser === 'undefined') {
   const browser = chrome;
 }
 
+
 console.log('🚀 YouTubeIntegration content script loaded - CLEAN MODERN APPROACH');
 
 /**
@@ -112,7 +113,7 @@ if (window.hasYouTubeIntegration) {
       browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log('YouTubeIntegration: Received message:', request);
         if (request.action === 'copyTranscript') {
-          this.extractTranscriptForCopy().then(sendResponse);
+          this.extractTranscriptData().then(sendResponse);
           return true;
         }
         return false;
@@ -128,9 +129,9 @@ if (window.hasYouTubeIntegration) {
       return videoId;
     }
 
-    async extractTranscriptForCopy() {
+    async extractTranscriptData() {
       try {
-        console.log('YouTubeIntegration: extractTranscriptForCopy called - using PROVEN working method');
+        console.log('YouTubeIntegration: extractTranscriptData called - returning raw data for domain layer');
         const videoUrl = window.location.href;
         const isShorts = /youtube\.com\/shorts\//.test(videoUrl);
         const videoId = isShorts ? videoUrl.split('/shorts/')[1].split(/[/?#&]/)[0] : new URLSearchParams(window.location.search).get('v');
@@ -154,17 +155,16 @@ if (window.hasYouTubeIntegration) {
         }
 
         const lines = transcriptObj.transcript.map(([timestamp, text]) => `(${timestamp}) ${text}`).join('\n');
-        const transcriptWithTitle = `Title: ${transcriptObj.title}\n\n${lines}`;
 
         return {
           status: 'success',
-          transcript: transcriptWithTitle,
+          transcript: lines,
           title: transcriptObj.title,
           author: transcriptObj.author,
           url: window.location.href
         };
       } catch (error) {
-        console.error('YouTubeIntegration: extractTranscriptForCopy error:', error);
+        console.error('YouTubeIntegration: extractTranscriptData error:', error);
         return {
           status: 'error',
           message: `Transcript extraction failed: ${error.message}`

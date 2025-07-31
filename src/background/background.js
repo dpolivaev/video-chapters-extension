@@ -37,7 +37,6 @@ JsModuleImporter.importScriptsIfNeeded([
   '../infrastructure/repositories/SessionRepository.js',
   '../infrastructure/repositories/TabRegistry.js',
   '../infrastructure/repositories/SettingsRepository.js',
-  '../domain/services/TranscriptExtractor.js',
   '../domain/services/ChapterGenerator.js',
   'prompt-generator.js',
   'BaseLLM.js',
@@ -47,7 +46,7 @@ JsModuleImporter.importScriptsIfNeeded([
   '../domain/services/OpenRouterChapterGenerator.js',
   '../infrastructure/adapters/GeminiApiAdapter.js',
   '../infrastructure/adapters/OpenRouterApiAdapter.js'
-], ['SessionRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration', 'TranscriptExtractor']);
+], ['SessionRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration']);
 
 
 const sessionRepository = new SessionRepository();
@@ -60,7 +59,6 @@ class BackgroundService {
     this.openRouterAPI = new OpenRouterApiAdapter();
 
     this.chapterGenerator = new ChapterGenerator(this.geminiAPI, this.openRouterAPI);
-    this.transcriptExtractor = new TranscriptExtractor();
 
     this.setupMessageListeners();
     this.setupContextMenus();

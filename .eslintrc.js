@@ -28,7 +28,6 @@ module.exports = {
     SessionRepository: 'readonly',
     TabRegistry: 'readonly',
     SettingsRepository: 'readonly',
-    TranscriptExtractor: 'readonly',
     ChapterGenerator: 'readonly',
     MessageCoordinator: 'readonly',
     PromptGenerator: 'writable',

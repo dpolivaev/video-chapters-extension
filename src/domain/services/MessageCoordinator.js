@@ -7,9 +7,8 @@
  */
 
 class MessageCoordinator {
-  constructor(chapterGenerator, transcriptExtractor, sessionRepository, settingsRepository, instructionHistory) {
+  constructor(chapterGenerator, sessionRepository, settingsRepository, instructionHistory) {
     this.chapterGenerator = chapterGenerator;
-    this.transcriptExtractor = transcriptExtractor;
     this.sessionRepository = sessionRepository;
     this.settingsRepository = settingsRepository;
     this.instructionHistory = instructionHistory;

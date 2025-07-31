@@ -14,7 +14,6 @@ if (typeof importScripts !== 'undefined') {
     'values/GenerationProgress.js',
     'entities/VideoTranscript.js',
     'entities/ChapterGeneration.js',
-    'entities/BrowserTab.js',
-    'services/TranscriptExtractor.js'
+    'entities/BrowserTab.js'
   );
 }

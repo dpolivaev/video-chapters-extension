@@ -11,7 +11,6 @@ const MessageCoordinator = require('./MessageCoordinator');
 describe('MessageCoordinator', () => {
   let messageCoordinator;
   let mockChapterGenerator;
-  let mockTranscriptExtractor;
   let mockSessionRepository;
   let mockSettingsRepository;
   let mockInstructionHistory;
@@ -27,10 +26,6 @@ describe('MessageCoordinator', () => {
       }
     };
 
-    mockTranscriptExtractor = {
-      extractFromTab: jest.fn(),
-      canExtractFromTab: jest.fn()
-    };
 
     mockSessionRepository = {
       save: jest.fn(),
@@ -50,7 +45,6 @@ describe('MessageCoordinator', () => {
 
     messageCoordinator = new MessageCoordinator(
       mockChapterGenerator,
-      mockTranscriptExtractor,
       mockSessionRepository,
       mockSettingsRepository,
       mockInstructionHistory
@@ -60,7 +54,6 @@ describe('MessageCoordinator', () => {
   describe('constructor and configuration', () => {
     test('should store injected dependencies', () => {
       expect(messageCoordinator.chapterGenerator).toBe(mockChapterGenerator);
-      expect(messageCoordinator.transcriptExtractor).toBe(mockTranscriptExtractor);
       expect(messageCoordinator.sessionRepository).toBe(mockSessionRepository);
       expect(messageCoordinator.settingsRepository).toBe(mockSettingsRepository);
       expect(messageCoordinator.instructionHistory).toBe(mockInstructionHistory);

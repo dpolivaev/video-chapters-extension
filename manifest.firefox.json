@@ -34,7 +34,6 @@
       "domain/services/GeminiChapterGenerator.js",
       "domain/services/OpenRouterChapterGenerator.js",
       "domain/services/MessageCoordinator.js",
-      "domain/services/TranscriptExtractor.js",
       "domain/services/ChapterGenerator.js",
       "background/prompt-generator.js",
       "background/BaseLLM.js", 
