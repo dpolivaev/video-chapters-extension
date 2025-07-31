@@ -346,12 +346,13 @@ class BackgroundService {
   }
   async handleGetInstructionHistory(request, sendResponse) {
     try {
-      const result = await browser.storage.local.get([ 'instructionHistory', 'historyLimit' ]);
+      const historyResult = await browser.storage.local.get('instructionHistory');
+      const settings = await settingsRepository.loadSettings();
       sendResponse({
         success: true,
         data: {
-          history: result.instructionHistory || [],
-          limit: result.historyLimit || 10
+          history: historyResult.instructionHistory || [],
+          limit: settings.historyLimit || 10
         }
       });
     } catch (error) {

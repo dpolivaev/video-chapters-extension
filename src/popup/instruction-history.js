@@ -38,6 +38,7 @@ class InstructionHistoryView {
     this.limitInput = document.getElementById('historyLimitInput');
     this.instructionsTextarea = document.getElementById('instructionsTextarea');
     this.instructionsPlaceholder = document.getElementById('instructionsPlaceholder');
+
     this.setupEventListeners();
     await this.loadHistoryLimit();
   }
@@ -202,7 +203,6 @@ class InstructionHistoryView {
       if (!response || !response.success) {
         throw new Error(response?.error || 'Failed to save settings');
       }
-      await this.loadHistory();
     } catch (error) {
       console.error('Error updating history limit:', error);
       this.showNotification('Error updating history limit', 'error');
