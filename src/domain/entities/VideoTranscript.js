@@ -31,7 +31,7 @@ class VideoTranscript {
   }
 
   toSubtitleContent() {
-    return `Video Title: ${this.title}\n\nTranscript Content:\n${this.content}`;
+    return `Video Title: ${this.title}\nAuthor: ${this.author}\n\nTranscript Content:\n${this.content}`;
   }
 
   getWordCount() {
