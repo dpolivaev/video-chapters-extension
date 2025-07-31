@@ -157,7 +157,7 @@ describe('ChapterGeneration Entity', () => {
     test('should create from session results', () => {
       const sessionResults = {
         resultId: 123456789,
-        subtitles: {
+        processedContent: {
           content: 'Test content',
           language: 'en'
         },

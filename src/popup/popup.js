@@ -309,7 +309,7 @@ class PopupView {
                 title: results.videoMetadata?.title || 'Unknown Title',
                 author: results.videoMetadata?.author || 'Unknown Author',
                 url: results.videoMetadata?.url || '',
-                processedContent: results.subtitles?.content || '',
+                processedContent: results.processedContent?.content || '',
                 tabId: tab.id,
                 fromResultsPage: true
               };
@@ -498,7 +498,7 @@ class PopupView {
         const videoUrl = this.currentVideo.url;
         sessionResults = {
           resultId,
-          subtitles: {
+          processedContent: {
             content: processedContent
           },
           chapters: videoUrl + '\n\n',
