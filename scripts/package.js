@@ -159,6 +159,9 @@ class ExtensionPackager {
         });
         archive.pipe(output);
         for (const file of gitFiles) {
+          if (file.startsWith('web-store-submissions/')) {
+            continue;
+          }
           const filePath = path.join(process.cwd(), file);
           if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
             archive.file(filePath, {
@@ -202,7 +205,7 @@ class ExtensionPackager {
     this.log(`   Source package: ${chalk.gray(`video-chapters-extension-source-v${version}.zip`)} (${sourceSize})`);
     this.log(`   Output directory: ${chalk.gray(this.outputDir)}\n`);
     this.log(chalk.bold('ℹ️  Package Contents:'));
-    this.log('   Contains all git-tracked files, excluding git-ignored files');
+    this.log('   Contains all git-tracked files, excluding web-store-submissions/');
     this.log('   Suitable for code review or distribution purposes\n');
   }
   async getFileSize(filePath) {
