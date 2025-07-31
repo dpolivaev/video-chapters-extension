@@ -221,3 +221,8 @@ For development-related information, please see [DEVELOPMENT.md](DEVELOPMENT.md)
 <img src="web-store-submissions/screenshots/instruction-history-management.png" width="400" alt="Instruction History">
 
 *Instruction history management for saving and reusing custom prompts*
+
+### Help and Examples
+<img src="web-store-submissions/screenshots/help-and-examples.png" width="600" alt="Help and Examples">
+
+*Help page showing API key setup links and user instruction examples*

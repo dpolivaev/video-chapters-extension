@@ -119,4 +119,8 @@ youtube, chapters, timecodes, ai, transcripts, video, productivity, content-crea
 ![Instruction History](screenshots/instruction-history-management.png)
 *Instruction history management for saving and reusing custom prompts*
 
+### 8. Help and Examples Page
+![Help and Examples](screenshots/help-and-examples.png)
+*Help page showing API key setup links and user instruction examples*
+
 **Screenshot Files**: All screenshots are available in the `screenshots/` directory with descriptive filenames for easy web store submission.
