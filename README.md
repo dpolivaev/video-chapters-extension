@@ -88,6 +88,8 @@ The extension supports multiple AI providers with different models:
 
 **Note**: API keys are stored securely in your browser's local storage and never leave your device except when sent to the respective AI service.
 
+**Cost Information**: The extension itself is completely free. AI model usage costs (if any) are paid directly to AI providers - no money goes to the extension developer. Most users can operate entirely within free tiers.
+
 **Disclaimer**: No warranty is provided for external APIs and services. Free AI models may have usage limitations, rate limits, or availability restrictions that are beyond our control.
 
 ---

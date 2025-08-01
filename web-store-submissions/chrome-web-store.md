@@ -66,6 +66,8 @@ You can also try running without any custom instructions to see the default AI b
 • Session-only results with no persistent storage
 • Open source code available on GitHub
 
+**Cost Information:** The extension itself is completely free. AI model usage costs (if any) are paid directly to AI providers - no money goes to the extension developer. Most users can operate entirely within free tiers including Google Gemini's generous free tier.
+
 **Note:** This extension requires videos to have captions/transcripts available on YouTube. Free models may have usage limitations beyond our control.
 
 ---
