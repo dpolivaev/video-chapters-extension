@@ -39,6 +39,14 @@ jobs:
         run: |
           mkdir -p _site
           
+          # Copy images to the site
+          if [ -d "web-store-submissions/screenshots" ]; then
+            cp -r web-store-submissions _site/
+          fi
+          if [ -d "icons" ]; then
+            cp -r icons _site/
+          fi
+          
           # Create the HTML wrapper
           cat > _site/index.html << 'EOF'
           <!DOCTYPE html>
