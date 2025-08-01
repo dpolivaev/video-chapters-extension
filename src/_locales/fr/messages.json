@@ -91,7 +91,7 @@
   "about_license_link_text": { "message": "Voir la licence" },
   "help_button_tooltip": { "message": "Aide" },
   "help_page_title": { "message": "Aide et exemples" },
-  "instruction_examples": { "message": "Les titres doivent être brefs mais significatifs, refléter le contenu et correspondre à l'individualité des participants de la vidéo. En plus écrire un bref résumé|Les titres doivent être détaillés, refléter le contenu et correspondre à l'individualité des participants de la vidéo|Écrire à la fois le titre et sa thèse en une phrase en [LANGUE], sans ajouter de préfixes comme 'Thèse :'|Pour chaque titre, fournir à la fois la thèse et le contre-argument" },
+  "instruction_examples": { "message": "Les titres doivent être brefs mais significatifs, refléter le contenu et correspondre à l'individualité des participants de la vidéo. En plus écrire un bref résumé|Les titres doivent être détaillés, refléter le contenu et correspondre à l'individualité des participants de la vidéo|Écrire à la fois le titre et la thèse en une phrase pour chacun sans ajouter de préfixes comme 'Thèse :'|Pour chaque titre, fournir à la fois la thèse et le contre-argument" },
   "instruction_categories": { "message": "Instructions de base|Académique et éducatif|Création de contenu|Professionnel et technique" },
   "api_help_gemini": { "message": "Obtenir une clé API Gemini gratuite (le niveau gratuit est suffisant)" },
   "api_help_openrouter": { "message": "Créer un compte OpenRouter gratuit pour plusieurs modèles d'IA" },

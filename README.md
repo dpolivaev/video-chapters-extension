@@ -110,7 +110,7 @@ You can also try running without any custom instructions to see the default AI b
 
 - "Headlines should be brief yet meaningful, reflect the content, and match the individuality of the video participants. Additionally write a brief summary"
 - "Headlines should be detailed, reflect the content, and match the individuality of the video participants"
-- "Write both the headline and its one-sentence thesis in [LANGUAGE], without adding prefixes like 'Thesis:'"
+- "Write both the headline and one-sentence thesis for each without adding prefixes like 'Thesis:'"
 - "For each headline, provide both thesis and counter-argument"
 
 ### Instruction History

@@ -91,7 +91,7 @@
   "about_license_link_text": { "message": "Visualizza licenza" },
   "help_button_tooltip": { "message": "Aiuto" },
   "help_page_title": { "message": "Aiuto ed esempi" },
-  "instruction_examples": { "message": "I titoli dovrebbero essere brevi ma significativi, riflettere il contenuto e corrispondere all'individualità dei partecipanti del video. Inoltre scrivere un breve riassunto|I titoli dovrebbero essere dettagliati, riflettere il contenuto e corrispondere all'individualità dei partecipanti del video|Scrivere sia il titolo che la sua tesi in una frase in [LINGUA], senza aggiungere prefissi come 'Tesi:'|Per ogni titolo, fornire sia la tesi che il controargomento" },
+  "instruction_examples": { "message": "I titoli dovrebbero essere brevi ma significativi, riflettere il contenuto e corrispondere all'individualità dei partecipanti del video. Inoltre scrivere un breve riassunto|I titoli dovrebbero essere dettagliati, riflettere il contenuto e corrispondere all'individualità dei partecipanti del video|Scrivere sia il titolo che la tesi in una frase per ciascuno senza aggiungere prefissi come 'Tesi:'|Per ogni titolo, fornire sia la tesi che il controargomento" },
   "instruction_categories": { "message": "Istruzioni di base|Accademico ed educativo|Creazione di contenuti|Professionale e tecnico" },
   "api_help_gemini": { "message": "Ottieni una chiave API Gemini gratuita (il livello gratuito è sufficiente)" },
   "api_help_openrouter": { "message": "Crea un account OpenRouter gratuito per più modelli AI" },
