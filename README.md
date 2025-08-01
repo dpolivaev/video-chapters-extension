@@ -43,7 +43,7 @@ Download the latest Firefox add-on (.xpi file) from the [GitHub Releases](https:
 
 ### Manual Installation
 
-For developers or advanced users, see [DEVELOPMENT.md](DEVELOPMENT.md) for manual installation instructions.
+For developers or advanced users, see [DEVELOPMENT.md](https://github.com/dpolivaev/video-chapters-extension/blob/main/DEVELOPMENT.md) for manual installation instructions.
 
 ---
 
