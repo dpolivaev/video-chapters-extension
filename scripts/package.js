@@ -49,7 +49,6 @@ class ExtensionPackager {
       this.log(chalk.blue('📦 Packaging Video Chapters Generator Extension\n'));
       await this.validateBuild();
       const version = await this.getVersion();
-      await this.createMainPackage(version);
       await this.createVersionedPackage(version);
       this.showSummary(version);
     } catch (error) {
@@ -96,8 +95,8 @@ class ExtensionPackager {
     const packageJson = await fs.readJson(packagePath);
     return packageJson.version;
   }
-  async createMainPackage(version) {
-    this.spinner = ora('Creating main package').start();
+  async createVersionedPackage(version) {
+    this.spinner = ora('Creating versioned package').start();
     await fs.ensureDir(this.outputDir);
     let browserName;
     if (this.options.output.includes('firefox-store')) {
@@ -109,25 +108,8 @@ class ExtensionPackager {
     } else {
       browserName = 'chrome';
     }
-    const outputPath = path.join(this.outputDir, `video-chapters-extension-${browserName}.zip`);
-    await this.createZip(this.distDir, outputPath);
-    this.spinner.succeed(`Main package created: video-chapters-extension-${browserName}.zip`);
-  }
-  async createVersionedPackage(version) {
-    this.spinner = ora('Creating versioned package').start();
-    let browserName;
-    if (this.options.output.includes('firefox-store')) {
-      browserName = 'firefox-store';
-    } else if (this.options.output.includes('firefox-dev')) {
-      browserName = 'firefox-dev';
-    } else if (this.options.output.includes('firefox')) {
-      browserName = 'firefox';
-    } else {
-      browserName = 'chrome';
-    }
-    const mainZipPath = path.join(this.outputDir, `video-chapters-extension-${browserName}.zip`);
     const versionedZipPath = path.join(this.outputDir, `video-chapters-extension-${browserName}-v${version}.zip`);
-    await fs.copy(mainZipPath, versionedZipPath);
+    await this.createZip(this.distDir, versionedZipPath);
     this.spinner.succeed(`Versioned package created: video-chapters-extension-${browserName}-v${version}.zip`);
   }
   async createSourcePackage(version) {
@@ -205,22 +187,18 @@ class ExtensionPackager {
     } else {
       browserName = 'chrome';
     }
-    const mainPackagePath = path.join(this.outputDir, `video-chapters-extension-${browserName}.zip`);
     const versionedPackagePath = path.join(this.outputDir, `video-chapters-extension-${browserName}-v${version}.zip`);
-    const mainSize = await this.getFileSize(mainPackagePath);
     const versionedSize = await this.getFileSize(versionedPackagePath);
     this.log(chalk.bold('📦 Package Information:'));
     this.log(`   Version: ${chalk.cyan(version)}`);
-    this.log(`   Main package: ${chalk.gray(`video-chapters-extension-${browserName}.zip`)} (${mainSize})`);
-    this.log(`   Versioned package: ${chalk.gray(`video-chapters-extension-${browserName}-v${version}.zip`)} (${versionedSize})`);
+    this.log(`   Package: ${chalk.gray(`video-chapters-extension-${browserName}-v${version}.zip`)} (${versionedSize})`);
     this.log(`   Output directory: ${chalk.gray(this.outputDir)}\n`);
     this.log(chalk.bold('🚀 Next Steps:'));
     this.log('   1. Test the extension by loading the dist/ directory in Chrome/Edge');
     const storeName = browserName.includes('firefox') ? 'Firefox Add-ons' : 'Chrome Web Store';
-    this.log(`   2. Upload video-chapters-extension-${browserName}.zip to the ${storeName}`);
-    this.log('   3. Keep the versioned ZIP as a backup');
-    this.log('   4. Keep the versioned ZIP as a backup\n');
-    if (await this.getFileSizeBytes(mainPackagePath) > 5 * 1024 * 1024) {
+    this.log(`   2. Upload video-chapters-extension-${browserName}-v${version}.zip to the ${storeName}`);
+    this.log('   3. Archive the ZIP file for future reference\n');
+    if (await this.getFileSizeBytes(versionedPackagePath) > 5 * 1024 * 1024) {
       this.log(chalk.yellow('⚠️  Warning: Package size is larger than 5MB. Consider optimizing.'));
     }
   }
