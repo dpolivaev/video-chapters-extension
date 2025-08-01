@@ -27,9 +27,19 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install markdown processor
+        run: npm install -g marked
+        
       - name: Convert README to HTML
         run: |
           mkdir -p _site
+          
+          # Create the HTML wrapper
           cat > _site/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
@@ -51,23 +61,48 @@ jobs:
                           padding: 15px;
                       }
                   }
+                  
+                  /* Enhanced styles for the extension documentation */
+                  .markdown-body h1 {
+                      border-bottom: 3px solid #0969da;
+                      padding-bottom: 10px;
+                  }
+                  
+                  .markdown-body img {
+                      border: 1px solid #d1d9e0;
+                      border-radius: 6px;
+                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                  }
+                  
+                  /* Add GitHub link in top right */
+                  .github-link {
+                      position: fixed;
+                      top: 20px;
+                      right: 20px;
+                      background: #24292f;
+                      color: white;
+                      padding: 8px 16px;
+                      border-radius: 6px;
+                      text-decoration: none;
+                      font-size: 14px;
+                      z-index: 1000;
+                  }
+                  
+                  .github-link:hover {
+                      background: #32383f;
+                      color: white;
+                  }
               </style>
           </head>
           <body>
+              <a href="https://github.com/${{ github.repository }}" class="github-link">View on GitHub</a>
               <article class="markdown-body">
           EOF
           
-          # Convert README.md to HTML using GitHub API
-          curl -s -H "Accept: application/vnd.github.v3+json" \
-               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -d @- "https://api.github.com/markdown" << 'MARKDOWN_EOF' >> _site/index.html
-          {
-            "text": "$(cat README.md | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')",
-            "mode": "gfm",
-            "context": "${{ github.repository }}"
-          }
-          MARKDOWN_EOF
+          # Convert README to HTML and append
+          marked README.md >> _site/index.html
           
+          # Close the HTML wrapper
           cat >> _site/index.html << 'EOF'
               </article>
           </body>
