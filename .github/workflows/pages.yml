@@ -6,6 +6,7 @@ on:
     paths:
       - 'README.md'
       - '.github/workflows/pages.yml'
+      - '.github/page-template.html'
   workflow_dispatch:
 
 permissions:
