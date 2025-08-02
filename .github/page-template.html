@@ -186,25 +186,6 @@
         }
     </style>
     <script>
-        const SUPPORTED_LANGUAGES = {
-            'es': 'Spanish',
-            'fr': 'French', 
-            'de': 'German',
-            'it': 'Italian',
-            'ru': 'Russian',
-            'uk': 'Ukrainian',
-            'he': 'Hebrew',
-            'zh': 'Chinese (Simplified)',
-            'ja': 'Japanese',
-            'ko': 'Korean',
-            'pt': 'Portuguese',
-            'nl': 'Dutch',
-            'pl': 'Polish',
-            'tr': 'Turkish',
-            'ar': 'Arabic',
-            'hi': 'Hindi'
-        };
-        
         function getCurrentLanguageCode() {
             const userLang = navigator.language || navigator.userLanguage;
             return userLang.split('-')[0].toLowerCase();
@@ -220,11 +201,9 @@
         
         function googleTranslateElementInit() {
             if (isAutoTranslateEnabled()) {
-                const includedLanguages = ['en', ...Object.keys(SUPPORTED_LANGUAGES)].join(',');
                 new google.translate.TranslateElement({
                     pageLanguage: 'en',
                     autoDisplay: false,
-                    includedLanguages: includedLanguages,
                     layout: google.translate.TranslateElement.InlineLayout.SIMPLE
                 }, 'google_translate_element');
             }
@@ -237,7 +216,7 @@
             
             const langCode = getCurrentLanguageCode();
             
-            if (langCode !== 'en' && SUPPORTED_LANGUAGES[langCode]) {
+            if (langCode !== 'en') {
                 setTimeout(() => {
                     const selectElement = document.querySelector('.goog-te-combo');
                     if (selectElement) {
