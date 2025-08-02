@@ -13,6 +13,7 @@ Transform any YouTube video into organized chapters with customizable AI-powered
 * **Custom Instructions**: Add personalized instructions to tailor chapter generation to your needs
 * **Direct Video Navigation**: Jump directly to any chapter timestamp from the results page
 * **Cross-Browser Support**: Works on both Chrome (Manifest V3) and Firefox (Manifest V2)
+* **Multi-Language Interface**: Localized in 9 languages (English, Spanish, French, German, Italian, Russian, Ukrainian, Hebrew, Chinese Simplified)
 * **Session-Based Results**: Results are stored only for the current browser session
 * **Open Source**: Full transparency with code available on GitHub
 
@@ -141,6 +142,7 @@ You can also try running without any custom instructions to see the default AI b
 * **Minimal Permissions**: The extension requests only the permissions necessary for YouTube integration and session storage
 * **Session-Only Results**: Generated chapters are stored only for the current browser session and are not persisted
 * **API Key Security**: API keys are stored locally in your browser and only transmitted to their respective AI services
+* **Localized Interface**: Extension interface automatically adapts to your browser language (supports 9 languages)
 
 ---
 

@@ -44,6 +44,47 @@
             padding: 16px;
         }
         
+        /* Language controls styling */
+        .language-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .language-selector {
+            background: #f6f8fa;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #24292f;
+        }
+        
+        .translate-toggle {
+            background: #0969da;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .translate-toggle:hover {
+            background: #0550ae;
+        }
+        
+        .translate-toggle.disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
         /* Add GitHub link in top right */
         .github-link {
             position: fixed;
@@ -62,12 +103,142 @@
             background: #32383f;
             color: white;
         }
+        
+        /* Hide Google Translate banner */
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+        
+        body {
+            top: 0 !important;
+        }
+        
+        .goog-te-gadget {
+            font-size: 0 !important;
+        }
+        
+        .goog-te-gadget > span > a {
+            display: none !important;
+        }
+        
+        .goog-te-gadget > span {
+            display: none !important;
+        }
+        
+        .goog-te-combo {
+            margin: 0 !important;
+            padding: 8px 12px !important;
+            border: 1px solid #d1d9e0 !important;
+            border-radius: 6px !important;
+            background: #f6f8fa !important;
+            font-size: 14px !important;
+            color: #24292f !important;
+        }
     </style>
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                autoDisplay: false,
+                includedLanguages: 'en,es,fr,de,it,ru,uk,he,zh-CN,ja,ko,pt,nl,pl,tr,ar,hi',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+        
+        function detectAndSetLanguage() {
+            const userLang = navigator.language || navigator.userLanguage;
+            const langCode = userLang.split('-')[0].toLowerCase();
+            
+            // Map of supported languages
+            const supportedLangs = {
+                'es': 'Spanish',
+                'fr': 'French', 
+                'de': 'German',
+                'it': 'Italian',
+                'ru': 'Russian',
+                'uk': 'Ukrainian',
+                'he': 'Hebrew',
+                'zh': 'Chinese (Simplified)',
+                'ja': 'Japanese',
+                'ko': 'Korean',
+                'pt': 'Portuguese',
+                'nl': 'Dutch',
+                'pl': 'Polish',
+                'tr': 'Turkish',
+                'ar': 'Arabic',
+                'hi': 'Hindi'
+            };
+            
+            // Check if auto-translate is disabled
+            if (localStorage.getItem('autoTranslateDisabled') === 'true') {
+                return;
+            }
+            
+            // Auto-translate if browser language is supported and not English
+            if (langCode !== 'en' && supportedLangs[langCode]) {
+                setTimeout(() => {
+                    const selectElement = document.querySelector('.goog-te-combo');
+                    if (selectElement) {
+                        selectElement.value = langCode;
+                        selectElement.dispatchEvent(new Event('change'));
+                    }
+                }, 1000);
+            }
+        }
+        
+        function toggleAutoTranslate() {
+            const isDisabled = localStorage.getItem('autoTranslateDisabled') === 'true';
+            const newState = !isDisabled;
+            localStorage.setItem('autoTranslateDisabled', newState.toString());
+            
+            const button = document.getElementById('toggleAutoTranslate');
+            if (newState) {
+                button.textContent = 'Enable Auto-Translate';
+                button.classList.add('disabled');
+                // Reset to English
+                const selectElement = document.querySelector('.goog-te-combo');
+                if (selectElement) {
+                    selectElement.value = '';
+                    selectElement.dispatchEvent(new Event('change'));
+                }
+            } else {
+                button.textContent = 'Disable Auto-Translate';
+                button.classList.remove('disabled');
+                detectAndSetLanguage();
+            }
+        }
+        
+        function initializeAutoTranslateButton() {
+            const isDisabled = localStorage.getItem('autoTranslateDisabled') === 'true';
+            const button = document.getElementById('toggleAutoTranslate');
+            
+            if (isDisabled) {
+                button.textContent = 'Enable Auto-Translate';
+                button.classList.add('disabled');
+            } else {
+                button.textContent = 'Disable Auto-Translate';
+                button.classList.remove('disabled');
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            initializeAutoTranslateButton();
+            detectAndSetLanguage();
+        });
+    </script>
 </head>
 <body>
+    <div class="language-controls">
+        <div id="google_translate_element"></div>
+        <button id="toggleAutoTranslate" class="translate-toggle" onclick="toggleAutoTranslate()">
+            Disable Auto-Translate
+        </button>
+    </div>
+    
     <a href="https://github.com/dpolivaev/video-chapters-extension" class="github-link">View on GitHub</a>
     <article class="markdown-body">
         <!-- README content will be inserted here -->
     </article>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

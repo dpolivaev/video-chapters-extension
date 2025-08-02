@@ -47,75 +47,15 @@ jobs:
             cp -r icons _site/
           fi
           
-          # Create the HTML wrapper
-          cat > _site/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Video Chapters Generator</title>
-              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.4.0/github-markdown-light.min.css">
-              <style>
-                  .markdown-body {
-                      box-sizing: border-box;
-                      min-width: 200px;
-                      max-width: 980px;
-                      margin: 0 auto;
-                      padding: 45px;
-                  }
-                  @media (max-width: 767px) {
-                      .markdown-body {
-                          padding: 15px;
-                      }
-                  }
-                  
-                  /* Enhanced styles for the extension documentation */
-                  .markdown-body h1 {
-                      border-bottom: 3px solid #0969da;
-                      padding-bottom: 10px;
-                  }
-                  
-                  .markdown-body img {
-                      border: 1px solid #d1d9e0;
-                      border-radius: 6px;
-                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                  }
-                  
-                  /* Add GitHub link in top right */
-                  .github-link {
-                      position: fixed;
-                      top: 20px;
-                      right: 20px;
-                      background: #24292f;
-                      color: white;
-                      padding: 8px 16px;
-                      border-radius: 6px;
-                      text-decoration: none;
-                      font-size: 14px;
-                      z-index: 1000;
-                  }
-                  
-                  .github-link:hover {
-                      background: #32383f;
-                      color: white;
-                  }
-              </style>
-          </head>
-          <body>
-              <a href="https://github.com/${{ github.repository }}" class="github-link">View on GitHub</a>
-              <article class="markdown-body">
-          EOF
+          # Use the template file and replace GitHub repository URL
+          cp .github/page-template.html _site/index.html
+          sed -i 's|https://github.com/dpolivaev/video-chapters-extension|https://github.com/${{ github.repository }}|g' _site/index.html
           
-          # Convert README to HTML and append
-          marked README.md >> _site/index.html
-          
-          # Close the HTML wrapper
-          cat >> _site/index.html << 'EOF'
-              </article>
-          </body>
-          </html>
-          EOF
+          # Convert README to HTML and insert into template
+          marked README.md > readme-content.html
+          sed -i '/<!-- README content will be inserted here -->/r readme-content.html' _site/index.html
+          sed -i '/<!-- README content will be inserted here -->/d' _site/index.html
+          rm readme-content.html
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
