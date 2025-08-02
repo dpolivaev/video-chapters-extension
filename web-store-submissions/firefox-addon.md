@@ -15,7 +15,7 @@ Choose from multiple AI providers including free options, add custom instruction
 • Multiple AI providers: Google Gemini, OpenRouter (DeepSeek, Claude, GPT-4o, Llama)
 • Free model options with no API key required
 • Custom instructions for tailored chapter styles
-• Multi-language interface (9 languages supported)
+• Multi-language interface (12 languages supported)
 • Direct video navigation from generated chapters page
 
 ⚙️ **AI MODEL OPTIONS:**
@@ -36,7 +36,7 @@ Choose from multiple AI providers including free options, add custom instruction
 ✨ **SMART & RELIABLE:**
 • Session-based storage (no data persistence)
 • Cross-browser compatibility (Chrome & Firefox)
-• Localized interface in 9 languages (English, Spanish, French, German, Italian, Russian, Ukrainian, Hebrew, Chinese Simplified)
+• Localized interface in 12 languages (English, Spanish, French, German, Italian, Russian, Ukrainian, Hebrew, Chinese Simplified, Portuguese, Arabic, Korean)
 • Privacy-focused: data only sent to your chosen AI provider
 • Lightweight and fast
 • Open source with full transparency
