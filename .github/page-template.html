@@ -116,7 +116,7 @@
         /* Add GitHub link in top right */
         .github-link {
             position: fixed;
-            top: 20px;
+            top: 70px;
             right: 20px;
             background: #24292f;
             color: white;
@@ -126,6 +126,15 @@
             font-size: 14px;
             z-index: 2000;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 767px) {
+            .github-link {
+                top: 120px;
+                right: 10px;
+                font-size: 12px;
+                padding: 6px 12px;
+            }
         }
         
         .github-link:hover {
