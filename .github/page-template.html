@@ -108,10 +108,6 @@
             background: #0550ae;
         }
         
-        .translate-toggle.disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
         
         /* Add GitHub link in top right */
         .github-link {
@@ -190,46 +186,58 @@
         }
     </style>
     <script>
+        const SUPPORTED_LANGUAGES = {
+            'es': 'Spanish',
+            'fr': 'French', 
+            'de': 'German',
+            'it': 'Italian',
+            'ru': 'Russian',
+            'uk': 'Ukrainian',
+            'he': 'Hebrew',
+            'zh': 'Chinese (Simplified)',
+            'ja': 'Japanese',
+            'ko': 'Korean',
+            'pt': 'Portuguese',
+            'nl': 'Dutch',
+            'pl': 'Polish',
+            'tr': 'Turkish',
+            'ar': 'Arabic',
+            'hi': 'Hindi'
+        };
+        
+        function getCurrentLanguageCode() {
+            const userLang = navigator.language || navigator.userLanguage;
+            return userLang.split('-')[0].toLowerCase();
+        }
+        
+        function isAutoTranslateEnabled() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const langCode = getCurrentLanguageCode();
+            
+            return urlParams.get('translate') === 'true' || 
+                   (urlParams.get('translate') !== 'false' && langCode !== 'en');
+        }
+        
         function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                autoDisplay: false,
-                includedLanguages: 'en,es,fr,de,it,ru,uk,he,zh-CN,ja,ko,pt,nl,pl,tr,ar,hi',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
+            if (isAutoTranslateEnabled()) {
+                const includedLanguages = ['en', ...Object.keys(SUPPORTED_LANGUAGES)].join(',');
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    autoDisplay: false,
+                    includedLanguages: includedLanguages,
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                }, 'google_translate_element');
+            }
         }
         
         function detectAndSetLanguage() {
-            const userLang = navigator.language || navigator.userLanguage;
-            const langCode = userLang.split('-')[0].toLowerCase();
-            
-            // Map of supported languages
-            const supportedLangs = {
-                'es': 'Spanish',
-                'fr': 'French', 
-                'de': 'German',
-                'it': 'Italian',
-                'ru': 'Russian',
-                'uk': 'Ukrainian',
-                'he': 'Hebrew',
-                'zh': 'Chinese (Simplified)',
-                'ja': 'Japanese',
-                'ko': 'Korean',
-                'pt': 'Portuguese',
-                'nl': 'Dutch',
-                'pl': 'Polish',
-                'tr': 'Turkish',
-                'ar': 'Arabic',
-                'hi': 'Hindi'
-            };
-            
-            // Check if auto-translate is disabled
-            if (localStorage.getItem('autoTranslateDisabled') === 'true') {
+            if (!isAutoTranslateEnabled()) {
                 return;
             }
             
-            // Auto-translate if browser language is supported and not English
-            if (langCode !== 'en' && supportedLangs[langCode]) {
+            const langCode = getCurrentLanguageCode();
+            
+            if (langCode !== 'en' && SUPPORTED_LANGUAGES[langCode]) {
                 setTimeout(() => {
                     const selectElement = document.querySelector('.goog-te-combo');
                     if (selectElement) {
@@ -241,42 +249,41 @@
         }
         
         function toggleAutoTranslate() {
-            const isDisabled = localStorage.getItem('autoTranslateDisabled') === 'true';
-            const newState = !isDisabled;
-            localStorage.setItem('autoTranslateDisabled', newState.toString());
+            const currentUrl = new URL(window.location);
             
-            const button = document.getElementById('toggleAutoTranslate');
-            if (newState) {
-                button.textContent = 'Enable Auto-Translate';
-                button.classList.add('disabled');
-                // Reset to English
-                const selectElement = document.querySelector('.goog-te-combo');
-                if (selectElement) {
-                    selectElement.value = '';
-                    selectElement.dispatchEvent(new Event('change'));
-                }
+            if (isAutoTranslateEnabled()) {
+                currentUrl.searchParams.set('translate', 'false');
             } else {
-                button.textContent = 'Disable Auto-Translate';
-                button.classList.remove('disabled');
-                detectAndSetLanguage();
+                currentUrl.searchParams.set('translate', 'true');
             }
+            window.location.href = currentUrl.toString();
         }
         
         function initializeAutoTranslateButton() {
-            const isDisabled = localStorage.getItem('autoTranslateDisabled') === 'true';
             const button = document.getElementById('toggleAutoTranslate');
+            const translateElement = document.getElementById('google_translate_element');
             
-            if (isDisabled) {
-                button.textContent = 'Enable Auto-Translate';
-                button.classList.add('disabled');
-            } else {
+            if (isAutoTranslateEnabled()) {
                 button.textContent = 'Disable Auto-Translate';
-                button.classList.remove('disabled');
+                translateElement.style.display = 'block';
+            } else {
+                button.textContent = 'Enable Auto-Translate';
+                translateElement.style.display = 'none';
+            }
+        }
+        
+        
+        function loadGoogleTranslateScript() {
+            if (isAutoTranslateEnabled()) {
+                const script = document.createElement('script');
+                script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+                document.head.appendChild(script);
             }
         }
         
         window.addEventListener('load', () => {
             initializeAutoTranslateButton();
+            loadGoogleTranslateScript();
             detectAndSetLanguage();
         });
     </script>
@@ -293,6 +300,5 @@
     <article class="markdown-body">
         <!-- README content will be inserted here -->
     </article>
-    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
