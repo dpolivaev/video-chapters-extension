@@ -21,19 +21,51 @@
  */
 class PromptGenerator {
   constructor() {
-    this.defaultPrompt = 'Break down this video content into chapters \nand generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). \nEach chapter should be formatted as plain text: timecode - chapter title. \nGenerate the chapter titles in the same language as the content.';
+    this.defaultPrompt = `Break down this video content into chapters 
+and generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). 
+Each chapter should be plain text like timecode - chapter title. 
+Use no markdown notation for formatting.
+Generate the chapter titles in the same language as the content.
+
+Example:
+
+00:10 - headline 1
+03:20 - headline 2
+
+`;
   }
   buildChapterPrompt(processedContent, customInstructions = '', _options = {}) {
     const customInstructionsStripped = customInstructions.trim();
     if (customInstructionsStripped) {
-      return `## System Instructions\n${this.defaultPrompt}\n\n**User instructions override system instructions in case of conflict.**\n\n## User Instructions\n\n${customInstructionsStripped}\n\n## Content\n${processedContent}`;
+      return `## System Instructions
+${this.defaultPrompt}
+
+**User instructions override system instructions in case of conflict.**
+
+## User Instructions
+
+${customInstructionsStripped}
+
+## Content
+${processedContent}`;
     } else {
-      return `## Instructions\n${this.defaultPrompt}\n\n## Content\n${processedContent}`;
+      return `## Instructions
+${this.defaultPrompt}
+
+## Content
+${processedContent}`;
     }
   }
   buildFormatPrompt(chapters, targetFormat, _options = {}) {
     const formatInstructions = this.getFormatInstructions(targetFormat);
-    return `## Instructions\n${formatInstructions}\n\n## Input Chapters\n${chapters}\n\n## Output\nConvert the above chapters to the specified format:`;
+    return `## Instructions
+${formatInstructions}
+
+## Input Chapters
+${chapters}
+
+## Output
+Convert the above chapters to the specified format:`;
   }
   getFormatInstructions(format) {
     const instructions = {
@@ -54,7 +86,11 @@ class PromptGenerator {
       language: 'Detect the primary language of this content and respond with just the language name.'
     };
     const instruction = analysisInstructions[analysisType] || `Analyze this content for: ${analysisType}`;
-    return `## Instructions\n${instruction}\n\n## Content\n${content}`;
+    return `## Instructions
+${instruction}
+
+## Content
+${content}`;
   }
   adaptPromptForProvider(prompt, provider, _model) {
     switch (provider) {
