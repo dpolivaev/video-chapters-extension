@@ -53,9 +53,9 @@ This is a cross-browser extension that generates AI-powered chapter timecodes fo
 1. **Cross-Browser Build System**: Separate manifests for Chrome (V3) and Firefox (V2) with a unified codebase using browser polyfill for API compatibility.
 
 2. **Modular LLM Architecture**:
-   - `background/llm.js`: Base class with shared functionality (error handling, response parsing, token estimation)
-   - `background/gemini-api.js`: Direct Google Gemini API integration
-   - `background/openrouter-api.js`: OpenRouter API supporting multiple models (DeepSeek, Claude, GPT-4o, Llama)
+   - `background/BaseLLM.js`: Base class with shared functionality (error handling, response parsing, token estimation)
+   - `infrastructure/adapters/GeminiApiAdapter.js`: Direct Google Gemini API integration
+   - `domain/services/OpenRouterChapterGenerator.js`: OpenRouter API supporting multiple models (DeepSeek, Claude, GPT-4o, Llama)
    - `background/prompt-generator.js`: Centralized prompt building for consistency
 
 3. **Session-Based Storage**: Results are stored only during the browser session using background script as relay, with no persistent storage for privacy.

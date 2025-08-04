@@ -116,7 +116,7 @@ class RetryHandler {
             if (attempt > 0) {
               console.log(`✅ RETRY_SUCCESS: Request succeeded after ${attempt} retries for ${url}`);
             } else {
-              console.log(`✅ REQUEST_SUCCESS: Request succeeded on first attempt for ${url}`);
+              console.log(`✅ REQUEST_ACCEPTED: Request accepted and processing started for ${url}`);
             }
             return response;
           }

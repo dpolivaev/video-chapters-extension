@@ -9,7 +9,7 @@ Transform any YouTube video into organized chapters with customizable AI-powered
 
 * **One-Click Chapter Generation**: Generate chapters directly from YouTube video pages
 * **Multiple AI Providers**: Google Gemini (direct API) or OpenRouter (DeepSeek R1, Claude, GPT-4o, Llama, and more)
-* **Free Model Options**: Use DeepSeek R1 for free without requiring an API key
+* **Free Model Options**: Use free models with minimal setup (API key required for authentication but no usage costs)
 * **Custom Instructions**: Add personalized instructions to tailor chapter generation to your needs
 * **Direct Video Navigation**: Jump directly to any chapter timestamp from the results page
 * **Cross-Browser Support**: Works on both Chrome (Manifest V3) and Firefox (Manifest V2)
@@ -54,8 +54,9 @@ For developers or advanced users, see [DEVELOPMENT.md](https://github.com/dpoliv
 
 The extension supports multiple AI providers with different models:
 
-#### Free Options (No API Key Required)
-* **DeepSeek R1 Free**: Latest reasoning model, completely free to use
+#### Free Options (API Key Required for Authentication)
+* **DeepSeek R1 Free**: Latest reasoning model, no usage costs but requires OpenRouter API key
+* **Multiple Free Models via OpenRouter**: Llama, GLM, and other models with $0 usage cost
 
 #### Gemini Models (Direct Google API)
 * **Gemini 2.5 Pro**: Most capable model for complex analysis
@@ -70,9 +71,12 @@ The extension supports multiple AI providers with different models:
 
 ### API Key Setup
 
-#### Option 1: Use Free Models
-1. Click the extension icon and select "DeepSeek R1 0528 (Free)"
-2. No API key required - start generating chapters immediately!
+#### Option 1: Use Free Models (via OpenRouter)
+1. Create a free account at [OpenRouter](https://openrouter.ai)
+2. Generate an API key from your OpenRouter dashboard
+3. Click the extension icon and select any free model (e.g., "DeepSeek R1 0528 (Free)")
+4. Enter your OpenRouter API key
+5. Generate chapters with no usage costs!
 
 #### Option 2: Gemini Direct API
 1. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
@@ -81,7 +85,7 @@ The extension supports multiple AI providers with different models:
 4. Open extension options page and enter your Gemini API key
 5. Select any Gemini model in the popup
 
-#### Option 3: OpenRouter (Multiple Models)
+#### Option 3: OpenRouter (Paid Models)
 1. Create a free account at [OpenRouter](https://openrouter.ai)
 2. Generate an API key from your OpenRouter dashboard
 3. Open extension options page and enter your OpenRouter API key  
@@ -102,7 +106,7 @@ The extension supports multiple AI providers with different models:
 1. **Open any YouTube video** with captions
 2. **Click the extension icon**
 3. **Select your preferred AI model**
-4. **Enter your API key** if you select a paid AI model (not required for free models)
+4. **Enter your API key** (required for all models - free models have no usage costs)
 5. **Add custom instructions** to guide chapter generation (optional)
 6. **Click "Generate Chapters"**
 7. **Copy formatted chapters** from the results page
@@ -160,7 +164,7 @@ It is licensed under the [GNU General Public License v3.0](https://www.gnu.org/l
 ### v2.0.0 - Multi-Provider AI Support
 
 * **🚀 New Providers**: Added OpenRouter integration with 8+ AI models
-* **🆓 Free Options**: DeepSeek R1 available for free without API key
+* **🆓 Free Options**: DeepSeek R1 and other models with no usage costs (API key required for authentication)
 * **🎯 Model Selection**: Choose from Gemini, Claude, GPT-4o, Llama, and more
 * **🏗️ Modular Architecture**: Clean separation of AI providers with shared functionality
 * **🔧 Smart UI**: Dynamic API key field based on selected model

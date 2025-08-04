@@ -56,8 +56,8 @@ const settingsRepository = new SettingsRepository();
 class BackgroundService {
   constructor() {
     this.geminiAPI = new GeminiApiAdapter();
-    this.openRouterAPI = new OpenRouterApiAdapter();
 
+    this.openRouterAPI = new OpenRouterApiAdapter(this);
     this.chapterGenerator = new ChapterGenerator(this.geminiAPI, this.openRouterAPI);
 
     this.setupMessageListeners();
@@ -387,21 +387,110 @@ class BackgroundService {
       });
     }
   }
-  handleGetAllModels(request, sendResponse) {
+  async handleGetAllModels(request, sendResponse) {
     try {
-      const geminiModels = this.geminiAPI.getAvailableModels();
-      const openRouterModels = this.openRouterAPI.getAvailableModels();
-      const allModels = [ ...openRouterModels, ...geminiModels ];
+      const openRouterModels = await this.fetchOpenRouterModels();
+      const geminiModels = this.getGeminiModels();
+      const allModels = [...openRouterModels, ...geminiModels];
+
       sendResponse({
         success: true,
         data: allModels
       });
     } catch (error) {
+      console.error('BackgroundService: handleGetAllModels - Error:', error);
       sendResponse({
         success: false,
         error: error.message
       });
     }
+  }
+
+  async fetchOpenRouterModels() {
+    // Curated list of best models - live pricing but filtered selection
+    const CURATED_MODELS = [
+      // Best free models
+      'deepseek/deepseek-r1-0528:free',
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'z-ai/glm-4.5-air:free',
+      'qwen/qwen-2.5-72b-instruct:free',
+      
+      // Best paid models  
+      'deepseek/deepseek-r1-0528',
+      'anthropic/claude-3.5-sonnet',
+      'anthropic/claude-3.5-haiku',
+      'openai/gpt-4o',
+      'openai/gpt-4o-mini',
+      'meta-llama/llama-3.3-70b-instruct',
+      'google/gemini-2.5-pro',
+      'google/gemini-2.5-flash'
+    ];
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/models', {
+        headers: {
+          'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
+          'X-Title': 'Video Chapters Generator'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenRouter API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.data || data.data.length === 0) {
+        throw new Error('OpenRouter API returned no models');
+      }
+
+      // Filter to only curated models with live pricing
+      return data.data
+        .filter(model => CURATED_MODELS.includes(model.id))
+        .map(model => {
+          const isFree = model.pricing &&
+            (model.pricing.prompt === '0' || model.pricing.prompt === 0) &&
+            (model.pricing.completion === '0' || model.pricing.completion === 0);
+
+          return {
+            id: model.id,
+            name: model.name,
+            description: model.description || `${model.name} model via OpenRouter`,
+            provider: 'OpenRouter',
+            isFree,
+            category: isFree ? 'free' : 'paid',
+            capabilities: ['general']
+          };
+        });
+    } catch (error) {
+      console.error('BackgroundService: OpenRouter API fetch failed:', error);
+      throw error; // No fallback - fail properly
+    }
+  }
+
+  // Removed: No more static fallbacks - API is the single source of truth
+
+  getGeminiModels() {
+    return [
+      {
+        id: 'gemini-2.5-pro',
+        name: 'Gemini 2.5 Pro',
+        description: 'Google Gemini 2.5 Pro - Most capable model',
+        provider: 'Gemini',
+        isFree: false,
+        category: 'premium',
+        capabilities: ['reasoning', 'coding', 'analysis']
+      },
+      {
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
+        description: 'Google Gemini 2.5 Flash - Faster model',
+        provider: 'Gemini',
+        isFree: false,
+        category: 'fast',
+        capabilities: ['speed', 'general']
+      }
+    ];
   }
 
   shouldRegisterVideoTabMapping(resultId, vidTabId, vidUrl) {

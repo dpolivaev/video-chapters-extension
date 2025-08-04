@@ -52,6 +52,7 @@ class ChapterGenerator {
           tabId
         );
       } else if (modelId.isOpenRouter()) {
+        console.log('ChapterGenerator: Calling OpenRouter API with:', { model: modelId.toString(), hasApiKey: !!apiKey });
         result = await this.openRouterAPI.processSubtitles(
           processedContent,
           chapterGeneration.customInstructions,
@@ -59,6 +60,7 @@ class ChapterGenerator {
           modelId.toString(),
           tabId
         );
+        console.log('ChapterGenerator: OpenRouter result:', result);
       } else {
         throw new Error(`Unsupported model provider: ${modelId.provider}`);
       }

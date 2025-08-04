@@ -42,15 +42,7 @@ class BaseLLM {
     return apiKey.length > 10;
   }
   getAvailableModels() {
-    return this.availableModels.map(model => ({
-      id: model.id,
-      name: this.getModelDisplayName(model.id),
-      description: this.getModelDescription(model.id),
-      provider: this.providerName,
-      isFree: model.isFree || false,
-      category: model.category || 'general',
-      capabilities: model.capabilities || []
-    }));
+    throw new Error(`getAvailableModels() must be implemented by ${this.constructor.name}`);
   }
   getModelDisplayName(modelId) {
     const model = this.availableModels.find(m => m.id === modelId);

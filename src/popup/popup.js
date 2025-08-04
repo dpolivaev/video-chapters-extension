@@ -149,6 +149,7 @@ class PopupView {
         const modelSelect = document.getElementById('modelSelect');
         modelSelect.innerHTML = '';
         const models = response.data;
+
         this.allModels = models;
         const providers = {};
         models.forEach(model => {
@@ -157,7 +158,9 @@ class PopupView {
           }
           providers[model.provider].push(model);
         });
+
         if (providers.OpenRouter) {
+
           const openRouterGroup = document.createElement('optgroup');
           openRouterGroup.label = 'OpenRouter';
           providers.OpenRouter.sort((a, b) => {
@@ -169,15 +172,18 @@ class PopupView {
             }
             return a.name.localeCompare(b.name);
           });
-          providers.OpenRouter.forEach(model => {
+
+          providers.OpenRouter.forEach((model, _index) => {
             const option = document.createElement('option');
             option.value = model.id;
-            option.textContent = model.name;
+            option.textContent = model.name; // Use the name as-is from the API
             option.title = model.description;
             openRouterGroup.appendChild(option);
           });
+
           modelSelect.appendChild(openRouterGroup);
         }
+
         if (providers.Gemini) {
           const geminiGroup = document.createElement('optgroup');
           geminiGroup.label = 'Gemini';
@@ -190,7 +196,6 @@ class PopupView {
           });
           modelSelect.appendChild(geminiGroup);
         }
-        console.log('PopupView: Models loaded successfully:', models.length);
       } else {
         console.error('PopupView: Failed to load models:', response);
         this.loadFallbackModels();
@@ -201,8 +206,9 @@ class PopupView {
     }
   }
   loadFallbackModels() {
+    console.error('PopupView: Could not load models from BackgroundService - this should not happen');
     const modelSelect = document.getElementById('modelSelect');
-    modelSelect.innerHTML = '\n      <optgroup label="OpenRouter">\n        <option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 0528 (Free)</option>\n        <option value="deepseek/deepseek-r1-0528">DeepSeek R1 0528</option>\n        <option value="deepseek/deepseek-r1">DeepSeek R1</option>\n        <option value="deepseek/deepseek-r1-distill-qwen-1.5b">DeepSeek R1 Distill 1.5B</option>\n      </optgroup>\n      <optgroup label="Gemini">\n        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>\n        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>\n      </optgroup>\n    ';
+    modelSelect.innerHTML = '<option value="">Error loading models</option>';
   }
   updateApiKeyField() {
     const modelSelect = document.getElementById('modelSelect');
@@ -219,15 +225,16 @@ class PopupView {
       apiKeyGroup.style.display = 'block';
     } else if (this.isOpenRouterModel(selectedModel)) {
       const modelInfo = this.getModelInfo(selectedModel);
+      apiKeyLabel.textContent = 'OpenRouter API Key:';
+      dynamicApiKeyInput.placeholder = 'Enter your OpenRouter API key';
+      dynamicApiKeyInput.value = this.settings?.openRouterApiKey || '';
       if (modelInfo && modelInfo.isFree) {
-        apiKeyGroup.style.display = 'none';
+        apiKeyInfo.innerHTML = '<small>Free model - no usage cost, but API key required for authentication</small>';
+        apiKeyInfo.style.display = 'block';
       } else {
-        apiKeyLabel.textContent = 'OpenRouter API Key:';
-        dynamicApiKeyInput.placeholder = 'Enter your OpenRouter API key';
-        dynamicApiKeyInput.value = this.settings?.openRouterApiKey || '';
         apiKeyInfo.style.display = 'none';
-        apiKeyGroup.style.display = 'block';
       }
+      apiKeyGroup.style.display = 'block';
     } else {
       apiKeyLabel.textContent = 'API Key:';
       dynamicApiKeyInput.placeholder = 'Enter your API key';
@@ -236,7 +243,6 @@ class PopupView {
       apiKeyInfo.style.display = 'block';
       apiKeyGroup.style.display = 'block';
     }
-    console.log('PopupView: Updated API key field for model:', selectedModel);
   }
   getModelInfo(modelId) {
     return this.allModels.find(model => model.id === modelId);
@@ -457,13 +463,10 @@ class PopupView {
         return;
       }
     } else if (this.isOpenRouterModel(model)) {
-      const modelInfo = this.getModelInfo(model);
-      if (modelInfo && !modelInfo.isFree) {
-        apiKey = dynamicApiKey;
-        if (!apiKey) {
-          this.showNotification(chrome.i18n.getMessage('openrouter_api_key_required'), 'error');
-          return;
-        }
+      apiKey = dynamicApiKey;
+      if (!apiKey) {
+        this.showNotification(chrome.i18n.getMessage('openrouter_api_key_required'), 'error');
+        return;
       }
     }
     if (!this.currentVideo) {
@@ -677,7 +680,6 @@ class PopupView {
     const dynamicApiKey = document.getElementById('dynamicApiKeyInput').value.trim();
     const model = document.getElementById('modelSelect').value;
     console.log('PopupView: Dynamic API key present:', !!dynamicApiKey);
-    console.log('PopupView: Selected model:', model);
     console.log('PopupView: isProcessing:', this.isProcessing);
     console.log('PopupView: currentVideo present:', !!this.currentVideo);
     let canUseModel = false;
@@ -688,14 +690,9 @@ class PopupView {
         reasonDisabled = chrome.i18n.getMessage('gemini_api_key_required');
       }
     } else if (this.isOpenRouterModel(model)) {
-      const modelInfo = this.getModelInfo(model);
-      if (modelInfo && modelInfo.isFree) {
-        canUseModel = true;
-      } else {
-        canUseModel = !!dynamicApiKey;
-        if (!canUseModel) {
-          reasonDisabled = chrome.i18n.getMessage('openrouter_api_key_required');
-        }
+      canUseModel = !!dynamicApiKey;
+      if (!canUseModel) {
+        reasonDisabled = chrome.i18n.getMessage('openrouter_api_key_required');
       }
     } else {
       canUseModel = false;
@@ -728,10 +725,7 @@ class PopupView {
       if (selectedModel.includes('gemini-')) {
         settings.apiKey = dynamicApiKey;
       } else if (this.isOpenRouterModel(selectedModel)) {
-        const modelInfo = this.getModelInfo(selectedModel);
-        if (modelInfo && !modelInfo.isFree) {
-          settings.openRouterApiKey = dynamicApiKey;
-        }
+        settings.openRouterApiKey = dynamicApiKey;
       }
       const response = await browser.runtime.sendMessage({
         action: 'saveSettings',

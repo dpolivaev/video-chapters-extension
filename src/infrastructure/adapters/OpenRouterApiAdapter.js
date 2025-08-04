@@ -1,70 +1,26 @@
 /**
- * OpenRouter API Adapter - Trivial Infrastructure
- * Zero control flow - just dependency wiring for browser extension
+ * OpenRouter API Adapter - Minimal wrapper for BackgroundService integration
  *
  * Copyright (C) 2025 Dimitry Polivaev
  * Licensed under GPL3 or later
  */
 
-if (typeof importScripts !== 'undefined') {
-  if (typeof retryHandler === 'undefined') {
-    importScripts('../background/errorhandler.js');
+class OpenRouterApiAdapter {
+  constructor(backgroundService) {
+    this.backgroundService = backgroundService;
   }
-  if (typeof BrowserHttpAdapter === 'undefined') {
-    importScripts('BrowserHttpAdapter.js');
-  }
-  if (typeof NetworkCommunicator === 'undefined') {
-    importScripts('../domain/services/NetworkCommunicator.js');
-  }
-  if (typeof OpenRouterChapterGenerator === 'undefined') {
-    importScripts('../domain/services/OpenRouterChapterGenerator.js');
-  }
-}
 
-class OpenRouterApiAdapter extends BaseLLM {
-  constructor() {
-    super('OpenRouter');
+  async getAvailableModels() {
+    return this.backgroundService.fetchOpenRouterModels();
+  }
 
+  async processSubtitles(processedContent, customInstructions, apiKey, model) {
+    // Create a minimal OpenRouterChapterGenerator for processing
     const httpAdapter = new BrowserHttpAdapter();
     const networkCommunicator = new NetworkCommunicator(httpAdapter, retryHandler);
+    const promptGenerator = new PromptGenerator();
+    const generator = new OpenRouterChapterGenerator(networkCommunicator, promptGenerator);
 
-    this.openRouterChapterGenerator = new OpenRouterChapterGenerator(networkCommunicator, this.promptGenerator);
-    this.availableModels = this.openRouterChapterGenerator.getAvailableModels();
-  }
-
-  async processSubtitles(processedContent, customInstructions = '', apiKey, model = 'deepseek/deepseek-r1-0528:free') {
-    return this.openRouterChapterGenerator.processSubtitles(processedContent, customInstructions, apiKey, model);
-  }
-
-  async makeAPICall(prompt, apiKey, model) {
-    const url = this.openRouterChapterGenerator.buildRequestUrl();
-    const headers = this.openRouterChapterGenerator.buildHttpHeaders(apiKey, model);
-    const body = this.openRouterChapterGenerator.buildRequestBody(prompt, model);
-
-    return this.openRouterChapterGenerator.networkCommunicator.post(url, headers, body);
-  }
-
-  parseResponse(response) {
-    return this.openRouterChapterGenerator.parseApiResponse(response);
-  }
-
-  validateAPIKey(apiKey) {
-    return this.openRouterChapterGenerator.validateApiKey(apiKey);
-  }
-
-  isModelFree(modelId) {
-    return this.openRouterChapterGenerator.isModelFree(modelId);
-  }
-
-  getModelsByCategory() {
-    return this.openRouterChapterGenerator.getModelsByCategory();
-  }
-
-  getModelProvider(modelId) {
-    return this.openRouterChapterGenerator.getModelProvider(modelId);
-  }
-
-  getModelRequirements(modelId) {
-    return this.openRouterChapterGenerator.getModelRequirements(modelId);
+    return generator.processSubtitles(processedContent, customInstructions, apiKey, model);
   }
 }

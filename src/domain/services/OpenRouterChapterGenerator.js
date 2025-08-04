@@ -11,96 +11,7 @@ class OpenRouterChapterGenerator {
     this.networkCommunicator = networkCommunicator;
     this.promptGenerator = promptGenerator;
     this.baseUrl = 'https://openrouter.ai/api/v1';
-    this.availableModels = [
-      {
-        id: 'deepseek/deepseek-r1-0528:free',
-        displayName: 'DeepSeek R1 0528 (Free)',
-        description: 'Latest DeepSeek R1 model - Free to use, no API key required',
-        isFree: true,
-        category: 'reasoning',
-        capabilities: ['reasoning', 'coding', 'analysis']
-      },
-      {
-        id: 'deepseek/deepseek-r1-0528',
-        displayName: 'DeepSeek R1 0528',
-        description: 'Latest DeepSeek R1 model with advanced reasoning capabilities',
-        isFree: false,
-        category: 'reasoning',
-        capabilities: ['reasoning', 'coding', 'analysis']
-      },
-      {
-        id: 'deepseek/deepseek-r1',
-        displayName: 'DeepSeek R1',
-        description: 'Original DeepSeek R1 with performance on par with OpenAI o1',
-        isFree: false,
-        category: 'reasoning',
-        capabilities: ['reasoning', 'coding', 'analysis']
-      },
-      {
-        id: 'deepseek/deepseek-r1-distill-qwen-1.5b',
-        displayName: 'DeepSeek R1 Distill 1.5B',
-        description: 'Smaller, efficient model that outperforms GPT-4o on math',
-        isFree: false,
-        category: 'fast',
-        capabilities: ['math', 'reasoning', 'efficiency']
-      },
-      {
-        id: 'google/gemini-2.5-pro',
-        displayName: 'Gemini 2.5 Pro (OpenRouter)',
-        description: 'Google Gemini 2.5 Pro via OpenRouter - Most capable model for complex reasoning',
-        isFree: false,
-        category: 'premium',
-        capabilities: ['reasoning', 'coding', 'analysis', 'multimodal']
-      },
-      {
-        id: 'google/gemini-2.5-flash',
-        displayName: 'Gemini 2.5 Flash (OpenRouter)',
-        description: 'Google Gemini 2.5 Flash via OpenRouter - Faster model optimized for speed',
-        isFree: false,
-        category: 'fast',
-        capabilities: ['speed', 'general', 'multimodal']
-      },
-      {
-        id: 'anthropic/claude-3.5-sonnet',
-        displayName: 'Claude 3.5 Sonnet',
-        description: 'Anthropic Claude 3.5 Sonnet - Excellent for analysis and reasoning',
-        isFree: false,
-        category: 'premium',
-        capabilities: ['reasoning', 'analysis', 'writing', 'coding']
-      },
-      {
-        id: 'anthropic/claude-3.5-haiku',
-        displayName: 'Claude 3.5 Haiku',
-        description: 'Anthropic Claude 3.5 Haiku - Fast and efficient for most tasks',
-        isFree: false,
-        category: 'fast',
-        capabilities: ['speed', 'general', 'analysis']
-      },
-      {
-        id: 'openai/gpt-4o',
-        displayName: 'GPT-4o',
-        description: 'OpenAI GPT-4o - Advanced multimodal model with reasoning',
-        isFree: false,
-        category: 'premium',
-        capabilities: ['reasoning', 'multimodal', 'coding', 'analysis']
-      },
-      {
-        id: 'openai/gpt-4o-mini',
-        displayName: 'GPT-4o Mini',
-        description: 'OpenAI GPT-4o Mini - Faster, more affordable version of GPT-4o',
-        isFree: false,
-        category: 'fast',
-        capabilities: ['speed', 'general', 'coding']
-      },
-      {
-        id: 'meta-llama/llama-3.3-70b-instruct',
-        displayName: 'Llama 3.3 70B Instruct',
-        description: 'Meta Llama 3.3 70B - Advanced open-source model with strong performance',
-        isFree: false,
-        category: 'general',
-        capabilities: ['reasoning', 'coding', 'general']
-      }
-    ];
+    // No static models - Single Source of Truth is the OpenRouter API
   }
 
   validateApiKey(apiKey) {
@@ -111,35 +22,101 @@ class OpenRouterChapterGenerator {
     return apiKeyPattern.test(apiKey) && apiKey.length > 20;
   }
 
-  validateModel(model) {
-    return this.availableModels.some(m => m.id === model);
+  async validateModel(model) {
+    try {
+      const models = await this.fetchLiveModels();
+      return models.some(m => m.id === model);
+    } catch (error) {
+      // If API fails, allow any model (let API validation handle it)
+      console.warn('OpenRouterChapterGenerator: Could not validate model, allowing:', model);
+      return true;
+    }
   }
 
-  isModelFree(model) {
-    const modelInfo = this.availableModels.find(m => m.id === model);
-    return modelInfo ? modelInfo.isFree : false;
+  async isModelFree(model) {
+    try {
+      const models = await this.fetchLiveModels();
+      const modelInfo = models.find(m => m.id === model);
+      if (!modelInfo) {
+        console.warn('OpenRouterChapterGenerator: Model not found in API, assuming paid:', model);
+        return false;
+      }
+      const isFree = modelInfo.pricing &&
+        (modelInfo.pricing.prompt === '0' || modelInfo.pricing.prompt === 0) &&
+        (modelInfo.pricing.completion === '0' || modelInfo.pricing.completion === 0);
+      return isFree;
+    } catch (error) {
+      console.error('OpenRouterChapterGenerator: Failed to check if model is free:', error);
+      // If API fails, assume it's paid to be safe
+      return false;
+    }
   }
 
-  getAvailableModels() {
-    return [...this.availableModels];
+  async getAvailableModels() {
+    try {
+      const liveModels = await this.fetchLiveModels();
+      return liveModels.map(model => {
+        const isFree = model.pricing &&
+          (model.pricing.prompt === '0' || model.pricing.prompt === 0) &&
+          (model.pricing.completion === '0' || model.pricing.completion === 0);
+
+        return {
+          id: model.id,
+          displayName: model.name,
+          description: model.description || `${model.name} model via OpenRouter`,
+          isFree,
+          category: isFree ? 'free' : 'paid',
+          capabilities: ['general']
+        };
+      });
+    } catch (error) {
+      console.error('OpenRouterChapterGenerator: Failed to get available models:', error);
+      return [];
+    }
   }
 
-  getModelsByCategory() {
-    const categories = {
-      free: this.availableModels.filter(m => m.isFree),
-      reasoning: this.availableModels.filter(m => m.category === 'reasoning' && !m.isFree),
-      premium: this.availableModels.filter(m => m.category === 'premium'),
-      fast: this.availableModels.filter(m => m.category === 'fast' && !m.isFree),
-      general: this.availableModels.filter(m => m.category === 'general')
-    };
-
-    Object.keys(categories).forEach(key => {
-      if (categories[key].length === 0) {
-        delete categories[key];
+  async fetchLiveModels() {
+    const response = await fetch('https://openrouter.ai/api/v1/models', {
+      headers: {
+        'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
+        'X-Title': 'Video Chapters Generator'
       }
     });
 
-    return categories;
+    if (!response.ok) {
+      throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!data.data || data.data.length === 0) {
+      throw new Error('OpenRouter API returned no models');
+    }
+
+    return data.data;
+  }
+
+  async getModelsByCategory() {
+    try {
+      const models = await this.getAvailableModels();
+      const categories = {
+        free: models.filter(m => m.isFree),
+        reasoning: models.filter(m => m.category === 'reasoning' && !m.isFree),
+        premium: models.filter(m => m.category === 'premium'),
+        fast: models.filter(m => m.category === 'fast' && !m.isFree),
+        general: models.filter(m => m.category === 'general')
+      };
+
+      Object.keys(categories).forEach(key => {
+        if (categories[key].length === 0) {
+          delete categories[key];
+        }
+      });
+
+      return categories;
+    } catch (error) {
+      console.error('OpenRouterChapterGenerator: Failed to get models by category:', error);
+      return {};
+    }
   }
 
   getModelProvider(modelId) {
@@ -183,14 +160,15 @@ class OpenRouterChapterGenerator {
     return `${this.baseUrl}/chat/completions`;
   }
 
-  buildHttpHeaders(apiKey, model) {
+  async buildHttpHeaders(apiKey, _model) {
     const headers = {
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
       'X-Title': 'Video Chapters Generator'
     };
 
-    if (!this.isModelFree(model) && apiKey) {
+    // OpenRouter requires API key for all models
+    if (apiKey) {
       headers['Authorization'] = `Bearer ${apiKey}`;
     }
 
@@ -212,15 +190,17 @@ class OpenRouterChapterGenerator {
     };
   }
 
-  categorizeHttpError(status, errorData, model) {
+  async categorizeHttpError(status, errorData, model) {
     if (status === 401) {
-      if (this.isModelFree(model)) {
+      const isFreeModel = await this.isModelFree(model);
+      if (isFreeModel) {
         return new Error('Free model access denied. The model may be temporarily unavailable.');
       } else {
         return new Error('Invalid API key. Please check your OpenRouter API key.');
       }
     } else if (status === 403) {
-      if (this.isModelFree(model)) {
+      const isFreeModel = await this.isModelFree(model);
+      if (isFreeModel) {
         return new Error('Free model access forbidden. The model may have usage limits.');
       } else {
         return new Error('API access forbidden. Please check your API key permissions.');
@@ -266,28 +246,31 @@ class OpenRouterChapterGenerator {
   }
 
   async processSubtitles(processedContent, customInstructions, apiKey, model = 'deepseek/deepseek-r1-0528:free') {
-    const isFreeModel = this.isModelFree(model);
-    if (!isFreeModel && !apiKey) {
-      throw new Error('API key is required for paid models');
+    // OpenRouter requires API key for all models, even free ones
+    if (!apiKey) {
+      throw new Error('OpenRouter API key is required for all models (free models have no usage cost but still need authentication)');
     }
 
-    if (!this.validateModel(model)) {
-      const availableIds = this.availableModels.map(m => m.id);
-      throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
+    const isValidModel = await this.validateModel(model);
+    if (!isValidModel) {
+      throw new Error(`Invalid model: ${model}. Please check the model name.`);
     }
 
     const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
     const url = this.buildRequestUrl();
-    const headers = this.buildHttpHeaders(apiKey, model);
+    const headers = await this.buildHttpHeaders(apiKey, model);
     const body = this.buildRequestBody(prompt, model);
 
     try {
       const responseData = await this.networkCommunicator.post(url, headers, body);
+      console.log('OpenRouterChapterGenerator: Raw API response:', responseData);
       this.validateHttpResponse(responseData);
-      return this.parseApiResponse(responseData);
+      const result = this.parseApiResponse(responseData);
+      console.log('OpenRouterChapterGenerator: Parsed result:', result);
+      return result;
     } catch (error) {
       if (error.isHttpError) {
-        throw this.categorizeHttpError(error.status, error.responseData, model);
+        throw await this.categorizeHttpError(error.status, error.responseData, model);
       }
       throw new Error(`AI processing failed: ${error.message}`);
     }

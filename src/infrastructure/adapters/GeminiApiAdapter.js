@@ -32,6 +32,13 @@ class GeminiApiAdapter extends BaseLLM {
     this.availableModels = this.geminiChapterGenerator.getAvailableModels();
   }
 
+  getAvailableModels() {
+    return this.geminiChapterGenerator.getAvailableModels().map(model => ({
+      ...model,
+      provider: 'Gemini'
+    }));
+  }
+
   async processSubtitles(processedContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro') {
     return this.geminiChapterGenerator.processSubtitles(processedContent, customInstructions, apiKey, model);
   }
