@@ -8,9 +8,7 @@
     "activeTab",
     "storage",
     "tabs",
-    "contextMenus",
     "https://www.youtube.com/*",
-    "https://youtubei.googleapis.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://openrouter.ai/*"
   ],

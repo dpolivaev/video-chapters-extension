@@ -1,0 +1,74 @@
+Organize any YouTube video into chapters with AI-powered headlines and timecode generation.
+
+Video Chapters Generator automatically creates chapter timecodes for YouTube videos using advanced AI models. Choose from multiple AI providers including free options, add custom instructions, and get perfectly formatted chapters ready to use.
+
+🎯 MAIN FEATURES:
+• One-click chapter generation from YouTube videos
+• Multiple AI providers: Google Gemini, OpenRouter (DeepSeek, Claude, GPT-4o, Llama)
+• Free model options with no API key required
+• Custom instructions for tailored chapter styles
+• Multi-language interface (12 languages supported)
+• Direct video navigation from generated chapters page
+• Free • Non-commercial • Open Source •
+
+🎥 PERFECT FOR:
+• Content creators, vloggers and streamers organizing their videos
+• Students creating study guides from educational content
+• Researchers analyzing video content structure
+• Podcasters converting video episodes to chapters
+• Anyone wanting to make videos more navigable
+• Educators creating lesson breakdowns
+
+💡 HOW TO USE:
+1. Open any YouTube video with captions
+2. Click the extension icon
+3. Select your preferred AI model
+4. Enter your API key if needed (not required for free models)
+5. You can add instructions to guide chapter generation (optional)
+6. Click "Generate Chapters"
+7. Copy formatted chapters from the results page
+
+⚙️ AI MODEL OPTIONS:
+• Gemini Direct: Access Google's latest models with your API key from Google AI Studio
+• OpenRouter: Single API key for 8+ models (Claude, GPT-4o, Llama, etc.) from OpenRouter
+• Model Selection: Choose the best AI for your content type and budget
+• Free Models: DeepSeek R1 (completely free, no API key needed)
+
+Cost Information: The extension itself is completely free. AI model usage costs (if any) are paid directly to AI providers - no money goes to the extension developer. Most users can operate entirely within free tiers including Google Gemini's generous free tier.
+
+Example Custom Instructions:
+
+"Headlines should be brief yet meaningful, reflect the content, and match the individuality of the video participants"
+
+"Headlines should be detailed, reflect the content, and match the individuality of the video participants"
+
+"Write both the headline and one-sentence thesis for each without adding prefixes"
+
+"For each headline, provide both thesis and counter-argument"
+
+✨ SMART & RELIABLE:
+• Session-based storage (no data persistence)
+• Cross-browser compatibility (Chrome & Firefox)
+• Localized interface in 12 languages
+• Privacy-focused: data only sent to your chosen AI provider
+• Lightweight and fast
+• Open source with full transparency
+
+🛡️ PRIVACY & SECURITY:
+• No extension servers - all data stays local or goes to your chosen AI
+• API keys stored securely in browser storage only
+• You control which AI service processes your data
+• Session-only results with no persistent storage
+• Open source code available on GitHub
+
+Notes: 
+• This extension requires videos to have captions/transcripts available on YouTube.
+• Free AI models may have usage limitations beyond our control.
+
+Copyright (C) 2025 Dimitry Polivaev
+https://github.com/dpolivaev/video-chapters-extension
+  
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.

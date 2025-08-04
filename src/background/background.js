@@ -61,7 +61,6 @@ class BackgroundService {
     this.chapterGenerator = new ChapterGenerator(this.geminiAPI, this.openRouterAPI);
 
     this.setupMessageListeners();
-    this.setupContextMenus();
     this.setupTabListeners();
   }
   setupTabListeners() {
@@ -251,30 +250,6 @@ class BackgroundService {
           return false;
       }
     });
-  }
-  setupContextMenus() {
-    try {
-      if (!browser.contextMenus) {
-        return;
-      }
-      browser.runtime.onInstalled.addListener(() => {
-        browser.contextMenus.create({
-          id: 'generateChapters',
-          title: 'Generate Chapters for this Video',
-          contexts: [ 'page' ],
-          documentUrlPatterns: [ 'https://www.youtube.com/watch*' ]
-        });
-      });
-      browser.contextMenus.onClicked.addListener((info, tab) => {
-        if (info.menuItemId === 'generateChapters') {
-          browser.tabs.sendMessage(tab.id, {
-            action: 'triggerChapterGeneration'
-          });
-        }
-      });
-    } catch (error) {
-      // Context menus not available
-    }
   }
   async handleChapterGeneration(request, sendResponse, sender) {
     try {
