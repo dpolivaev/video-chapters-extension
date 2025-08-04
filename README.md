@@ -36,7 +36,7 @@ Transform any YouTube video into organized chapters with customizable AI-powered
 
 ### Firefox Web Store
 
-*To be published*
+https://addons.mozilla.org/en-US/firefox/addon/video-chapters-generator/
 
 ### Firefox Add-on
 
