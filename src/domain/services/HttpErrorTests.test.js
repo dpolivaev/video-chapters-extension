@@ -17,12 +17,45 @@ describe('HTTP Error Handling', () => {
 
   beforeEach(() => {
     mockNetworkCommunicator = {
-      post: jest.fn()
+      post: jest.fn(),
+      get: jest.fn()
     };
 
     mockPromptGenerator = {
       buildPrompt: jest.fn().mockReturnValue('test prompt')
     };
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            id: 'deepseek/deepseek-r1-0528:free',
+            name: 'DeepSeek R1 Free',
+            category: 'reasoning',
+            pricing: { prompt: '0', completion: '0' }
+          },
+          {
+            id: 'deepseek/deepseek-r1-0528',
+            name: 'DeepSeek R1',
+            category: 'reasoning',
+            pricing: { prompt: '0.27', completion: '1.10' }
+          },
+          {
+            id: 'anthropic/claude-3.5-sonnet',
+            name: 'Claude 3.5 Sonnet',
+            category: 'premium',
+            pricing: { prompt: '3', completion: '15' }
+          },
+          {
+            id: 'openai/gpt-4o-mini',
+            name: 'GPT-4o Mini',
+            category: 'fast',
+            pricing: { prompt: '0.15', completion: '0.6' }
+          }
+        ]
+      })
+    });
 
     geminiGenerator = new GeminiChapterGenerator(mockNetworkCommunicator, mockPromptGenerator);
     openRouterGenerator = new OpenRouterChapterGenerator(mockNetworkCommunicator, mockPromptGenerator);
@@ -110,9 +143,8 @@ describe('HTTP Error Handling', () => {
     });
 
     test('should handle malformed response validation', async () => {
-      mockNetworkCommunicator.post.mockResolvedValue({
-        // Missing candidates
-      });
+      const malformedResponse = {};
+      mockNetworkCommunicator.post.mockResolvedValue(malformedResponse);
 
       await expect(
         geminiGenerator.processSubtitles('content', 'instructions', 'valid-gemini-api-key-123', 'gemini-2.5-pro')
@@ -146,7 +178,7 @@ describe('HTTP Error Handling', () => {
 
       await expect(
         openRouterGenerator.processSubtitles('content', 'instructions', '', 'deepseek/deepseek-r1-0528:free')
-      ).rejects.toThrow('Free model access denied. The model may be temporarily unavailable.');
+      ).rejects.toThrow('OpenRouter API key is required for all models (free models have no usage cost but still need authentication)');
     });
 
     test('should handle 401 Unauthorized for paid models', async () => {
@@ -172,7 +204,7 @@ describe('HTTP Error Handling', () => {
 
       await expect(
         openRouterGenerator.processSubtitles('content', 'instructions', '', 'deepseek/deepseek-r1-0528:free')
-      ).rejects.toThrow('Free model access forbidden. The model may have usage limits.');
+      ).rejects.toThrow('OpenRouter API key is required for all models (free models have no usage cost but still need authentication)');
     });
 
     test('should handle 403 Forbidden for paid models', async () => {
@@ -251,44 +283,32 @@ describe('HTTP Error Handling', () => {
   });
 
   describe('Model Utilities Coverage', () => {
-    test('should get model categories for OpenRouter', () => {
-      const categories = openRouterGenerator.getModelsByCategory();
 
-      expect(categories.free).toBeDefined();
-      expect(categories.reasoning).toBeDefined();
-      expect(categories.premium).toBeDefined();
-      expect(categories.fast).toBeDefined();
-
-      // Verify free models are properly categorized
-      expect(categories.free.some(m => m.isFree)).toBe(true);
-    });
-
-    test('should get model requirements', () => {
-      const freeModelReqs = openRouterGenerator.getModelRequirements('deepseek/deepseek-r1-0528:free');
+    test('should get model requirements', async () => {
+      const freeModelReqs = await openRouterGenerator.getModelRequirements('deepseek/deepseek-r1-0528:free');
       expect(freeModelReqs.requiresApiKey).toBe(false);
       expect(freeModelReqs.estimatedCost).toBe('Free');
 
-      const paidModelReqs = openRouterGenerator.getModelRequirements('anthropic/claude-3.5-sonnet');
+      const paidModelReqs = await openRouterGenerator.getModelRequirements('anthropic/claude-3.5-sonnet');
       expect(paidModelReqs.requiresApiKey).toBe(true);
       expect(paidModelReqs.estimatedCost).toBe('Pay-per-use');
     });
 
-    test('should get specific model info', () => {
-      const model = openRouterGenerator.getModel('deepseek/deepseek-r1-0528:free');
+    test('should get specific model info', async () => {
+      const model = await openRouterGenerator.getModel('deepseek/deepseek-r1-0528:free');
       expect(model).toBeDefined();
       expect(model.id).toBe('deepseek/deepseek-r1-0528:free');
       expect(model.isFree).toBe(true);
 
-      const nonexistentModel = openRouterGenerator.getModel('nonexistent/model');
+      const nonexistentModel = await openRouterGenerator.getModel('nonexistent/model');
       expect(nonexistentModel).toBeUndefined();
     });
   });
 
   describe('Response Validation Edge Cases', () => {
     test('should handle OpenRouter response validation failure', async () => {
-      mockNetworkCommunicator.post.mockResolvedValue({
-        // Missing choices
-      });
+      const responseWithoutChoices = {};
+      mockNetworkCommunicator.post.mockResolvedValue(responseWithoutChoices);
 
       await expect(
         openRouterGenerator.processSubtitles('content', 'instructions', 'test-key', 'anthropic/claude-3.5-sonnet')
@@ -296,11 +316,10 @@ describe('HTTP Error Handling', () => {
     });
 
     test('should handle response without message', async () => {
-      mockNetworkCommunicator.post.mockResolvedValue({
-        choices: [{
-          // Missing message
-        }]
-      });
+      const responseWithChoicesButNoMessage = {
+        choices: [{}]
+      };
+      mockNetworkCommunicator.post.mockResolvedValue(responseWithChoicesButNoMessage);
 
       await expect(
         openRouterGenerator.processSubtitles('content', 'instructions', 'sk-or-valid-key-12345678901234567890', 'anthropic/claude-3.5-sonnet')

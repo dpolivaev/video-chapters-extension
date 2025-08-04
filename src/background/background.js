@@ -414,8 +414,8 @@ class BackgroundService {
       'meta-llama/llama-3.3-70b-instruct:free',
       'z-ai/glm-4.5-air:free',
       'qwen/qwen-2.5-72b-instruct:free',
-      
-      // Best paid models  
+
+      // Best paid models
       'deepseek/deepseek-r1-0528',
       'anthropic/claude-3.5-sonnet',
       'anthropic/claude-3.5-haiku',

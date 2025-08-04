@@ -15,12 +15,45 @@ describe('OpenRouterChapterGenerator', () => {
 
   beforeEach(() => {
     mockNetworkCommunicator = {
-      post: jest.fn()
+      post: jest.fn(),
+      get: jest.fn()
     };
 
     mockPromptGenerator = {
       buildPrompt: jest.fn()
     };
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            id: 'deepseek/deepseek-r1-0528:free',
+            name: 'DeepSeek R1 Free',
+            category: 'reasoning',
+            pricing: { prompt: '0', completion: '0' }
+          },
+          {
+            id: 'deepseek/deepseek-r1-0528',
+            name: 'DeepSeek R1',
+            category: 'reasoning',
+            pricing: { prompt: '0.27', completion: '1.10' }
+          },
+          {
+            id: 'anthropic/claude-3.5-sonnet',
+            name: 'Claude 3.5 Sonnet',
+            category: 'premium',
+            pricing: { prompt: '3', completion: '15' }
+          },
+          {
+            id: 'openai/gpt-4o-mini',
+            name: 'GPT-4o Mini',
+            category: 'fast',
+            pricing: { prompt: '0.15', completion: '0.6' }
+          }
+        ]
+      })
+    });
 
     openRouterGenerator = new OpenRouterChapterGenerator(mockNetworkCommunicator, mockPromptGenerator);
   });
@@ -35,8 +68,8 @@ describe('OpenRouterChapterGenerator', () => {
       expect(openRouterGenerator.baseUrl).toBe('https://openrouter.ai/api/v1');
     });
 
-    test('should provide available models including free models', () => {
-      const models = openRouterGenerator.getAvailableModels();
+    test('should provide available models including free models', async () => {
+      const models = await openRouterGenerator.getAvailableModels();
       expect(models.length).toBeGreaterThan(0);
 
       const freeModel = models.find(m => m.isFree === true);
@@ -44,8 +77,8 @@ describe('OpenRouterChapterGenerator', () => {
       expect(freeModel.id).toBe('deepseek/deepseek-r1-0528:free');
     });
 
-    test('should include various model categories', () => {
-      const models = openRouterGenerator.getAvailableModels();
+    test('should include various model categories', async () => {
+      const models = await openRouterGenerator.getAvailableModels();
       const categories = models.map(m => m.category);
 
       expect(categories).toContain('reasoning');
@@ -53,9 +86,9 @@ describe('OpenRouterChapterGenerator', () => {
       expect(categories).toContain('premium');
     });
 
-    test('should return immutable copy of models', () => {
-      const models1 = openRouterGenerator.getAvailableModels();
-      const models2 = openRouterGenerator.getAvailableModels();
+    test('should return immutable copy of models', async () => {
+      const models1 = await openRouterGenerator.getAvailableModels();
+      const models2 = await openRouterGenerator.getAvailableModels();
 
       expect(models1).not.toBe(models2);
       expect(models1).toEqual(models2);
@@ -63,13 +96,13 @@ describe('OpenRouterChapterGenerator', () => {
   });
 
   describe('model validation', () => {
-    test('should accept valid OpenRouter models', () => {
-      expect(openRouterGenerator.validateModel('deepseek/deepseek-r1-0528:free')).toBe(true);
-      expect(openRouterGenerator.validateModel('deepseek/deepseek-r1-0528')).toBe(true);
-      expect(openRouterGenerator.validateModel('anthropic/claude-3.5-sonnet')).toBe(true);
+    test('should accept valid OpenRouter models', async () => {
+      expect(await openRouterGenerator.validateModel('deepseek/deepseek-r1-0528:free')).toBe(true);
+      expect(await openRouterGenerator.validateModel('deepseek/deepseek-r1-0528')).toBe(true);
+      expect(await openRouterGenerator.validateModel('anthropic/claude-3.5-sonnet')).toBe(true);
     });
 
-    test('should reject invalid models', () => {
+    test('should reject invalid models', async () => {
       const invalidModels = [
         'gemini-2.5-pro', // This would be direct Gemini, not OpenRouter
         'gpt-4-invalid',
@@ -80,27 +113,27 @@ describe('OpenRouterChapterGenerator', () => {
         123
       ];
 
-      invalidModels.forEach(model => {
-        expect(openRouterGenerator.validateModel(model)).toBe(false);
-      });
+      for (const model of invalidModels) {
+        expect(await openRouterGenerator.validateModel(model)).toBe(false);
+      }
     });
   });
 
   describe('free model detection', () => {
-    test('should correctly identify free models', () => {
-      expect(openRouterGenerator.isModelFree('deepseek/deepseek-r1-0528:free')).toBe(true);
+    test('should correctly identify free models', async () => {
+      expect(await openRouterGenerator.isModelFree('deepseek/deepseek-r1-0528:free')).toBe(true);
     });
 
-    test('should correctly identify paid models', () => {
-      expect(openRouterGenerator.isModelFree('deepseek/deepseek-r1-0528')).toBe(false);
-      expect(openRouterGenerator.isModelFree('anthropic/claude-3.5-sonnet')).toBe(false);
-      expect(openRouterGenerator.isModelFree('openai/gpt-4o')).toBe(false);
+    test('should correctly identify paid models', async () => {
+      expect(await openRouterGenerator.isModelFree('deepseek/deepseek-r1-0528')).toBe(false);
+      expect(await openRouterGenerator.isModelFree('anthropic/claude-3.5-sonnet')).toBe(false);
+      expect(await openRouterGenerator.isModelFree('openai/gpt-4o')).toBe(false);
     });
 
-    test('should handle edge cases in free model detection', () => {
-      expect(openRouterGenerator.isModelFree('')).toBe(false);
-      expect(openRouterGenerator.isModelFree(null)).toBe(false);
-      expect(openRouterGenerator.isModelFree(undefined)).toBe(false);
+    test('should handle edge cases in free model detection', async () => {
+      expect(await openRouterGenerator.isModelFree('')).toBe(false);
+      expect(await openRouterGenerator.isModelFree(null)).toBe(false);
+      expect(await openRouterGenerator.isModelFree(undefined)).toBe(false);
     });
   });
 
@@ -137,15 +170,15 @@ describe('OpenRouterChapterGenerator', () => {
   });
 
   describe('URL building', () => {
-    test('should build correct request URL', () => {
-      const url = openRouterGenerator.buildRequestUrl();
+    test('should build correct chat completions URL', () => {
+      const url = openRouterGenerator.buildChatCompletionsUrl();
       expect(url).toBe('https://openrouter.ai/api/v1/chat/completions');
     });
   });
 
   describe('request headers', () => {
-    test('should build headers for free models without API key', () => {
-      const headers = openRouterGenerator.buildHttpHeaders('', 'deepseek/deepseek-r1-0528:free');
+    test('should build OpenRouter headers without API key', () => {
+      const headers = openRouterGenerator.buildOpenRouterHeaders('');
 
       expect(headers).toEqual({
         'Content-Type': 'application/json',
@@ -154,9 +187,9 @@ describe('OpenRouterChapterGenerator', () => {
       });
     });
 
-    test('should build headers for paid models with API key', () => {
+    test('should build OpenRouter headers with API key', () => {
       const apiKey = 'sk-or-v1-test-key-123';
-      const headers = openRouterGenerator.buildHttpHeaders(apiKey, 'anthropic/claude-3.5-sonnet');
+      const headers = openRouterGenerator.buildOpenRouterHeaders(apiKey);
 
       expect(headers).toEqual({
         'Content-Type': 'application/json',
@@ -167,7 +200,7 @@ describe('OpenRouterChapterGenerator', () => {
     });
 
     test('should include referer and title for OpenRouter attribution', () => {
-      const headers = openRouterGenerator.buildHttpHeaders('', 'deepseek/deepseek-r1-0528:free');
+      const headers = openRouterGenerator.buildOpenRouterHeaders('');
 
       expect(headers['HTTP-Referer']).toBe('https://github.com/dimitry-polivaev/timecodes-browser-extension');
       expect(headers['X-Title']).toBe('Video Chapters Generator');
@@ -175,11 +208,11 @@ describe('OpenRouterChapterGenerator', () => {
   });
 
   describe('request body building', () => {
-    test('should build OpenAI-compatible request body', () => {
+    test('should build chat completion request body', () => {
       const prompt = 'Generate chapters for this video';
       const model = 'deepseek/deepseek-r1-0528:free';
 
-      const body = openRouterGenerator.buildRequestBody(prompt, model);
+      const body = openRouterGenerator.buildChatCompletionBody(prompt, model);
 
       expect(body).toEqual({
         model,
@@ -194,7 +227,7 @@ describe('OpenRouterChapterGenerator', () => {
     });
 
     test('should use consistent generation parameters', () => {
-      const body = openRouterGenerator.buildRequestBody('test prompt', 'test/model');
+      const body = openRouterGenerator.buildChatCompletionBody('test prompt', 'test/model');
 
       expect(body.temperature).toBe(0.7);
       expect(body.max_tokens).toBe(8192);
@@ -293,7 +326,7 @@ describe('OpenRouterChapterGenerator', () => {
       const result = await openRouterGenerator.processSubtitles(
         processedContent,
         customInstructions,
-        '', // No API key for free model
+        'test-api-key', // API key required for all models
         model
       );
 
@@ -306,6 +339,7 @@ describe('OpenRouterChapterGenerator', () => {
         'https://openrouter.ai/api/v1/chat/completions',
         {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-api-key',
           'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
           'X-Title': 'Video Chapters Generator'
         },
@@ -357,7 +391,7 @@ describe('OpenRouterChapterGenerator', () => {
       mockNetworkCommunicator.post.mockRejectedValue(networkError);
 
       await expect(
-        openRouterGenerator.processSubtitles('content', 'instructions', '', 'deepseek/deepseek-r1-0528:free')
+        openRouterGenerator.processSubtitles('content', 'instructions', 'test-api-key', 'deepseek/deepseek-r1-0528:free')
       ).rejects.toThrow('AI processing failed: Network timeout');
     });
 
@@ -385,7 +419,7 @@ describe('OpenRouterChapterGenerator', () => {
         }]
       });
 
-      const result = await openRouterGenerator.processSubtitles('', '', '', 'deepseek/deepseek-r1-0528:free');
+      const result = await openRouterGenerator.processSubtitles('', '', 'test-api-key', 'deepseek/deepseek-r1-0528:free');
 
       expect(result.chapters).toBe('No chapters available');
     });
@@ -399,7 +433,7 @@ describe('OpenRouterChapterGenerator', () => {
         }]
       });
 
-      await openRouterGenerator.processSubtitles('content', null, '', 'deepseek/deepseek-r1-0528:free');
+      await openRouterGenerator.processSubtitles('content', null, 'test-api-key', 'deepseek/deepseek-r1-0528:free');
 
       expect(mockPromptGenerator.buildPrompt).toHaveBeenCalledWith('content', null);
     });

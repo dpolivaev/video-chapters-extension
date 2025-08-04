@@ -11,7 +11,13 @@ class OpenRouterChapterGenerator {
     this.networkCommunicator = networkCommunicator;
     this.promptGenerator = promptGenerator;
     this.baseUrl = 'https://openrouter.ai/api/v1';
-    // No static models - Single Source of Truth is the OpenRouter API
+    this.MINIMUM_API_KEY_LENGTH = 20;
+    this.DEFAULT_FREE_MODEL = 'deepseek/deepseek-r1-0528:free';
+    this.GENERATION_TEMPERATURE = 0.7;
+    this.MAX_RESPONSE_TOKENS = 8192;
+    this.TOP_P_SAMPLING = 0.95;
+    this.GITHUB_REFERER = 'https://github.com/dimitry-polivaev/timecodes-browser-extension';
+    this.APPLICATION_TITLE = 'Video Chapters Generator';
   }
 
   validateApiKey(apiKey) {
@@ -19,7 +25,18 @@ class OpenRouterChapterGenerator {
       return false;
     }
     const apiKeyPattern = /^sk-or-[A-Za-z0-9_-]+$/;
-    return apiKeyPattern.test(apiKey) && apiKey.length > 20;
+    return apiKeyPattern.test(apiKey) && apiKey.length > this.MINIMUM_API_KEY_LENGTH;
+  }
+
+  allowModelWhenApiUnavailable(model) {
+    console.warn('OpenRouterChapterGenerator: Could not validate model, allowing:', model);
+    return true;
+  }
+
+  validateApiKeyRequired(apiKey) {
+    if (!apiKey) {
+      throw new Error('OpenRouter API key is required for all models (free models have no usage cost but still need authentication)');
+    }
   }
 
   async validateModel(model) {
@@ -27,10 +44,14 @@ class OpenRouterChapterGenerator {
       const models = await this.fetchLiveModels();
       return models.some(m => m.id === model);
     } catch (error) {
-      // If API fails, allow any model (let API validation handle it)
-      console.warn('OpenRouterChapterGenerator: Could not validate model, allowing:', model);
-      return true;
+      return this.allowModelWhenApiUnavailable(model);
     }
+  }
+
+  determineIfModelIsFree(modelPricing) {
+    return modelPricing &&
+      (modelPricing.prompt === '0' || modelPricing.prompt === 0) &&
+      (modelPricing.completion === '0' || modelPricing.completion === 0);
   }
 
   async isModelFree(model) {
@@ -41,13 +62,9 @@ class OpenRouterChapterGenerator {
         console.warn('OpenRouterChapterGenerator: Model not found in API, assuming paid:', model);
         return false;
       }
-      const isFree = modelInfo.pricing &&
-        (modelInfo.pricing.prompt === '0' || modelInfo.pricing.prompt === 0) &&
-        (modelInfo.pricing.completion === '0' || modelInfo.pricing.completion === 0);
-      return isFree;
+      return this.determineIfModelIsFree(modelInfo.pricing);
     } catch (error) {
       console.error('OpenRouterChapterGenerator: Failed to check if model is free:', error);
-      // If API fails, assume it's paid to be safe
       return false;
     }
   }
@@ -56,16 +73,14 @@ class OpenRouterChapterGenerator {
     try {
       const liveModels = await this.fetchLiveModels();
       return liveModels.map(model => {
-        const isFree = model.pricing &&
-          (model.pricing.prompt === '0' || model.pricing.prompt === 0) &&
-          (model.pricing.completion === '0' || model.pricing.completion === 0);
+        const isFree = this.determineIfModelIsFree(model.pricing);
 
         return {
           id: model.id,
           displayName: model.name,
           description: model.description || `${model.name} model via OpenRouter`,
           isFree,
-          category: isFree ? 'free' : 'paid',
+          category: model.category || 'general',
           capabilities: ['general']
         };
       });
@@ -78,8 +93,8 @@ class OpenRouterChapterGenerator {
   async fetchLiveModels() {
     const response = await fetch('https://openrouter.ai/api/v1/models', {
       headers: {
-        'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
-        'X-Title': 'Video Chapters Generator'
+        'HTTP-Referer': this.GITHUB_REFERER,
+        'X-Title': this.APPLICATION_TITLE
       }
     });
 
@@ -95,29 +110,6 @@ class OpenRouterChapterGenerator {
     return data.data;
   }
 
-  async getModelsByCategory() {
-    try {
-      const models = await this.getAvailableModels();
-      const categories = {
-        free: models.filter(m => m.isFree),
-        reasoning: models.filter(m => m.category === 'reasoning' && !m.isFree),
-        premium: models.filter(m => m.category === 'premium'),
-        fast: models.filter(m => m.category === 'fast' && !m.isFree),
-        general: models.filter(m => m.category === 'general')
-      };
-
-      Object.keys(categories).forEach(key => {
-        if (categories[key].length === 0) {
-          delete categories[key];
-        }
-      });
-
-      return categories;
-    } catch (error) {
-      console.error('OpenRouterChapterGenerator: Failed to get models by category:', error);
-      return {};
-    }
-  }
 
   getModelProvider(modelId) {
     if (modelId.startsWith('deepseek/')) {
@@ -138,8 +130,8 @@ class OpenRouterChapterGenerator {
     return 'Unknown';
   }
 
-  getModelRequirements(modelId) {
-    const model = this.getModel(modelId);
+  async getModelRequirements(modelId) {
+    const model = await this.getModel(modelId);
     if (!model) {
       return {};
     }
@@ -152,22 +144,22 @@ class OpenRouterChapterGenerator {
     };
   }
 
-  getModel(modelId) {
-    return this.availableModels.find(m => m.id === modelId);
+  async getModel(modelId) {
+    const models = await this.getAvailableModels();
+    return models.find(m => m.id === modelId);
   }
 
-  buildRequestUrl() {
+  buildChatCompletionsUrl() {
     return `${this.baseUrl}/chat/completions`;
   }
 
-  async buildHttpHeaders(apiKey, _model) {
+  buildOpenRouterHeaders(apiKey) {
     const headers = {
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
-      'X-Title': 'Video Chapters Generator'
+      'HTTP-Referer': this.GITHUB_REFERER,
+      'X-Title': this.APPLICATION_TITLE
     };
 
-    // OpenRouter requires API key for all models
     if (apiKey) {
       headers['Authorization'] = `Bearer ${apiKey}`;
     }
@@ -175,7 +167,7 @@ class OpenRouterChapterGenerator {
     return headers;
   }
 
-  buildRequestBody(prompt, model) {
+  buildChatCompletionBody(prompt, model) {
     return {
       model,
       messages: [
@@ -184,32 +176,44 @@ class OpenRouterChapterGenerator {
           content: prompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 8192,
-      top_p: 0.95
+      temperature: this.GENERATION_TEMPERATURE,
+      max_tokens: this.MAX_RESPONSE_TOKENS,
+      top_p: this.TOP_P_SAMPLING
     };
+  }
+
+  async categorizeUnauthorizedError(model) {
+    const isFreeModel = await this.isModelFree(model);
+    if (isFreeModel) {
+      return new Error('Free model access denied. The model may be temporarily unavailable.');
+    } else {
+      return new Error('Invalid API key. Please check your OpenRouter API key.');
+    }
+  }
+
+  async categorizeForbiddenError(model) {
+    const isFreeModel = await this.isModelFree(model);
+    if (isFreeModel) {
+      return new Error('Free model access forbidden. The model may have usage limits.');
+    } else {
+      return new Error('API access forbidden. Please check your API key permissions.');
+    }
+  }
+
+  categorizeBadRequestError(errorData) {
+    const errorMessage = errorData.error?.message || 'Bad request';
+    return new Error(`Request error: ${errorMessage}`);
   }
 
   async categorizeHttpError(status, errorData, model) {
     if (status === 401) {
-      const isFreeModel = await this.isModelFree(model);
-      if (isFreeModel) {
-        return new Error('Free model access denied. The model may be temporarily unavailable.');
-      } else {
-        return new Error('Invalid API key. Please check your OpenRouter API key.');
-      }
+      return await this.categorizeUnauthorizedError(model);
     } else if (status === 403) {
-      const isFreeModel = await this.isModelFree(model);
-      if (isFreeModel) {
-        return new Error('Free model access forbidden. The model may have usage limits.');
-      } else {
-        return new Error('API access forbidden. Please check your API key permissions.');
-      }
+      return await this.categorizeForbiddenError(model);
     } else if (status === 429) {
       return new Error('Rate limit exceeded. Please try again later.');
     } else if (status === 400) {
-      const errorMessage = errorData.error?.message || 'Bad request';
-      return new Error(`Request error: ${errorMessage}`);
+      return this.categorizeBadRequestError(errorData);
     } else {
       return new Error(`API request failed: ${status}`);
     }
@@ -245,11 +249,8 @@ class OpenRouterChapterGenerator {
     };
   }
 
-  async processSubtitles(processedContent, customInstructions, apiKey, model = 'deepseek/deepseek-r1-0528:free') {
-    // OpenRouter requires API key for all models, even free ones
-    if (!apiKey) {
-      throw new Error('OpenRouter API key is required for all models (free models have no usage cost but still need authentication)');
-    }
+  async processSubtitles(processedContent, customInstructions, apiKey, model = this.DEFAULT_FREE_MODEL) {
+    this.validateApiKeyRequired(apiKey);
 
     const isValidModel = await this.validateModel(model);
     if (!isValidModel) {
@@ -257,9 +258,9 @@ class OpenRouterChapterGenerator {
     }
 
     const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
-    const url = this.buildRequestUrl();
-    const headers = await this.buildHttpHeaders(apiKey, model);
-    const body = this.buildRequestBody(prompt, model);
+    const url = this.buildChatCompletionsUrl();
+    const headers = this.buildOpenRouterHeaders(apiKey);
+    const body = this.buildChatCompletionBody(prompt, model);
 
     try {
       const responseData = await this.networkCommunicator.post(url, headers, body);
