@@ -40,7 +40,7 @@ Example Custom Instructions:
 
 "Headlines should be detailed, reflect the content, and match the individuality of the video participants"
 
-"Write both the headline and one-sentence thesis for each without adding prefixes"
+"Write both the headline and one-sentence thesis for each without adding prefixes like 'Thesis:'"
 
 "For each headline, provide both thesis and counter-argument"
 
