@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Video Chapters Generator",
   "version": "1.0.0-BUILD_INJECTED",
-  "description": "Generate chapter timecodes from YouTube videos using AI subtitle analysis",
+  "description": "Organize YouTube videos into chapters with AI-powered headlines and timecode generation",
   "default_locale": "en",
   "permissions": [
     "activeTab",

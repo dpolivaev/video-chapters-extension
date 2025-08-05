@@ -3,7 +3,7 @@
 
 [![Test](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml/badge.svg)](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml)
 
-Transform any YouTube video into organized chapters with customizable AI-powered timecode generation using multiple AI providers.
+Organize YouTube videos into chapters with AI-powered headlines and timecode generation.
 
 ## Features
 
