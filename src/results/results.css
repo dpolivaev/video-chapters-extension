@@ -21,7 +21,7 @@
 
 .content-html {
   padding: 12px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   font-family: var(--mono-font);
@@ -54,8 +54,8 @@
   --text-secondary: #666;
   --text-muted: #999;
   --border-color: #ddd;
-  --background-light: #f9f9f9;
-  --background-white: #fff;
+  --background-subtle: #f9f9f9;
+  --background-elevated: #fff;
   --shadow: 0 2px 8px rgba(0,0,0,0.1);
   --border-radius: 4px;
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -73,7 +73,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-primary);
-  background: var(--background-light);
+  background: var(--background-subtle);
   min-height: 100vh;
 }
 
@@ -83,7 +83,7 @@ body {
   min-height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
-  background: var(--background-white);
+  background: var(--background-elevated);
   box-shadow: var(--shadow);
 }
 
@@ -93,7 +93,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
@@ -164,7 +164,7 @@ body {
 }
 
 .help-btn:hover {
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 .help-btn:hover::before {
@@ -175,7 +175,7 @@ body {
 /* Video Info */
 .video-info {
   padding: 20px 24px;
-  background: var(--background-light);
+  background: var(--background-subtle);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -207,7 +207,7 @@ body {
 /* Tab Navigation */
 .tab-nav {
   display: flex;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-bottom: 1px solid var(--border-color);
   padding: 0 24px;
 }
@@ -230,7 +230,7 @@ body {
 
 .tab-btn:hover {
   color: var(--text-primary);
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 .tab-btn.active {
@@ -265,7 +265,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-bottom: 1px solid var(--border-color);
   flex-wrap: wrap;
   gap: 16px;
@@ -290,7 +290,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   font-size: 13px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   min-width: 120px;
 }
 
@@ -326,7 +326,7 @@ body {
   gap: 6px;
   padding: 10px 16px;
   min-width: 120px;
-  background: var(--background-light);
+  background: var(--background-subtle);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -365,7 +365,7 @@ body {
   font-family: var(--mono-font);
   font-size: 13px;
   line-height: 1.6;
-  background: var(--background-white);
+  background: var(--background-elevated);
   resize: vertical;
   color: var(--text-primary);
 }
@@ -389,7 +389,7 @@ body {
 
 /* Chapter Preview */
 .chapter-preview {
-  background: var(--background-light);
+  background: var(--background-subtle);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 16px;
@@ -415,7 +415,7 @@ body {
   align-items: flex-start;
   gap: 12px;
   padding: 8px 12px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   transition: border-color 0.2s ease;
@@ -449,7 +449,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-top: 1px solid var(--border-color);
   margin-top: auto;
 }
@@ -557,7 +557,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -576,8 +576,8 @@ body {
     --text-secondary: #b0b0b0;
     --text-muted: #808080;
     --border-color: #404040;
-    --background-light: #2d2d2d;
-    --background-white: #1e1e1e;
+    --background-subtle: #2d2d2d;
+    --background-elevated: #1e1e1e;
   }
   
   .loading-overlay {
@@ -732,7 +732,7 @@ body {
 .progress-section {
   padding: 12px 24px;
   border-bottom: 1px solid var(--border-color);
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 .progress-bar {
   width: 100%;

@@ -29,8 +29,8 @@
   --text-secondary: #666;
   --text-muted: #999;
   --border-color: #ddd;
-  --background-light: #f9f9f9;
-  --background-white: #fff;
+  --background-subtle: #f9f9f9;
+  --background-elevated: #fff;
   --shadow: 0 2px 8px rgba(0,0,0,0.1);
   --border-radius: 4px;
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -47,7 +47,7 @@ body {
   font-size: 14px;
   line-height: 1.4;
   color: var(--text-primary);
-  background: var(--background-white);
+  background: var(--background-elevated);
   width: 420px;
 }
 
@@ -61,7 +61,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -99,7 +99,7 @@ body {
 }
 
 .settings-btn:hover {
-  background: var(--background-light);
+  background: var(--background-subtle);
   color: var(--text-primary);
 }
 
@@ -132,7 +132,7 @@ body {
 }
 
 .help-btn:hover {
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 .help-btn:hover::before {
@@ -223,7 +223,7 @@ body {
   font-size: 7pt;
   line-height: 1.2;
   resize: vertical;
-  background: var(--background-white);
+  background: var(--background-elevated);
   color: var(--text-primary);
 }
 
@@ -291,7 +291,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   font-size: 13px;
-  background: var(--background-white);
+  background: var(--background-elevated);
 }
 
 /* Buttons */
@@ -323,7 +323,7 @@ body {
 
 .btn-secondary {
   padding: 6px 12px;
-  background: var(--background-light);
+  background: var(--background-subtle);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -363,7 +363,7 @@ body {
 .progress-section {
   padding: 12px 20px;
   border-bottom: 1px solid var(--border-color);
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 .progress-bar {
@@ -404,7 +404,7 @@ body {
 }
 
 .modal-content {
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-radius: var(--border-radius);
   width: 90%;
   max-width: 600px;
@@ -444,13 +444,13 @@ body {
 }
 
 .modal-close:hover {
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 .modal-settings {
   padding: 12px 20px;
   border-bottom: 1px solid var(--border-color);
-  background: var(--background-light);
+  background: var(--background-subtle);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -495,7 +495,7 @@ body {
 
 .history-entry-header {
   padding: 8px 12px;
-  background: var(--background-light);
+  background: var(--background-subtle);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -513,13 +513,13 @@ body {
   transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .history-name-input:hover {
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 .history-name-input:focus {
   outline: none;
-  background: var(--background-white);
+  background: var(--background-elevated);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
@@ -547,7 +547,7 @@ body {
 .history-actions {
   padding: 8px 12px;
   border-top: 1px solid var(--border-color);
-  background: var(--background-light);
+  background: var(--background-subtle);
   display: flex;
   gap: 8px;
 }
@@ -638,7 +638,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-light);
+  background: var(--background-subtle);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -666,8 +666,8 @@ textarea:focus-visible {
     --text-secondary: #b0b0b0;
     --text-muted: #808080;
     --border-color: #404040;
-    --background-light: #2d2d2d;
-    --background-white: #1e1e1e;
+    --background-subtle: #2d2d2d;
+    --background-elevated: #1e1e1e;
   }
   
   /* Ensure all form elements have proper colors */
@@ -675,7 +675,7 @@ textarea:focus-visible {
   .model-select,
   .language-select,
   .instructions-textarea {
-    background: var(--background-white);
+    background: var(--background-elevated);
     color: var(--text-primary);
     border-color: var(--border-color);
   }
@@ -685,7 +685,7 @@ textarea:focus-visible {
   .language-select:focus,
   .instructions-textarea:focus {
     border-color: var(--primary-color);
-    background: var(--background-white);
+    background: var(--background-elevated);
     color: var(--text-primary);
   }
   
@@ -711,7 +711,7 @@ textarea:focus-visible {
   }
   
   .modal-content {
-    background: var(--background-white);
+    background: var(--background-elevated);
     color: var(--text-primary);
   }
   
