@@ -109,33 +109,31 @@
         }
         
         
-        /* Add GitHub link in top right */
-        .github-link {
-            position: fixed;
-            top: 70px;
-            right: 20px;
+        .github-link, .install-button {
             background: #24292f;
             color: white;
             padding: 8px 16px;
             border-radius: 6px;
             text-decoration: none;
             font-size: 14px;
-            z-index: 2000;
+            text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
+        .github-link:hover, .install-button:hover {
+            background: #32383f;
+            color: white;
+        }
+        
+        .install-button {
+            display: none;
+        }
+        
         @media (max-width: 767px) {
-            .github-link {
-                top: 120px;
-                right: 10px;
+            .github-link, .install-button {
                 font-size: 12px;
                 padding: 6px 12px;
             }
-        }
-        
-        .github-link:hover {
-            background: #32383f;
-            color: white;
         }
         
         /* Hide Google Translate banner */
@@ -251,6 +249,34 @@
             }
         }
         
+        function getBrowserInfo() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            if (userAgent.indexOf('firefox') !== -1) {
+                return {
+                    name: 'Firefox',
+                    url: 'https://addons.mozilla.org/en-US/firefox/addon/video-chapters-generator/',
+                    text: 'Install for Firefox'
+                };
+            }
+            
+            
+            return null;
+        }
+        
+        function initializeInstallButton() {
+            const installButton = document.getElementById('installButton');
+            const browserInfo = getBrowserInfo();
+            
+            if (browserInfo) {
+                installButton.style.display = 'block';
+                installButton.textContent = browserInfo.text;
+                installButton.onclick = function() {
+                    window.open(browserInfo.url, '_blank');
+                };
+            }
+        }
+        
         
         function loadGoogleTranslateScript() {
             if (isAutoTranslateEnabled()) {
@@ -262,6 +288,7 @@
         
         window.addEventListener('load', () => {
             initializeAutoTranslateButton();
+            initializeInstallButton();
             loadGoogleTranslateScript();
             detectAndSetLanguage();
         });
@@ -273,9 +300,9 @@
         <button id="toggleAutoTranslate" class="translate-toggle" onclick="toggleAutoTranslate()">
             Disable Auto-Translate
         </button>
+        <a href="https://github.com/dpolivaev/video-chapters-extension" class="github-link">View on GitHub</a>
+        <a id="installButton" class="install-button">Install for Firefox</a>
     </div>
-    
-    <a href="https://github.com/dpolivaev/video-chapters-extension" class="github-link">View on GitHub</a>
     <article class="markdown-body">
         <!-- README content will be inserted here -->
     </article>
