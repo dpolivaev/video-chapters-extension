@@ -181,7 +181,6 @@
         /* Ensure Google Translate elements don't override our layout */
         .goog-te-menu-frame {
             z-index: 1500 !important;
-            max-height: 400px !important;
         }
     </style>
     <script>
@@ -202,6 +201,7 @@
             if (isAutoTranslateEnabled()) {
                 new google.translate.TranslateElement({
                     pageLanguage: 'en',
+                    includedLanguages: 'ar,de,es,fr,he,it,ko,pt,ru,uk,zh-cn',
                     autoDisplay: false,
                     layout: google.translate.TranslateElement.InlineLayout.SIMPLE
                 }, 'google_translate_element');
