@@ -100,10 +100,10 @@
   "get_gemini_api_key": { "message": "Отримати безкоштовний API-ключ Gemini" },
   "create_openrouter_account": { "message": "Створити безкоштовний обліковий запис OpenRouter" },
   "help_github_title": { "message": "Вихідний код та підтримка" },
-  "disclaimer_firefox": { "message": "Тимчасові коди та заголовки розділів були створені безкоштовним розширенням Firefox з відкритим вихідним кодом %EXTENSION_LINK% за допомогою ШІ-моделі $1" },
-  "disclaimer_chrome": { "message": "Тимчасові коди та заголовки розділів були створені безкоштовним розширенням Chrome з відкритим вихідним кодом %EXTENSION_LINK% за допомогою ШІ-моделі $1" },
+  "disclaimer": { "message": "Тимчасові коди та заголовки розділів були створені безкоштовним розширенням браузера з відкритим вихідним кодом %EXTENSION_LINK% за допомогою ШІ-моделі $1" },
   "language_settings_title": { "message": "Налаштування мови" },
   "language_selector_label": { "message": "Мова інтерфейсу:" },
   "language_browser_ui": { "message": "Мова інтерфейсу браузера" },
-  "language_saved": { "message": "Налаштування мови збережено! Перезавантаження сторінки..." }
+  "language_saved": { "message": "Налаштування мови збережено! Перезавантаження сторінки..." },
+  "free": { "message": "Безкоштовно" }
 } 

@@ -100,10 +100,10 @@
   "get_gemini_api_key": { "message": "Obtenir une clé API Gemini gratuite" },
   "create_openrouter_account": { "message": "Créer un compte OpenRouter gratuit" },
   "help_github_title": { "message": "Code source et support" },
-  "disclaimer_firefox": { "message": "Les codes temporels et titres des chapitres ont été générés par l'extension Firefox gratuite et open source %EXTENSION_LINK% en utilisant le modèle d'IA $1" },
-  "disclaimer_chrome": { "message": "Les codes temporels et titres des chapitres ont été générés par l'extension Chrome gratuite et open source %EXTENSION_LINK% en utilisant le modèle d'IA $1" },
+  "disclaimer": { "message": "Les codes temporels et titres des chapitres ont été générés par l'extension de navigateur gratuite et open source %EXTENSION_LINK% en utilisant le modèle d'IA $1" },
   "language_settings_title": { "message": "Paramètres de langue" },
   "language_selector_label": { "message": "Langue de l'interface :" },
   "language_browser_ui": { "message": "Langue de l'interface du navigateur" },
-  "language_saved": { "message": "Paramètre de langue sauvegardé ! Rechargement de la page..." }
+  "language_saved": { "message": "Paramètre de langue sauvegardé ! Rechargement de la page..." },
+  "free": { "message": "Gratuit" }
 } 

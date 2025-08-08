@@ -100,10 +100,10 @@
   "get_gemini_api_key": { "message": "קבל מפתח API חינמי של Gemini" },
   "create_openrouter_account": { "message": "צור חשבון OpenRouter חינמי" },
   "help_github_title": { "message": "קוד מקור ותמיכה" },
-  "disclaimer_firefox": { "message": "קודי הזמן וכותרות הפרקים נוצרו על ידי התוסף החינמי בקוד פתוח %EXTENSION_LINK% עבור Firefox באמצעות מודל הבינה המלאכותית $1" },
-  "disclaimer_chrome": { "message": "קודי הזמן וכותרות הפרקים נוצרו על ידי התוסף החינמי בקוד פתוח %EXTENSION_LINK% עבור Chrome באמצעות מודל הבינה המלאכותית $1" },
+  "disclaimer": { "message": "קודי הזמן וכותרות הפרקים נוצרו על ידי תוסף הדפדפן החינמי בקוד פתוח %EXTENSION_LINK% באמצעות מודל הבינה המלאכותית $1" },
   "language_settings_title": { "message": "הגדרות שפה" },
   "language_selector_label": { "message": "שפת ממשק:" },
   "language_browser_ui": { "message": "שפת ממשק הדפדפן" },
-  "language_saved": { "message": "הגדרת שפה נשמרה! טוען מחדש את העמוד..." }
+  "language_saved": { "message": "הגדרת שפה נשמרה! טוען מחדש את העמוד..." },
+  "free": { "message": "חינם" }
 } 

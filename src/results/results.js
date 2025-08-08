@@ -596,10 +596,8 @@ class ResultsView {
     element.style.fontSize = 'smaller';
     element.style.color = '#666';
 
-    const isFirefox = this.detectFirefox();
     const modelName = '"' + this.getModelDisplayName(this.results.model) + '"';
-    const disclaimerKey = isFirefox ? 'disclaimer_firefox' : 'disclaimer_chrome';
-    const disclaimerText = getLocalizedMessage(disclaimerKey, [modelName]);
+    const disclaimerText = getLocalizedMessage('disclaimer', [modelName]);
 
     const parts = disclaimerText.split('%EXTENSION_LINK%');
 
@@ -620,9 +618,6 @@ class ResultsView {
     return element;
   }
 
-  detectFirefox() {
-    return typeof InstallTrigger !== 'undefined' || navigator.userAgent.includes('Firefox');
-  }
 }
 
 if (document.readyState === 'loading') {
