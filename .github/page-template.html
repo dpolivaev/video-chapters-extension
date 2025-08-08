@@ -118,6 +118,7 @@
             font-size: 14px;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
         
         .github-link:hover, .install-button:hover {
@@ -260,7 +261,6 @@
                 };
             }
             
-            
             return null;
         }
         
@@ -271,9 +271,7 @@
             if (browserInfo) {
                 installButton.style.display = 'block';
                 installButton.textContent = browserInfo.text;
-                installButton.onclick = function() {
-                    window.open(browserInfo.url, '_blank');
-                };
+                installButton.href = browserInfo.url;
             }
         }
         
@@ -300,8 +298,8 @@
         <button id="toggleAutoTranslate" class="translate-toggle" onclick="toggleAutoTranslate()">
             Disable Auto-Translate
         </button>
-        <a href="https://github.com/dpolivaev/video-chapters-extension" class="github-link">View on GitHub</a>
-        <a id="installButton" class="install-button">Install for Firefox</a>
+        <a href="https://github.com/dpolivaev/video-chapters-extension" class="github-link" target="_blank">View on GitHub</a>
+        <a id="installButton" class="install-button" target="_blank">Install for Firefox</a>
     </div>
     <article class="markdown-body">
         <!-- README content will be inserted here -->
