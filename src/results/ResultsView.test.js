@@ -51,6 +51,9 @@ global.chrome = {
   }
 };
 
+// Mock getLocalizedMessage function
+global.getLocalizedMessage = jest.fn((key) => key);
+
 // Load the ResultsView class
 const fs = require('fs');
 const path = require('path');
