@@ -93,7 +93,7 @@ class ResultsView {
         return response.status;
       }
     } catch (e) {
-      // Ignore errors in status check
+      console.debug('Status check failed silently', e);
     }
     return 'pending';
   }
@@ -375,15 +375,15 @@ class ResultsView {
     const chaptersHtml = document.getElementById('chaptersHtml');
     chaptersHtml.textContent = '';
 
-    if (this.results.videoMetadata?.url) {
-      const videoId = this.extractVideoId(this.results.videoMetadata.url);
-      if (videoId) {
-        this.renderChaptersWithVideoLink(chaptersHtml, videoId);
-        return;
-      }
+    const videoId = this.results.videoMetadata?.url && this.extractVideoId(this.results.videoMetadata.url);
+
+    if (videoId) {
+      this.renderChaptersWithVideoLink(chaptersHtml, videoId);
+    } else {
+      this.renderChaptersAsPlainText(chaptersHtml);
     }
 
-    this.renderChaptersAsPlainText(chaptersHtml);
+    this.appendDisclaimer(chaptersHtml);
   }
   renderChaptersWithVideoLink(container, videoId) {
     const urlLink = document.createElement('a');
@@ -576,6 +576,52 @@ class ResultsView {
   }
   openHelp() {
     browser.tabs.create({ url: browser.runtime.getURL('help/help.html') });
+  }
+
+  appendDisclaimer(container) {
+    if (!this.results?.model) {
+      return;
+    }
+
+    container.appendChild(document.createElement('br'));
+    container.appendChild(document.createElement('br'));
+
+    const disclaimerElement = this.buildDisclaimerElement();
+    container.appendChild(disclaimerElement);
+  }
+
+  buildDisclaimerElement() {
+    const element = document.createElement('div');
+    element.style.fontStyle = 'italic';
+    element.style.fontSize = 'smaller';
+    element.style.color = '#666';
+
+    const isFirefox = this.detectFirefox();
+    const modelName = '"' + this.getModelDisplayName(this.results.model) + '"';
+    const disclaimerKey = isFirefox ? 'disclaimer_firefox' : 'disclaimer_chrome';
+    const disclaimerText = chrome.i18n.getMessage(disclaimerKey, [modelName]);
+
+    const parts = disclaimerText.split('%EXTENSION_LINK%');
+
+    if (parts.length === 2) {
+      element.appendChild(document.createTextNode(parts[0]));
+
+      const link = document.createElement('a');
+      link.href = 'https://dpolivaev.github.io/video-chapters-extension/';
+      link.target = '_blank';
+      link.textContent = '"Video Chapters Generator"';
+      element.appendChild(link);
+
+      element.appendChild(document.createTextNode(parts[1]));
+    } else {
+      element.textContent = disclaimerText;
+    }
+
+    return element;
+  }
+
+  detectFirefox() {
+    return typeof InstallTrigger !== 'undefined' || navigator.userAgent.includes('Firefox');
   }
 }
 

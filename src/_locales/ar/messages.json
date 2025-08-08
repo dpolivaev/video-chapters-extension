@@ -104,5 +104,7 @@
   "help_examples_title": { "message": "أمثلة التعليمات" },
   "get_gemini_api_key": { "message": "احصل على مفتاح API مجاني لـ Gemini" },
   "create_openrouter_account": { "message": "أنشئ حساب OpenRouter مجاني" },
-  "help_github_title": { "message": "الكود المصدري والدعم" }
+  "help_github_title": { "message": "الكود المصدري والدعم" },
+  "disclaimer_firefox": { "message": "تم إنشاء رموز الوقت وعناوين الفصول بواسطة إضافة Firefox المجانية مفتوحة المصدر %EXTENSION_LINK% باستخدام نموذج الذكاء الاصطناعي $1" },
+  "disclaimer_chrome": { "message": "تم إنشاء رموز الوقت وعناوين الفصول بواسطة امتداد Chrome المجاني مفتوح المصدر %EXTENSION_LINK% باستخدام نموذج الذكاء الاصطناعي $1" }
 }

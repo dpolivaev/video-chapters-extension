@@ -99,5 +99,7 @@
   "help_examples_title": { "message": "指令示例" },
   "get_gemini_api_key": { "message": "获取免费Gemini API密钥" },
   "create_openrouter_account": { "message": "创建免费OpenRouter账户" },
-  "help_github_title": { "message": "源代码和支持" }
+  "help_github_title": { "message": "源代码和支持" },
+  "disclaimer_firefox": { "message": "章节时间码和标题由免费开源的 Firefox 扩展 %EXTENSION_LINK% 使用 AI 模型 $1 生成" },
+  "disclaimer_chrome": { "message": "章节时间码和标题由免费开源的 Chrome 扩展 %EXTENSION_LINK% 使用 AI 模型 $1 生成" }
 } 

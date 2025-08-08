@@ -99,5 +99,7 @@
   "help_examples_title": { "message": "Ejemplos de instrucciones" },
   "get_gemini_api_key": { "message": "Obtener clave API gratuita de Gemini" },
   "create_openrouter_account": { "message": "Crear cuenta gratuita de OpenRouter" },
-  "help_github_title": { "message": "Código fuente y soporte" }
+  "help_github_title": { "message": "Código fuente y soporte" },
+  "disclaimer_firefox": { "message": "Los códigos de tiempo y títulos de los capítulos fueron generados por el complemento gratuito y de código abierto de Firefox %EXTENSION_LINK% utilizando el modelo de IA $1" },
+  "disclaimer_chrome": { "message": "Los códigos de tiempo y títulos de los capítulos fueron generados por la extensión gratuita y de código abierto de Chrome %EXTENSION_LINK% utilizando el modelo de IA $1" }
 } 

@@ -99,5 +99,7 @@
   "help_examples_title": { "message": "Примеры инструкций" },
   "get_gemini_api_key": { "message": "Получить бесплатный API-ключ Gemini" },
   "create_openrouter_account": { "message": "Создать бесплатную учетную запись OpenRouter" },
-  "help_github_title": { "message": "Исходный код и поддержка" }
+  "help_github_title": { "message": "Исходный код и поддержка" },
+  "disclaimer_firefox": { "message": "Временные коды и заголовки глав были созданы бесплатным расширением Firefox с открытым исходным кодом %EXTENSION_LINK% с использованием ИИ-модели $1" },
+  "disclaimer_chrome": { "message": "Временные коды и заголовки глав были созданы бесплатным расширением Chrome с открытым исходным кодом %EXTENSION_LINK% с использованием ИИ-модели $1" }
 } 

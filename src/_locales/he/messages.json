@@ -99,5 +99,7 @@
   "help_examples_title": { "message": "דוגמאות להוראות" },
   "get_gemini_api_key": { "message": "קבל מפתח API חינמי של Gemini" },
   "create_openrouter_account": { "message": "צור חשבון OpenRouter חינמי" },
-  "help_github_title": { "message": "קוד מקור ותמיכה" }
+  "help_github_title": { "message": "קוד מקור ותמיכה" },
+  "disclaimer_firefox": { "message": "קודי הזמן וכותרות הפרקים נוצרו על ידי התוסף החינמי בקוד פתוח %EXTENSION_LINK% עבור Firefox באמצעות מודל הבינה המלאכותית $1" },
+  "disclaimer_chrome": { "message": "קודי הזמן וכותרות הפרקים נוצרו על ידי התוסף החינמי בקוד פתוח %EXTENSION_LINK% עבור Chrome באמצעות מודל הבינה המלאכותית $1" }
 } 

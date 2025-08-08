@@ -104,5 +104,7 @@
   "help_examples_title": { "message": "지시사항 예시" },
   "get_gemini_api_key": { "message": "무료 Gemini API 키 받기" },
   "create_openrouter_account": { "message": "무료 OpenRouter 계정 만들기" },
-  "help_github_title": { "message": "소스 코드 및 지원" }
+  "help_github_title": { "message": "소스 코드 및 지원" },
+  "disclaimer_firefox": { "message": "챕터 타임코드와 제목은 무료 오픈소스 Firefox 확장 프로그램 %EXTENSION_LINK%가 AI 모델 $1을 사용하여 생성했습니다" },
+  "disclaimer_chrome": { "message": "챕터 타임코드와 제목은 무료 오픈소스 Chrome 확장 프로그램 %EXTENSION_LINK%가 AI 모델 $1을 사용하여 생성했습니다" }
 }
