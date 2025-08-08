@@ -171,8 +171,8 @@ class InstructionHistoryView {
   }
 
   setupNameInputEventListeners(nameInput, entry) {
-    nameInput.addEventListener('focus', () => {
-      this.nameEditController.startEditing(entry.id, nameInput.value);
+    nameInput.addEventListener('focus', async () => {
+      await this.nameEditController.startEditing(entry.id, nameInput.value);
     });
 
     nameInput.addEventListener('input', () => {

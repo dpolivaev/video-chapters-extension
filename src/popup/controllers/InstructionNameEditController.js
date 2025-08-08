@@ -26,12 +26,34 @@ class InstructionNameEditController {
     this.activeEdit = { id: null, originalValue: '', isDirty: false };
   }
 
-  startEditing(instructionId, currentValue) {
+  async startEditing(instructionId, currentValue) {
+    await this.flushCurrentEditIfDifferent(instructionId);
+
     this.activeEdit = {
       id: instructionId,
       originalValue: currentValue,
       isDirty: false
     };
+  }
+
+  async flushCurrentEditIfDifferent(newInstructionId) {
+    if (this.activeEdit.id !== null && this.activeEdit.id !== newInstructionId && this.activeEdit.isDirty) {
+      const previousInputElement = document.querySelector(
+        `input.history-name-input[data-id="${this.activeEdit.id}"]`
+      );
+
+      if (previousInputElement) {
+        const previousEntry = this.findEntryById(this.activeEdit.id);
+        if (previousEntry) {
+          await this.finishEditing(this.activeEdit.id, previousInputElement.value, previousEntry);
+        }
+      }
+    }
+  }
+
+  findEntryById(instructionId) {
+    const inputElement = document.querySelector(`input.history-name-input[data-id="${instructionId}"]`);
+    return inputElement ? { getNameFieldValue: () => inputElement.placeholder } : null;
   }
 
   markAsDirty(instructionId, _newValue) {
