@@ -144,9 +144,7 @@ This checks if classes are already loaded (Firefox case) before calling `importS
 
 ### User-Focused Changelog Requirements
 
-**Content Policy**: Changelog entries should only mention changes that directly affect user experience:
-- ✅ **Include**: New features users can see/use, UI improvements, bug fixes affecting functionality
-- ❌ **Exclude**: Internal refactoring, code architecture changes, developer tooling, technical debt fixes
+**Content Policy**: Changelog entries should only mention changes that directly affect user experience.
 
 **Format Requirements**:
 - No dates in version headers (use `## [1.3.8]` not `## [1.3.8] - 2025-07-31`)
