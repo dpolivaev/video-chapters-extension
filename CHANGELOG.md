@@ -5,6 +5,25 @@ All notable changes to the Video Chapters Generator extension will be documented
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.12]
+
+### Added
+- Edit instruction names in the history
+
+## [1.3.11]
+
+### Fixed
+- Free model access through OpenRouter API
+- Chapter generation prompt quality with better formatting rules
+
+### Changed
+- Updated extension descriptions for web store submissions
+
+## [1.3.10]
+
+### Added
+- Portuguese, Arabic, and Korean language support
+
 ## [1.3.9]
 
 ### Fixed
