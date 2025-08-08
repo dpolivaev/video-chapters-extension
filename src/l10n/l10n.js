@@ -7,7 +7,7 @@
 const l10n = {
   updateString(string) {
     return string.replace(/__MSG_([-@.\w]+)__/g, (matched, key) => {
-      return chrome.i18n.getMessage(key) || matched;
+      return getLocalizedMessage(key) || matched;
     });
   },
 
@@ -52,6 +52,10 @@ const l10n = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Wait for language override to initialize if available
+  if (window.languageOverride && window.languageOverride.initPromise) {
+    await window.languageOverride.initPromise;
+  }
   l10n.updateDocument();
 }, { once: true });

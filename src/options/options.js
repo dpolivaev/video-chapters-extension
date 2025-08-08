@@ -25,6 +25,7 @@ if (typeof browser === 'undefined') {
 
 document.addEventListener('DOMContentLoaded', async function() {
   await loadApiKeys();
+  await loadLanguageSettings();
   await loadVersionInfo();
   setupEventListeners();
 });
@@ -37,7 +38,7 @@ async function loadApiKeys() {
     document.getElementById('openRouterApiKey').value = settings.openRouterApiKey || '';
   } catch (error) {
     console.error('Error loading API keys:', error);
-    showStatus(chrome.i18n.getMessage('error_loading_settings'), 'error');
+    showStatus(getLocalizedMessage('error_loading_settings'), 'error');
   }
 }
 
@@ -53,10 +54,10 @@ async function saveApiKey() {
     await browser.storage.sync.set({
       userSettings: updatedSettings
     });
-    showStatus(chrome.i18n.getMessage('gemini_api_key_saved'), 'success');
+    showStatus(getLocalizedMessage('gemini_api_key_saved'), 'success');
   } catch (error) {
     console.error('Error saving Gemini API key:', error);
-    showStatus(chrome.i18n.getMessage('error_saving_gemini_api_key'), 'error');
+    showStatus(getLocalizedMessage('error_saving_gemini_api_key'), 'error');
   }
 }
 
@@ -72,10 +73,51 @@ async function saveOpenRouterApiKey() {
     await browser.storage.sync.set({
       userSettings: updatedSettings
     });
-    showStatus(chrome.i18n.getMessage('openrouter_api_key_saved'), 'success');
+    showStatus(getLocalizedMessage('openrouter_api_key_saved'), 'success');
   } catch (error) {
     console.error('Error saving OpenRouter API key:', error);
-    showStatus(chrome.i18n.getMessage('error_saving_openrouter_api_key'), 'error');
+    showStatus(getLocalizedMessage('error_saving_openrouter_api_key'), 'error');
+  }
+}
+
+async function loadLanguageSettings() {
+  try {
+    const result = await browser.storage.sync.get('userSettings');
+    const settings = result.userSettings || {};
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+      languageSelect.value = settings.uiLanguage || '';
+    }
+  } catch (error) {
+    console.error('Error loading language settings:', error);
+    showStatus(getLocalizedMessage('error_loading_settings'), 'error');
+  }
+}
+
+async function saveLanguageSettings() {
+  try {
+    const languageSelect = document.getElementById('languageSelect');
+    const selectedLanguage = languageSelect.value;
+
+    const result = await browser.storage.sync.get('userSettings');
+    const existingSettings = result.userSettings || {};
+    const updatedSettings = {
+      ...existingSettings,
+      uiLanguage: selectedLanguage
+    };
+
+    await browser.storage.sync.set({
+      userSettings: updatedSettings
+    });
+
+    showStatus(getLocalizedMessage('language_saved'), 'success');
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  } catch (error) {
+    console.error('Error saving language settings:', error);
+    showStatus(getLocalizedMessage('error_saving_settings'), 'error');
   }
 }
 
@@ -154,6 +196,10 @@ function setupEventListeners() {
   const helpButton = document.getElementById('helpBtn');
   if (helpButton) {
     helpButton.addEventListener('click', openHelp);
+  }
+  const saveLanguageButton = document.getElementById('saveLanguage');
+  if (saveLanguageButton) {
+    saveLanguageButton.addEventListener('click', saveLanguageSettings);
   }
 }
 

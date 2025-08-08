@@ -60,7 +60,7 @@ class PopupView {
       console.log('PopupView: Initialization completed successfully');
     } catch (error) {
       console.error('PopupView: Error initializing popup:', error, error && error.stack);
-      this.showNotification(chrome.i18n.getMessage('error_initializing_extension'), 'error');
+      this.showNotification(getLocalizedMessage('error_initializing_extension'), 'error');
     }
   }
   setupEventListeners() {
@@ -283,12 +283,12 @@ class PopupView {
       console.log('PopupView: Current tab result:', tab);
       if (!tab) {
         console.log('PopupView: No tab found');
-        this.showNoVideoMessage(chrome.i18n.getMessage('no_active_tab_found'));
+        this.showNoVideoMessage(getLocalizedMessage('no_active_tab_found'));
         return;
       }
       if (!tab.url) {
         console.log('PopupView: Tab has no URL');
-        this.showNoVideoMessage(chrome.i18n.getMessage('tab_has_no_url'));
+        this.showNoVideoMessage(getLocalizedMessage('tab_has_no_url'));
         return;
       }
       console.log('PopupView: Tab URL:', tab.url);
@@ -348,7 +348,7 @@ class PopupView {
         new VideoUrl(tab.url);
       } catch (error) {
         console.log('PopupView: Not a valid YouTube video page:', error.message);
-        this.showNoVideoMessage(chrome.i18n.getMessage('not_a_youtube_video_page'));
+        this.showNoVideoMessage(getLocalizedMessage('not_a_youtube_video_page'));
         return;
       }
       console.log('PopupView: YouTube video page detected, trying transcript extraction...');
@@ -396,31 +396,31 @@ class PopupView {
           console.log('PopupView: Response status:', transcriptResponse?.status);
           console.log('PopupView: Response message:', transcriptResponse?.message);
           const errorMessage = transcriptResponse?.message || 'Transcript extraction failed';
-          this.showNoVideoMessage(chrome.i18n.getMessage('transcript_extraction_failed') + ': ' + errorMessage);
+          this.showNoVideoMessage(getLocalizedMessage('transcript_extraction_failed') + ': ' + errorMessage);
           return;
         }
       } catch (transcriptError) {
         console.log('PopupView: Transcript extraction error:', transcriptError);
-        this.showNoVideoMessage(chrome.i18n.getMessage('error_extracting_transcript') + ': ' + transcriptError.message);
+        this.showNoVideoMessage(getLocalizedMessage('error_extracting_transcript') + ': ' + transcriptError.message);
         return;
       }
     } catch (error) {
       console.error('PopupView: Error in loadCurrentVideo:', error);
-      this.showNoVideoMessage(chrome.i18n.getMessage('error') + ': ' + error.message);
+      this.showNoVideoMessage(getLocalizedMessage('error') + ': ' + error.message);
     }
   }
   showLoadingMessage() {
     const videoMetaLine = document.getElementById('videoMetaLine');
     if (videoMetaLine) {
-      videoMetaLine.textContent = chrome.i18n.getMessage('loading_video_info');
+      videoMetaLine.textContent = getLocalizedMessage('loading_video_info');
     }
     this.updateUI();
   }
-  showNoVideoMessage(message = chrome.i18n.getMessage('please_navigate_to_youtube')) {
+  showNoVideoMessage(message = getLocalizedMessage('please_navigate_to_youtube')) {
     console.log('PopupView: showNoVideoMessage called with:', message);
     const videoMetaLine = document.getElementById('videoMetaLine');
     if (videoMetaLine) {
-      videoMetaLine.textContent = message || chrome.i18n.getMessage('video_info_not_loaded');
+      videoMetaLine.textContent = message || getLocalizedMessage('video_info_not_loaded');
     }
     this.updateUI();
   }
@@ -429,11 +429,11 @@ class PopupView {
     console.log('PopupView: currentVideo:', this.currentVideo);
     const videoMetaLine = document.getElementById('videoMetaLine');
     if (!this.currentVideo) {
-      videoMetaLine.textContent = chrome.i18n.getMessage('video_info_not_loaded');
+      videoMetaLine.textContent = getLocalizedMessage('video_info_not_loaded');
       return;
     }
-    const title = this.currentVideo.title || chrome.i18n.getMessage('unknown_title');
-    const author = this.currentVideo.author || chrome.i18n.getMessage('unknown_author');
+    const title = this.currentVideo.title || getLocalizedMessage('unknown_title');
+    const author = this.currentVideo.author || getLocalizedMessage('unknown_author');
     const url = this.currentVideo.url || '';
     videoMetaLine.textContent = '';
     const urlLink = document.createElement('a');
@@ -459,19 +459,19 @@ class PopupView {
     if (model.includes('gemini-')) {
       apiKey = dynamicApiKey;
       if (!apiKey) {
-        this.showNotification(chrome.i18n.getMessage('gemini_api_key_required'), 'error');
+        this.showNotification(getLocalizedMessage('gemini_api_key_required'), 'error');
         return;
       }
     } else if (this.isOpenRouterModel(model)) {
       apiKey = dynamicApiKey;
       if (!apiKey) {
-        this.showNotification(chrome.i18n.getMessage('openrouter_api_key_required'), 'error');
+        this.showNotification(getLocalizedMessage('openrouter_api_key_required'), 'error');
         return;
       }
     }
     if (!this.currentVideo) {
       console.log('PopupView: No video detected for chapter generation');
-      this.showNotification(chrome.i18n.getMessage('no_video_detected'), 'error');
+      this.showNotification(getLocalizedMessage('no_video_detected'), 'error');
       return;
     }
     try {
@@ -479,7 +479,7 @@ class PopupView {
         await window.instructionHistory.saveInstruction(customInstructions);
       }
       if (!this.currentVideo.processedContent) {
-        throw new Error(chrome.i18n.getMessage('no_transcript_available'));
+        throw new Error(getLocalizedMessage('no_transcript_available'));
       }
       const processedContent = this.currentVideo.processedContent;
       let sessionResults;
@@ -573,11 +573,11 @@ class PopupView {
     const progressSection = document.getElementById('progressSection');
     if (processing) {
       generateBtn.disabled = true;
-      generateBtn.textContent = chrome.i18n.getMessage('processing_button');
+      generateBtn.textContent = getLocalizedMessage('processing_button');
       progressSection.style.display = 'block';
     } else {
       generateBtn.disabled = false;
-      generateBtn.textContent = chrome.i18n.getMessage('generate_chapters_button');
+      generateBtn.textContent = getLocalizedMessage('generate_chapters_button');
       progressSection.style.display = 'none';
       this.updateProgress(0, '');
     }
@@ -626,20 +626,20 @@ class PopupView {
       document.getElementById('dynamicApiKeyInput').value = '';
       await this.saveSettings();
       if (selectedModel.includes('gemini-')) {
-        this.showNotification(chrome.i18n.getMessage('api_key_cleared_gemini'), 'success');
+        this.showNotification(getLocalizedMessage('api_key_cleared_gemini'), 'success');
       } else if (this.isOpenRouterModel(selectedModel)) {
         const modelInfo = this.getModelInfo(selectedModel);
         if (modelInfo && !modelInfo.isFree) {
-          this.showNotification(chrome.i18n.getMessage('api_key_cleared_openrouter'), 'success');
+          this.showNotification(getLocalizedMessage('api_key_cleared_openrouter'), 'success');
         } else {
-          this.showNotification(chrome.i18n.getMessage('api_key_cleared'), 'success');
+          this.showNotification(getLocalizedMessage('api_key_cleared'), 'success');
         }
       } else {
-        this.showNotification(chrome.i18n.getMessage('api_key_cleared'), 'success');
+        this.showNotification(getLocalizedMessage('api_key_cleared'), 'success');
       }
     } catch (error) {
       console.error('Error clearing API key:', error);
-      this.showNotification(chrome.i18n.getMessage('error_clearing_api_key'), 'error');
+      this.showNotification(getLocalizedMessage('error_clearing_api_key'), 'error');
     }
   }
   openOptions() {
@@ -687,12 +687,12 @@ class PopupView {
     if (model.includes('gemini-')) {
       canUseModel = !!dynamicApiKey;
       if (!canUseModel) {
-        reasonDisabled = chrome.i18n.getMessage('gemini_api_key_required');
+        reasonDisabled = getLocalizedMessage('gemini_api_key_required');
       }
     } else if (this.isOpenRouterModel(model)) {
       canUseModel = !!dynamicApiKey;
       if (!canUseModel) {
-        reasonDisabled = chrome.i18n.getMessage('openrouter_api_key_required');
+        reasonDisabled = getLocalizedMessage('openrouter_api_key_required');
       }
     } else {
       canUseModel = false;

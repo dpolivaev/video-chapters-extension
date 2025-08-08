@@ -101,5 +101,9 @@
   "create_openrouter_account": { "message": "Создать бесплатную учетную запись OpenRouter" },
   "help_github_title": { "message": "Исходный код и поддержка" },
   "disclaimer_firefox": { "message": "Временные коды и заголовки глав были созданы бесплатным расширением Firefox с открытым исходным кодом %EXTENSION_LINK% с использованием ИИ-модели $1" },
-  "disclaimer_chrome": { "message": "Временные коды и заголовки глав были созданы бесплатным расширением Chrome с открытым исходным кодом %EXTENSION_LINK% с использованием ИИ-модели $1" }
+  "disclaimer_chrome": { "message": "Временные коды и заголовки глав были созданы бесплатным расширением Chrome с открытым исходным кодом %EXTENSION_LINK% с использованием ИИ-модели $1" },
+  "language_settings_title": { "message": "Настройки языка" },
+  "language_selector_label": { "message": "Язык интерфейса:" },
+  "language_browser_ui": { "message": "Язык интерфейса браузера" },
+  "language_saved": { "message": "Настройка языка сохранена! Перезагрузка страницы..." }
 } 

@@ -27,7 +27,7 @@ function initializeHelpPage() {
 }
 
 function renderExamples() {
-  const examples = chrome.i18n.getMessage('instruction_examples').split('|');
+  const examples = getLocalizedMessage('instruction_examples').split('|');
 
   const container = document.getElementById('examples-container');
   if (!container) {

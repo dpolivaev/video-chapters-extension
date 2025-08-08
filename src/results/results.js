@@ -43,7 +43,7 @@ class ResultsView {
       await this.checkStatusAndInit();
     } catch (error) {
       console.error('Error initializing results:', error);
-      this.showError(chrome.i18n.getMessage('error_loading_results') + ': ' + error.message);
+      this.showError(getLocalizedMessage('error_loading_results') + ': ' + error.message);
       this.hideProgress();
     }
   }
@@ -74,7 +74,7 @@ class ResultsView {
         this.hideProgress();
       } else {
         this.switchTab('subtitles');
-        this.showProgress(chrome.i18n.getMessage('progress_generating_chapters'), 30);
+        this.showProgress(getLocalizedMessage('progress_generating_chapters'), 30);
         this.setupEventListeners();
         this.setupTabSwitching();
         this.updateDisplay();
@@ -118,7 +118,7 @@ class ResultsView {
     const msg = document.getElementById('progressMessage');
     section.style.display = 'block';
     fill.style.width = (percent || 30) + '%';
-    msg.textContent = message || chrome.i18n.getMessage('progress_generating_chapters');
+    msg.textContent = message || getLocalizedMessage('progress_generating_chapters');
   }
   hideProgress() {
     const section = document.getElementById('progressSection');
@@ -176,9 +176,9 @@ class ResultsView {
       } else {
         elapsed += 2;
         if (elapsed >= 300) {
-          this.showProgress(chrome.i18n.getMessage('generation_is_taking_longer_than_expected'), 90);
+          this.showProgress(getLocalizedMessage('generation_is_taking_longer_than_expected'), 90);
         } else if (elapsed >= 60) {
-          this.showProgress(chrome.i18n.getMessage('still_generating_chapters_please_wait'), 60);
+          this.showProgress(getLocalizedMessage('still_generating_chapters_please_wait'), 60);
         }
         this.pollingTimeout = setTimeout(poll, 2e3);
       }
@@ -187,12 +187,12 @@ class ResultsView {
   }
   startProgressTimeout() {
     this.progressTimeout = setTimeout(() => {
-      this.showProgress(chrome.i18n.getMessage('generation_timed_out_please_try_again'), 100);
+      this.showProgress(getLocalizedMessage('generation_timed_out_please_try_again'), 100);
     }, 5 * 60 * 1e3);
   }
   async handleGenerationError() {
-    let errorMessage = chrome.i18n.getMessage('chapter_generation_failed');
-    let suggestion = chrome.i18n.getMessage('please_try_again');
+    let errorMessage = getLocalizedMessage('chapter_generation_failed');
+    let suggestion = getLocalizedMessage('please_try_again');
     if (this.results && this.results.error) {
       errorMessage = this.results.error;
       if (this.results.errorType && this.results.errorType.suggestion) {
@@ -200,10 +200,10 @@ class ResultsView {
       }
     }
     this.showNotification(errorMessage + ' ' + suggestion, 'error');
-    document.getElementById('statusText').textContent = chrome.i18n.getMessage('generation_failed');
+    document.getElementById('statusText').textContent = getLocalizedMessage('generation_failed');
     const chaptersContent = document.getElementById('chaptersContent');
     if (chaptersContent) {
-      chaptersContent.value = chrome.i18n.getMessage('error') + ': ' + errorMessage + '\n\n' + chrome.i18n.getMessage('please_try_again') + '\n\n' + chrome.i18n.getMessage('general_error');
+      chaptersContent.value = getLocalizedMessage('error') + ': ' + errorMessage + '\n\n' + getLocalizedMessage('please_try_again') + '\n\n' + getLocalizedMessage('general_error');
       chaptersContent.classList.add('error-content');
     }
     if (!this.userSwitchedTab) {
@@ -282,7 +282,7 @@ class ResultsView {
         this.updatePageTitle();
         return;
       } else {
-        throw new Error(chrome.i18n.getMessage('no_results_found_in_this_session_please_generate_chapters_first'));
+        throw new Error(getLocalizedMessage('no_results_found_in_this_session_please_generate_chapters_first'));
       }
     } catch (error) {
       console.error('Error loading results:', error);
@@ -303,12 +303,12 @@ class ResultsView {
     if (!metadata) {
       return;
     }
-    document.getElementById('videoTitle').textContent = metadata.title || chrome.i18n.getMessage('unknown_title');
-    document.getElementById('videoAuthor').textContent = metadata.author || chrome.i18n.getMessage('unknown_author');
+    document.getElementById('videoTitle').textContent = metadata.title || getLocalizedMessage('unknown_title');
+    document.getElementById('videoAuthor').textContent = metadata.author || getLocalizedMessage('unknown_author');
     if (this.results.timestamp) {
       const date = new Date(this.results.timestamp);
       const timeStr = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
-      document.getElementById('generationTime').textContent = chrome.i18n.getMessage('generated_on') + ' ' + timeStr;
+      document.getElementById('generationTime').textContent = getLocalizedMessage('generated_on') + ' ' + timeStr;
     }
   }
   updatePageTitle() {
@@ -317,7 +317,7 @@ class ResultsView {
     if (!pageTitle) {
       return;
     }
-    let title = chrome.i18n.getMessage('results_page_title');
+    let title = getLocalizedMessage('results_page_title');
     if (this.results && this.results.model) {
       const modelName = this.getModelDisplayName(this.results.model);
       title += ` (${modelName})`;
@@ -365,7 +365,7 @@ class ResultsView {
     }
     const parts = model.split('/');
     const modelPart = parts[parts.length - 1];
-    const freeText = chrome.i18n.getMessage('free') || 'Free';
+    const freeText = getLocalizedMessage('free') || 'Free';
     return modelPart.replace(/:free$/, ' (' + freeText + ')');
   }
   updateChaptersDisplay() {
@@ -452,13 +452,13 @@ class ResultsView {
     subtitlesContent.value = this.results.processedContent.content || '';
     const info = [];
     if (this.results.processedContent.language) {
-      info.push(`${chrome.i18n.getMessage('language')}: ${this.results.processedContent.language}`);
+      info.push(`${getLocalizedMessage('language')}: ${this.results.processedContent.language}`);
     }
     if (this.results.processedContent.trackName) {
-      info.push(`${chrome.i18n.getMessage('track')}: ${this.results.processedContent.trackName}`);
+      info.push(`${getLocalizedMessage('track')}: ${this.results.processedContent.trackName}`);
     }
     if (this.results.processedContent.isAutoGenerated) {
-      info.push(chrome.i18n.getMessage('auto_generated'));
+      info.push(getLocalizedMessage('auto_generated'));
     }
     subtitleInfo.textContent = info.join(' • ');
   }
@@ -486,7 +486,7 @@ class ResultsView {
 
       const content = element.tagName === 'TEXTAREA' ? element.value : element.textContent;
       if (!element || !content.trim()) {
-        this.showNotification(chrome.i18n.getMessage('no_' + contentName.toLowerCase() + '_to_copy'), 'warning');
+        this.showNotification(getLocalizedMessage('no_' + contentName.toLowerCase() + '_to_copy'), 'warning');
         return;
       }
 
@@ -524,17 +524,17 @@ class ResultsView {
         }
       }
 
-      this.showNotification(chrome.i18n.getMessage(contentName.toLowerCase() + '_copied'), 'success');
+      this.showNotification(getLocalizedMessage(contentName.toLowerCase() + '_copied'), 'success');
     } catch (error) {
       console.error('Error copying to clipboard:', error);
-      this.showNotification(chrome.i18n.getMessage('failed_to_copy'), 'error');
+      this.showNotification(getLocalizedMessage('failed_to_copy'), 'error');
     }
   }
   hideLoading() {}
   showLoading() {}
   showError(message) {
     this.showNotification(message, 'error');
-    document.getElementById('statusText').textContent = chrome.i18n.getMessage('error_loading_results');
+    document.getElementById('statusText').textContent = getLocalizedMessage('error_loading_results');
   }
   showNotification(message, type = 'info') {
     const container = document.getElementById('notificationContainer');
@@ -599,7 +599,7 @@ class ResultsView {
     const isFirefox = this.detectFirefox();
     const modelName = '"' + this.getModelDisplayName(this.results.model) + '"';
     const disclaimerKey = isFirefox ? 'disclaimer_firefox' : 'disclaimer_chrome';
-    const disclaimerText = chrome.i18n.getMessage(disclaimerKey, [modelName]);
+    const disclaimerText = getLocalizedMessage(disclaimerKey, [modelName]);
 
     const parts = disclaimerText.split('%EXTENSION_LINK%');
 

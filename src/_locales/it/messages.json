@@ -101,5 +101,9 @@
   "create_openrouter_account": { "message": "Crea account OpenRouter gratuito" },
   "help_github_title": { "message": "Codice sorgente e supporto" },
   "disclaimer_firefox": { "message": "I codici temporali e i titoli dei capitoli sono stati generati dall'estensione Firefox gratuita e open source %EXTENSION_LINK% utilizzando il modello di IA $1" },
-  "disclaimer_chrome": { "message": "I codici temporali e i titoli dei capitoli sono stati generati dall'estensione Chrome gratuita e open source %EXTENSION_LINK% utilizzando il modello di IA $1" }
+  "disclaimer_chrome": { "message": "I codici temporali e i titoli dei capitoli sono stati generati dall'estensione Chrome gratuita e open source %EXTENSION_LINK% utilizzando il modello di IA $1" },
+  "language_settings_title": { "message": "Impostazioni lingua" },
+  "language_selector_label": { "message": "Lingua dell'interfaccia:" },
+  "language_browser_ui": { "message": "Lingua dell'interfaccia del browser" },
+  "language_saved": { "message": "Impostazione lingua salvata! Ricaricamento pagina..." }
 } 

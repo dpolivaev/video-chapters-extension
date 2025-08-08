@@ -45,7 +45,8 @@ module.exports = {
     normalizeUrl: 'readonly',
     l10n: 'readonly',
     cleanVideoURL: 'readonly',
-    retryHandler: 'writable'
+    retryHandler: 'writable',
+    getLocalizedMessage: 'readonly'
   },
   rules: {
     'no-unused-vars': ['error', {
