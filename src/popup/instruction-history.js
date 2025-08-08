@@ -19,6 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
+
+/* global InstructionEntry, InstructionNameEditController */
 if (typeof browser === 'undefined') {
   const browser = chrome;
 }
@@ -30,6 +32,9 @@ class InstructionHistoryView {
     this.limitInput = null;
     this.instructionsTextarea = null;
     this.instructionsPlaceholder = null;
+    this.nameEditController = new InstructionNameEditController({
+      showError: (message) => this.showNotification(message, 'error')
+    });
     this.init();
   }
   async init() {
@@ -47,10 +52,12 @@ class InstructionHistoryView {
       this.showDialog();
     });
     document.getElementById('closeHistoryModal').addEventListener('click', () => {
+      this.flushLastEditedIfNeeded();
       this.hideDialog();
     });
     this.modal.addEventListener('click', e => {
       if (e.target === this.modal) {
+        this.flushLastEditedIfNeeded();
         this.hideDialog();
       }
     });
@@ -62,6 +69,7 @@ class InstructionHistoryView {
     });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && this.modal.style.display === 'block') {
+        this.flushLastEditedIfNeeded();
         this.hideDialog();
       }
     });
@@ -106,29 +114,18 @@ class InstructionHistoryView {
       return;
     }
     history.forEach((entry, index) => {
-      const entryElement = this.createHistoryEntry(entry, index);
+      const instructionEntry = InstructionEntry.fromStorageObject(entry);
+      const entryElement = this.createHistoryEntry(instructionEntry, index);
       this.historyList.appendChild(entryElement);
     });
   }
   createHistoryEntry(entry) {
     const entryDiv = document.createElement('div');
     entryDiv.className = 'history-entry';
-    let timestampStr = 'Unknown time';
-    try {
-      const date = new Date(entry.timestamp);
-      timestampStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (e) {
-      console.warn('Failed to parse timestamp:', entry.timestamp);
-    }
     const headerDiv = document.createElement('div');
     headerDiv.className = 'history-entry-header';
-    const timestampDiv = document.createElement('div');
-    timestampDiv.className = 'history-timestamp';
-    timestampDiv.textContent = timestampStr;
-    headerDiv.appendChild(timestampDiv);
+    const nameInput = this.createNameInput(entry);
+    headerDiv.appendChild(nameInput);
     const contentDiv = document.createElement('div');
     contentDiv.className = 'history-content';
     const textDiv = document.createElement('div');
@@ -150,13 +147,44 @@ class InstructionHistoryView {
     entryDiv.appendChild(headerDiv);
     entryDiv.appendChild(contentDiv);
     entryDiv.appendChild(actionsDiv);
+    this.setupNameInputEventListeners(nameInput, entry);
     selectBtn.addEventListener('click', () => {
+      this.nameEditController.flushPendingEdit(this.historyList);
       this.selectInstruction(entry.content);
     });
     deleteBtn.addEventListener('click', () => {
       this.deleteInstruction(entry.id, entryDiv);
     });
     return entryDiv;
+  }
+
+  createNameInput(entry) {
+    const nameInput = document.createElement('input');
+    nameInput.className = 'history-name-input';
+    nameInput.type = 'text';
+    nameInput.placeholder = entry.getFormattedTimestamp();
+    nameInput.value = entry.getNameFieldValue();
+    nameInput.setAttribute('data-id', entry.id);
+    nameInput.autocomplete = 'off';
+    nameInput.spellcheck = false;
+    return nameInput;
+  }
+
+  setupNameInputEventListeners(nameInput, entry) {
+    nameInput.addEventListener('focus', () => {
+      this.nameEditController.startEditing(entry.id, nameInput.value);
+    });
+
+    nameInput.addEventListener('input', () => {
+      this.nameEditController.markAsDirty(entry.id, nameInput.value);
+    });
+
+    nameInput.addEventListener('blur', async () => {
+      await this.nameEditController.finishEditing(entry.id, nameInput.value, entry);
+    });
+  }
+  flushLastEditedIfNeeded() {
+    this.nameEditController.flushPendingEdit(this.historyList);
   }
   selectInstruction(content) {
     this.instructionsTextarea.value = content;

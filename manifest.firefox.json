@@ -24,6 +24,7 @@
       "domain/entities/VideoTranscript.js",
       "domain/entities/ChapterGeneration.js",
       "domain/entities/BrowserTab.js",
+      "domain/entities/InstructionEntry.js",
       "infrastructure/repositories/SessionRepository.js",
       "infrastructure/repositories/TabRegistry.js",
       "infrastructure/repositories/SettingsRepository.js",

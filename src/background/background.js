@@ -20,6 +20,8 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* global InstructionEntry */
+
 if (typeof importScripts !== 'undefined') {
   importScripts('../lang/JsModuleImporter.js');
 }
@@ -34,6 +36,7 @@ JsModuleImporter.importScriptsIfNeeded([
   '../domain/entities/VideoTranscript.js',
   '../domain/entities/ChapterGeneration.js',
   '../domain/entities/BrowserTab.js',
+  '../domain/entities/InstructionEntry.js',
   '../infrastructure/repositories/SessionRepository.js',
   '../infrastructure/repositories/TabRegistry.js',
   '../infrastructure/repositories/SettingsRepository.js',
@@ -92,6 +95,10 @@ class BackgroundService {
 
         case 'deleteInstruction':
           this.handleDeleteInstruction(request, sendResponse);
+          return true;
+
+        case 'renameInstruction':
+          this.handleRenameInstruction(request, sendResponse);
           return true;
 
         case 'saveSettings':
@@ -356,6 +363,33 @@ class BackgroundService {
       });
     }
   }
+  async handleRenameInstruction(request, sendResponse) {
+    try {
+      const { id, name } = request;
+      this.validateRenameParameters(id, name);
+      await instructionHistory.renameInstruction(id, name);
+      sendResponse({
+        success: true
+      });
+    } catch (error) {
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
+  }
+
+  validateRenameParameters(id, name) {
+    if (id === null || id === undefined || id === '') {
+      throw new Error('Instruction ID is required');
+    }
+    if (name === null || name === undefined) {
+      throw new Error('Name parameter is required');
+    }
+    if (typeof name !== 'string') {
+      throw new Error('Name must be a string');
+    }
+  }
   async handleSaveSettings(request, sendResponse) {
     try {
       const {settings} = request;
@@ -372,7 +406,7 @@ class BackgroundService {
       });
     }
   }
-  async handleLoadSettings(request, sendResponse) {
+  async handleLoadSettings(_request, sendResponse) {
     try {
       const settings = await settingsRepository.loadSettings();
 
@@ -387,7 +421,7 @@ class BackgroundService {
       });
     }
   }
-  async handleGetAllModels(request, sendResponse) {
+  async handleGetAllModels(_request, sendResponse) {
     try {
       const openRouterModels = await this.fetchOpenRouterModels();
       const geminiModels = this.getGeminiModels();
@@ -407,24 +441,7 @@ class BackgroundService {
   }
 
   async fetchOpenRouterModels() {
-    // Curated list of best models - live pricing but filtered selection
-    const CURATED_MODELS = [
-      // Best free models
-      'deepseek/deepseek-r1-0528:free',
-      'meta-llama/llama-3.3-70b-instruct:free',
-      'z-ai/glm-4.5-air:free',
-      'qwen/qwen-2.5-72b-instruct:free',
-
-      // Best paid models
-      'deepseek/deepseek-r1-0528',
-      'anthropic/claude-3.5-sonnet',
-      'anthropic/claude-3.5-haiku',
-      'openai/gpt-4o',
-      'openai/gpt-4o-mini',
-      'meta-llama/llama-3.3-70b-instruct',
-      'google/gemini-2.5-pro',
-      'google/gemini-2.5-flash'
-    ];
+    const CURATED_MODELS = this.getBestAvailableModels();
 
     try {
       const response = await fetch('https://openrouter.ai/api/v1/models', {
@@ -444,31 +461,63 @@ class BackgroundService {
         throw new Error('OpenRouter API returned no models');
       }
 
-      // Filter to only curated models with live pricing
       return data.data
         .filter(model => CURATED_MODELS.includes(model.id))
-        .map(model => {
-          const isFree = model.pricing &&
-            (model.pricing.prompt === '0' || model.pricing.prompt === 0) &&
-            (model.pricing.completion === '0' || model.pricing.completion === 0);
-
-          return {
-            id: model.id,
-            name: model.name,
-            description: model.description || `${model.name} model via OpenRouter`,
-            provider: 'OpenRouter',
-            isFree,
-            category: isFree ? 'free' : 'paid',
-            capabilities: ['general']
-          };
-        });
+        .map(model => this.transformToStandardModelFormat(model));
     } catch (error) {
       console.error('BackgroundService: OpenRouter API fetch failed:', error);
-      throw error; // No fallback - fail properly
+      throw error;
     }
   }
 
-  // Removed: No more static fallbacks - API is the single source of truth
+  getBestAvailableModels() {
+    return [
+      ...this.getBestFreeModels(),
+      ...this.getBestPaidModels()
+    ];
+  }
+
+  getBestFreeModels() {
+    return [
+      'deepseek/deepseek-r1-0528:free',
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'z-ai/glm-4.5-air:free',
+      'qwen/qwen-2.5-72b-instruct:free'
+    ];
+  }
+
+  getBestPaidModels() {
+    return [
+      'deepseek/deepseek-r1-0528',
+      'anthropic/claude-3.5-sonnet',
+      'anthropic/claude-3.5-haiku',
+      'openai/gpt-4o',
+      'openai/gpt-4o-mini',
+      'meta-llama/llama-3.3-70b-instruct',
+      'google/gemini-2.5-pro',
+      'google/gemini-2.5-flash'
+    ];
+  }
+
+  transformToStandardModelFormat(model) {
+    const isFree = this.determineIfModelIsFree(model);
+    return {
+      id: model.id,
+      name: model.name,
+      description: model.description || `${model.name} model via OpenRouter`,
+      provider: 'OpenRouter',
+      isFree,
+      category: isFree ? 'free' : 'paid',
+      capabilities: ['general']
+    };
+  }
+
+  determineIfModelIsFree(model) {
+    return model.pricing &&
+      (model.pricing.prompt === '0' || model.pricing.prompt === 0) &&
+      (model.pricing.completion === '0' || model.pricing.completion === 0);
+  }
+
 
   getGeminiModels() {
     return [
@@ -724,28 +773,58 @@ class InstructionHistoryManager {
     const result = await browser.storage.local.get([ 'instructionHistory', 'historyLimit' ]);
     const history = result.instructionHistory || [];
     const limit = result.historyLimit || this.defaultLimit;
-    const existingIndex = history.findIndex(instruction => instruction.content.trim() === trimmedContent);
-    let instructionToAdd;
+
+    const instructionToAdd = this.createOrUpdateInstruction(trimmedContent, history);
+    const updatedHistory = this.addToHistoryWithLimit(instructionToAdd, history, limit);
+
+    await browser.storage.local.set({
+      instructionHistory: updatedHistory
+    });
+    return instructionToAdd;
+  }
+
+  createOrUpdateInstruction(content, history) {
+    const existingIndex = history.findIndex(instruction => instruction.content.trim() === content);
+
     if (existingIndex !== -1) {
-      const existingInstruction = history.splice(existingIndex, 1)[0];
-      instructionToAdd = {
-        id: existingInstruction.id,
-        content: trimmedContent,
-        timestamp: (new Date).toISOString()
-      };
-    } else {
-      instructionToAdd = {
-        id: Date.now(),
-        content: trimmedContent,
-        timestamp: (new Date).toISOString()
-      };
+      const existing = history.splice(existingIndex, 1)[0];
+      return new InstructionEntry(
+        existing.id,
+        content,
+        (new Date).toISOString(),
+        existing.name || '',
+        !!existing.isCustomName
+      ).toStorageObject();
     }
-    history.unshift(instructionToAdd);
+
+    return new InstructionEntry(
+      Date.now(),
+      content,
+      (new Date).toISOString()
+    ).toStorageObject();
+  }
+
+  addToHistoryWithLimit(instruction, history, limit) {
+    history.unshift(instruction);
     history.splice(limit);
+    return history;
+  }
+  async renameInstruction(id, name) {
+    const result = await browser.storage.local.get('instructionHistory');
+    const history = result.instructionHistory || [];
+    const entryIndex = history.findIndex(item => item.id === id);
+
+    if (entryIndex === -1) {
+      return;
+    }
+
+    const currentEntry = InstructionEntry.fromStorageObject(history[entryIndex]);
+    const updatedEntry = currentEntry.updateName(name);
+    history[entryIndex] = updatedEntry.toStorageObject();
+
     await browser.storage.local.set({
       instructionHistory: history
     });
-    return instructionToAdd;
   }
   async getHistory() {
     const result = await browser.storage.local.get('instructionHistory');
@@ -836,5 +915,8 @@ browser.runtime.onInstalled.addListener(details => {
 });
 
 browser.runtime.onStartup.addListener(() => {
-  // Extension started
+  handleExtensionStartup();
 });
+
+function handleExtensionStartup() {
+}
