@@ -332,7 +332,7 @@ class ResultsView {
       }
     }
   }
-  getModelDisplayName(model) {
+  getModelDisplayName(model, removeFree = false) {
     if (model.includes('gemini-2.5-pro')) {
       return 'Gemini 2.5 Pro';
     }
@@ -340,7 +340,12 @@ class ResultsView {
       return 'Gemini 2.5 Flash';
     }
     if (model.includes('deepseek-r1-0528:free')) {
-      return 'DeepSeek R1 (Free)';
+      if (removeFree) {
+        return 'DeepSeek R1';
+      } else {
+        const freeText = getLocalizedMessage('free') || 'Free';
+        return 'DeepSeek R1 (' + freeText + ')';
+      }
     }
     if (model.includes('deepseek-r1-0528')) {
       return 'DeepSeek R1';
@@ -365,8 +370,16 @@ class ResultsView {
     }
     const parts = model.split('/');
     const modelPart = parts[parts.length - 1];
-    const freeText = getLocalizedMessage('free') || 'Free';
-    return modelPart.replace(/:free$/, ' (' + freeText + ')');
+    if (removeFree) {
+      return modelPart.replace(/:free$/, '');
+    } else {
+      const freeText = getLocalizedMessage('free') || 'Free';
+      return modelPart.replace(/:free$/, ' (' + freeText + ')');
+    }
+  }
+
+  getDisclaimerModelName(model) {
+    return this.getModelDisplayName(model, true);
   }
   updateChaptersDisplay() {
     if (!this.results || !this.results.chapters) {
@@ -596,7 +609,7 @@ class ResultsView {
     element.style.fontSize = 'smaller';
     element.style.color = '#666';
 
-    const modelName = this.getModelDisplayName(this.results.model);
+    const modelName = this.getDisclaimerModelName(this.results.model);
     const disclaimerText = getLocalizedMessage('disclaimer', [modelName]);
 
     const linkPlaceholderParts = disclaimerText.split('%EXTENSION_LINK%');
