@@ -100,7 +100,7 @@
   "get_gemini_api_key": { "message": "Ottieni chiave API Gemini gratuita" },
   "create_openrouter_account": { "message": "Crea account OpenRouter gratuito" },
   "help_github_title": { "message": "Codice sorgente e supporto" },
-  "disclaimer": { "message": "I codici temporali e i titoli dei capitoli sono stati generati dall'estensione del browser gratuita e open source %EXTENSION_LINK% utilizzando il modello di IA $1" },
+  "disclaimer": { "message": "I codici temporali e i titoli dei capitoli sono stati creati utilizzando \"%EXTENSION_LINK%\" — un'estensione del browser gratuita e open source — alimentata dal modello di IA \"$1\"." },
   "language_settings_title": { "message": "Impostazioni lingua" },
   "language_selector_label": { "message": "Lingua dell'interfaccia:" },
   "language_browser_ui": { "message": "Lingua dell'interfaccia del browser" },

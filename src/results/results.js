@@ -596,26 +596,81 @@ class ResultsView {
     element.style.fontSize = 'smaller';
     element.style.color = '#666';
 
-    const modelName = '"' + this.getModelDisplayName(this.results.model) + '"';
+    const modelName = this.getModelDisplayName(this.results.model);
     const disclaimerText = getLocalizedMessage('disclaimer', [modelName]);
 
-    const parts = disclaimerText.split('%EXTENSION_LINK%');
+    const linkPlaceholderParts = disclaimerText.split('%EXTENSION_LINK%');
 
-    if (parts.length === 2) {
-      element.appendChild(document.createTextNode(parts[0]));
-
-      const link = document.createElement('a');
-      link.href = 'https://dpolivaev.github.io/video-chapters-extension/';
-      link.target = '_blank';
-      link.textContent = '"Video Chapters Generator"';
-      element.appendChild(link);
-
-      element.appendChild(document.createTextNode(parts[1]));
+    if (this.hasLinkPlaceholder(linkPlaceholderParts)) {
+      this.buildDisclaimerWithLink(element, linkPlaceholderParts);
     } else {
-      element.textContent = disclaimerText;
+      this.buildPlainDisclaimer(element, disclaimerText);
     }
 
     return element;
+  }
+
+  hasLinkPlaceholder(linkPlaceholderParts) {
+    return linkPlaceholderParts.length === 2;
+  }
+
+  buildDisclaimerWithLink(element, linkPlaceholderParts) {
+    const textBeforePlaceholder = linkPlaceholderParts[0];
+    const textAfterPlaceholder = linkPlaceholderParts[1];
+
+    const quoteChars = this.extractQuoteCharacters(textBeforePlaceholder, textAfterPlaceholder);
+    const textWithoutQuotes = this.removeQuoteCharacters(textBeforePlaceholder, textAfterPlaceholder);
+
+    element.appendChild(document.createTextNode(textWithoutQuotes.beforeText));
+    element.appendChild(this.createExtensionLink(quoteChars));
+    element.appendChild(document.createTextNode(textWithoutQuotes.afterText));
+  }
+
+  buildPlainDisclaimer(element, disclaimerText) {
+    element.textContent = disclaimerText;
+  }
+
+  extractQuoteCharacters(textBeforePlaceholder, textAfterPlaceholder) {
+    return {
+      opening: this.getLastCharacter(textBeforePlaceholder),
+      closing: this.getFirstCharacter(textAfterPlaceholder)
+    };
+  }
+
+  removeQuoteCharacters(textBeforePlaceholder, textAfterPlaceholder) {
+    return {
+      beforeText: this.removeLastCharacter(textBeforePlaceholder),
+      afterText: this.removeFirstCharacter(textAfterPlaceholder)
+    };
+  }
+
+  getLastCharacter(text) {
+    return text.charAt(text.length - 1);
+  }
+
+  getFirstCharacter(text) {
+    return text.charAt(0);
+  }
+
+  removeLastCharacter(text) {
+    return text.slice(0, -1);
+  }
+
+  removeFirstCharacter(text) {
+    return text.slice(1);
+  }
+
+  createExtensionLink(quoteChars) {
+    const link = document.createElement('a');
+    link.href = 'https://dpolivaev.github.io/video-chapters-extension/';
+    link.target = '_blank';
+    link.textContent = this.formatLinkTextWithQuotes(quoteChars);
+    return link;
+  }
+
+  formatLinkTextWithQuotes(quoteChars) {
+    const EXTENSION_NAME = 'Video Chapters Generator';
+    return quoteChars.opening + EXTENSION_NAME + quoteChars.closing;
   }
 
 }

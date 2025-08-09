@@ -100,7 +100,7 @@
   "get_gemini_api_key": { "message": "获取免费Gemini API密钥" },
   "create_openrouter_account": { "message": "创建免费OpenRouter账户" },
   "help_github_title": { "message": "源代码和支持" },
-  "disclaimer": { "message": "章节时间码和标题由免费开源的浏览器扩展 %EXTENSION_LINK% 使用 AI 模型 $1 生成" },
+  "disclaimer": { "message": "章节时间码和标题由「%EXTENSION_LINK%」——免费开源的浏览器扩展——通过「$1」AI 模型创建。" },
   "language_settings_title": { "message": "语言设置" },
   "language_selector_label": { "message": "界面语言：" },
   "language_browser_ui": { "message": "浏览器界面语言" },

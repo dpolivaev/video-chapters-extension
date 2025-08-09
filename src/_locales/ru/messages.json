@@ -100,7 +100,7 @@
   "get_gemini_api_key": { "message": "Получить бесплатный API-ключ Gemini" },
   "create_openrouter_account": { "message": "Создать бесплатную учетную запись OpenRouter" },
   "help_github_title": { "message": "Исходный код и поддержка" },
-  "disclaimer": { "message": "Временные коды и заголовки глав были созданы бесплатным расширением браузера с открытым исходным кодом %EXTENSION_LINK% с использованием ИИ-модели $1" },
+  "disclaimer": { "message": "Временные коды и заголовки глав были созданы «%EXTENSION_LINK%» — бесплатным расширением браузера с открытым исходным кодом — с применением ИИ-модели «$1»." },
   "language_settings_title": { "message": "Настройки языка" },
   "language_selector_label": { "message": "Язык интерфейса:" },
   "language_browser_ui": { "message": "Язык интерфейса браузера" },
