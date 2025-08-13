@@ -7,6 +7,7 @@
  */
 
 const ApiCredentials = require('./ApiCredentials');
+const ModelId = require('./ModelId');
 
 describe('ApiCredentials', () => {
   describe('constructor and validation', () => {
@@ -79,48 +80,53 @@ describe('ApiCredentials', () => {
   describe('model compatibility', () => {
     test('should allow Gemini models with Gemini key', () => {
       const credentials = new ApiCredentials('gemini-key', '');
-      expect(credentials.canUseModel('gemini-2.5-pro')).toBe(true);
-      expect(credentials.canUseModel('gemini-2.5-flash')).toBe(true);
+      const geminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiFlash = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      expect(credentials.canUseModel(geminiPro)).toBe(true);
+      expect(credentials.canUseModel(geminiFlash)).toBe(true);
     });
 
     test('should reject Gemini models without Gemini key', () => {
       const credentials = new ApiCredentials('', 'openrouter-key');
-      expect(credentials.canUseModel('gemini-2.5-pro')).toBe(false);
+      const geminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      expect(credentials.canUseModel(geminiPro)).toBe(false);
     });
 
     test('should allow paid OpenRouter models with OpenRouter key', () => {
       const credentials = new ApiCredentials('', 'openrouter-key');
-      expect(credentials.canUseModel('openai/gpt-4o')).toBe(true);
-      expect(credentials.canUseModel('anthropic/claude-3.5-sonnet')).toBe(true);
+      const gpt4o = new ModelId('openai/gpt-4o', 'OpenRouter', false);
+      const claude = new ModelId('anthropic/claude-3.5-sonnet', 'OpenRouter', false);
+      expect(credentials.canUseModel(gpt4o)).toBe(true);
+      expect(credentials.canUseModel(claude)).toBe(true);
     });
 
     test('should reject paid OpenRouter models without OpenRouter key', () => {
       const credentials = new ApiCredentials('gemini-key', '');
-      expect(credentials.canUseModel('openai/gpt-4o')).toBe(false);
+      const gpt4o = new ModelId('openai/gpt-4o', 'OpenRouter', false);
+      expect(credentials.canUseModel(gpt4o)).toBe(false);
     });
 
-    test('should allow free OpenRouter models without key', () => {
-      const credentials = new ApiCredentials('', '');
-      expect(credentials.canUseModel('deepseek/deepseek-r1-0528:free')).toBe(true);
-      expect(credentials.canUseModel('meta-llama/llama-3.3-70b:free')).toBe(true);
-    });
   });
 
   describe('key retrieval for models', () => {
     test('should return correct key for Gemini models', () => {
       const credentials = new ApiCredentials('gemini-key-123', 'openrouter-key-456');
-      expect(credentials.getKeyForModel('gemini-2.5-pro')).toBe('gemini-key-123');
+      const geminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      expect(credentials.getKeyForModel(geminiPro)).toBe('gemini-key-123');
     });
 
     test('should return correct key for OpenRouter models', () => {
       const credentials = new ApiCredentials('gemini-key-123', 'openrouter-key-456');
-      expect(credentials.getKeyForModel('openai/gpt-4o')).toBe('openrouter-key-456');
-      expect(credentials.getKeyForModel('deepseek/deepseek-r1-0528:free')).toBe('openrouter-key-456');
+      const gpt4o = new ModelId('openai/gpt-4o', 'OpenRouter', false);
+      const deepseek = new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
+      expect(credentials.getKeyForModel(gpt4o)).toBe('openrouter-key-456');
+      expect(credentials.getKeyForModel(deepseek)).toBe('openrouter-key-456');
     });
 
     test('should return empty string for unknown models', () => {
       const credentials = new ApiCredentials('gemini-key', 'openrouter-key');
-      expect(credentials.getKeyForModel('unknown-model')).toBe('');
+      const unknownModel = new ModelId('unknown-model', 'Unknown', false);
+      expect(credentials.getKeyForModel(unknownModel)).toBe('');
     });
   });
 
@@ -146,15 +152,6 @@ describe('ApiCredentials', () => {
     });
   });
 
-  describe('free model usage', () => {
-    test('should always allow free model usage', () => {
-      const emptyCredentials = new ApiCredentials();
-      expect(emptyCredentials.canUseFreeModel()).toBe(true);
-
-      const withKeys = new ApiCredentials('gemini', 'openrouter');
-      expect(withKeys.canUseFreeModel()).toBe(true);
-    });
-  });
 
   describe('immutability', () => {
     test('should be immutable after creation', () => {

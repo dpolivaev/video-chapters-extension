@@ -6,6 +6,11 @@
  * Licensed under GPL3 or later
  */
 
+// Load ModelId for Node.js environment (tests), skip if already loaded in browser
+if (typeof ModelId === 'undefined' && typeof require !== 'undefined') {
+  const ModelId = require('./ModelId');
+}
+
 class ApiCredentials {
   constructor(geminiKey = '', openRouterKey = '') {
     this.geminiKey = this.validateKey(geminiKey, 'Gemini');
@@ -20,27 +25,20 @@ class ApiCredentials {
     return key.trim();
   }
 
-  canUseModel(modelId) {
-    const model = new ModelId(modelId);
-
+  canUseModel(model) {
     if (model.isGemini()) {
       return !!this.geminiKey;
     }
 
-    if (model.isOpenRouter() && !model.isFree) {
+    if (model.isOpenRouter()) {
       return !!this.openRouterKey;
     }
 
-    return this.canUseFreeModel();
+    return false;
   }
 
-  canUseFreeModel() {
-    return true;
-  }
 
-  getKeyForModel(modelId) {
-    const model = new ModelId(modelId);
-
+  getKeyForModel(model) {
     if (model.isGemini()) {
       return this.geminiKey;
     }

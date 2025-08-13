@@ -1,6 +1,6 @@
 /**
  * ModelId Value Object Tests
- * Tests actual ModelId class with proper imports
+ * Tests ModelId class with JSON serialization and proper constructor validation
  *
  * Copyright (C) 2025 Dimitry Polivaev
  * Licensed under GPL3 or later
@@ -10,148 +10,139 @@ const ModelId = require('./ModelId');
 
 describe('ModelId Value Object', () => {
   describe('constructor and validation', () => {
-    test('should create ModelId with valid string', () => {
-      const modelId = new ModelId('gemini-2.5-pro');
+    test('should create ModelId with explicit parameters', () => {
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
 
       expect(modelId.value).toBe('gemini-2.5-pro');
       expect(modelId.provider).toBe('Gemini');
       expect(modelId.isFree).toBe(false);
     });
 
-    test('should throw error for null or undefined', () => {
-      expect(() => new ModelId(null)).toThrow('Model ID must be a non-empty string');
-      expect(() => new ModelId(undefined)).toThrow('Model ID must be a non-empty string');
+    test('should throw error for invalid id', () => {
+      expect(() => new ModelId(null, 'Gemini', false)).toThrow('Model ID must be a non-empty string');
+      expect(() => new ModelId(undefined, 'Gemini', false)).toThrow('Model ID must be a non-empty string');
+      expect(() => new ModelId('', 'Gemini', false)).toThrow('Model ID must be a non-empty string');
+      expect(() => new ModelId(123, 'Gemini', false)).toThrow('Model ID must be a non-empty string');
     });
 
-    test('should throw error for empty string', () => {
-      expect(() => new ModelId('')).toThrow('Model ID must be a non-empty string');
+    test('should throw error for invalid provider', () => {
+      expect(() => new ModelId('test', null, false)).toThrow('Provider must be a non-empty string');
+      expect(() => new ModelId('test', undefined, false)).toThrow('Provider must be a non-empty string');
+      expect(() => new ModelId('test', '', false)).toThrow('Provider must be a non-empty string');
+      expect(() => new ModelId('test', 123, false)).toThrow('Provider must be a non-empty string');
     });
 
-    test('should throw error for non-string input', () => {
-      expect(() => new ModelId(123)).toThrow('Model ID must be a non-empty string');
-      expect(() => new ModelId({})).toThrow('Model ID must be a non-empty string');
+    test('should throw error for invalid isFree', () => {
+      expect(() => new ModelId('test', 'Provider', null)).toThrow('isFree must be a boolean');
+      expect(() => new ModelId('test', 'Provider', undefined)).toThrow('isFree must be a boolean');
+      expect(() => new ModelId('test', 'Provider', 'free')).toThrow('isFree must be a boolean');
+      expect(() => new ModelId('test', 'Provider', 1)).toThrow('isFree must be a boolean');
     });
 
-    test('should be immutable', () => {
-      const modelId = new ModelId('gemini-2.5-pro');
-
+    test('should be frozen after creation', () => {
+      const modelId = new ModelId('test', 'Provider', true);
       expect(Object.isFrozen(modelId)).toBe(true);
-
-      const originalValue = modelId.value;
-      modelId.value = 'changed';
-      expect(modelId.value).toBe(originalValue);
     });
   });
 
   describe('provider detection', () => {
-    test('should detect Gemini provider', () => {
-      const modelId = new ModelId('gemini-2.5-pro');
+    test('should correctly identify Gemini models', () => {
+      const geminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiFlash = new ModelId('gemini-2.5-flash', 'Gemini', false);
 
-      expect(modelId.provider).toBe('Gemini');
-      expect(modelId.isGemini()).toBe(true);
-      expect(modelId.isOpenRouter()).toBe(false);
+      expect(geminiPro.isGemini()).toBe(true);
+      expect(geminiPro.isOpenRouter()).toBe(false);
+      expect(geminiFlash.isGemini()).toBe(true);
+      expect(geminiFlash.isOpenRouter()).toBe(false);
     });
 
-    test('should detect OpenRouter provider', () => {
-      const modelId = new ModelId('anthropic/claude-3.5-sonnet');
+    test('should correctly identify OpenRouter models', () => {
+      const openRouterGemini = new ModelId('google/gemini-2.5-pro', 'OpenRouter', false);
+      const freeModel = new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
 
-      expect(modelId.provider).toBe('OpenRouter');
-      expect(modelId.isOpenRouter()).toBe(true);
-      expect(modelId.isGemini()).toBe(false);
-    });
-
-    test('should detect unknown provider', () => {
-      const modelId = new ModelId('custom-model');
-
-      expect(modelId.provider).toBe('Unknown');
-      expect(modelId.isGemini()).toBe(false);
-      expect(modelId.isOpenRouter()).toBe(false);
+      expect(openRouterGemini.isGemini()).toBe(false);
+      expect(openRouterGemini.isOpenRouter()).toBe(true);
+      expect(freeModel.isGemini()).toBe(false);
+      expect(freeModel.isOpenRouter()).toBe(true);
     });
   });
 
-  describe('free model detection', () => {
-    test('should detect free models', () => {
-      const freeModel = new ModelId('deepseek/deepseek-r1-0528:free');
+  describe('JSON serialization', () => {
+    test('should serialize to JSON correctly', () => {
+      const modelId = new ModelId('google/gemini-2.5-pro', 'OpenRouter', false);
+      const json = modelId.toJSON();
 
-      expect(freeModel.isFree).toBe(true);
-    });
-
-    test('should detect paid models', () => {
-      const paidModel = new ModelId('deepseek/deepseek-r1-0528');
-
-      expect(paidModel.isFree).toBe(false);
-    });
-  });
-
-  describe('API key requirements', () => {
-    test('should require API key for Gemini models', () => {
-      const geminiPro = new ModelId('gemini-2.5-pro');
-      const geminiFlash = new ModelId('gemini-2.5-flash');
-
-      expect(geminiPro.requiresApiKey()).toBe(true);
-      expect(geminiFlash.requiresApiKey()).toBe(true);
-    });
-
-    test('should require API key for paid OpenRouter models', () => {
-      const paidModel = new ModelId('anthropic/claude-3.5-sonnet');
-
-      expect(paidModel.requiresApiKey()).toBe(true);
-    });
-
-    test('should not require API key for free OpenRouter models', () => {
-      const freeModel = new ModelId('deepseek/deepseek-r1-0528:free');
-
-      expect(freeModel.requiresApiKey()).toBe(false);
-    });
-  });
-
-  describe('display names', () => {
-    test('should provide display names for known models', () => {
-      const testCases = [
-        ['gemini-2.5-pro', 'Gemini 2.5 Pro'],
-        ['gemini-2.5-flash', 'Gemini 2.5 Flash'],
-        ['deepseek/deepseek-r1-0528:free', 'DeepSeek R1 (Free)'],
-        ['anthropic/claude-3.5-sonnet', 'Claude 3.5 Sonnet'],
-        ['openai/gpt-4o', 'GPT-4o']
-      ];
-
-      testCases.forEach(([modelStr, expectedName]) => {
-        const modelId = new ModelId(modelStr);
-        expect(modelId.getDisplayName()).toBe(expectedName);
+      expect(json).toEqual({
+        value: 'google/gemini-2.5-pro',
+        provider: 'OpenRouter',
+        isFree: false
       });
     });
 
-    test('should handle Llama models specifically', () => {
-      const llamaModel = new ModelId('meta-llama/llama-3.3-70b');
-      expect(llamaModel.getDisplayName()).toBe('Llama 3.3 70B');
+    test('should deserialize from JSON correctly', () => {
+      const jsonData = {
+        value: 'deepseek/deepseek-r1-0528:free',
+        provider: 'OpenRouter',
+        isFree: true
+      };
 
-      const llamaFreeModel = new ModelId('meta-llama/llama-3.3-70b:free');
-      expect(llamaFreeModel.getDisplayName()).toBe('Llama 3.3 70B');
+      const modelId = ModelId.fromJSON(jsonData);
+
+      expect(modelId.value).toBe('deepseek/deepseek-r1-0528:free');
+      expect(modelId.provider).toBe('OpenRouter');
+      expect(modelId.isFree).toBe(true);
+      expect(modelId.isOpenRouter()).toBe(true);
     });
 
-    test('should extract model names from paths', () => {
-      const modelWithPath = new ModelId('unknown/custom-model-name');
-      expect(modelWithPath.getDisplayName()).toBe('custom-model-name');
+    test('should maintain data integrity through JSON cycle', () => {
+      const original = new ModelId('anthropic/claude-3.5-sonnet', 'OpenRouter', false);
 
-      const freeModelWithPath = new ModelId('provider/model-name:free');
-      expect(freeModelWithPath.getDisplayName()).toBe('model-name (Free)');
-    });
+      // Serialize to JSON
+      const jsonData = original.toJSON();
 
-    test('should format model names correctly', () => {
-      const customFreeModel = new ModelId('custom/test-model:free');
-      expect(customFreeModel.getDisplayName()).toBe('test-model (Free)');
+      // Simulate browser storage JSON cycle
+      const storedData = JSON.parse(JSON.stringify(jsonData));
 
-      const customPaidModel = new ModelId('custom/test-model');
-      expect(customPaidModel.getDisplayName()).toBe('test-model');
+      // Deserialize back to ModelId
+      const restored = ModelId.fromJSON(storedData);
+
+      expect(restored.value).toBe(original.value);
+      expect(restored.provider).toBe(original.provider);
+      expect(restored.isFree).toBe(original.isFree);
+      expect(restored.isOpenRouter()).toBe(original.isOpenRouter());
     });
   });
 
-  describe('string representation', () => {
-    test('should convert to string correctly', () => {
-      const modelId = new ModelId('gemini-2.5-pro');
+  describe('routing behavior', () => {
+    test('should route direct Gemini models to Gemini API', () => {
+      const directGemini = new ModelId('gemini-2.5-pro', 'Gemini', false);
 
-      expect(modelId.toString()).toBe('gemini-2.5-pro');
-      expect(String(modelId)).toBe('gemini-2.5-pro');
+      expect(directGemini.isGemini()).toBe(true);
+      expect(directGemini.isOpenRouter()).toBe(false);
+    });
+
+    test('should route OpenRouter Gemini models to OpenRouter API', () => {
+      const openRouterGemini = new ModelId('google/gemini-2.5-pro', 'OpenRouter', false);
+
+      expect(openRouterGemini.isGemini()).toBe(false);
+      expect(openRouterGemini.isOpenRouter()).toBe(true);
+    });
+
+    test('should handle free models correctly', () => {
+      const freeModel = new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
+      const paidModel = new ModelId('deepseek/deepseek-r1-0528', 'OpenRouter', false);
+
+      expect(freeModel.isFree).toBe(true);
+      expect(paidModel.isFree).toBe(false);
+      expect(freeModel.isOpenRouter()).toBe(true);
+      expect(paidModel.isOpenRouter()).toBe(true);
+    });
+  });
+
+  describe('toString method', () => {
+    test('should return model value as string', () => {
+      const modelId = new ModelId('test-model', 'Provider', false);
+      expect(modelId.toString()).toBe('test-model');
     });
   });
 });

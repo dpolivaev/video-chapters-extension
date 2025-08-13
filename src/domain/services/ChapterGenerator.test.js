@@ -68,7 +68,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should reject invalid credentials parameter', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       const invalidInputs = [
         null,
@@ -87,13 +88,15 @@ describe('ChapterGenerator', () => {
     });
 
     test('should reject non-pending chapter generation', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       chapterGeneration.markCompleted('Test chapters');
       await expect(chapterGenerator.generateChapters(chapterGeneration, credentials))
         .rejects.toThrow('Chapter generation has already completed');
 
-      const failedGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const failedModelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const failedGeneration = new ChapterGeneration(videoTranscript, failedModelId, 'Test instructions');
       failedGeneration.markFailed(new Error('Previous error'));
       await expect(chapterGenerator.generateChapters(failedGeneration, credentials))
         .rejects.toThrow('Chapter generation has already failed');
@@ -102,7 +105,8 @@ describe('ChapterGenerator', () => {
 
   describe('Gemini model processing', () => {
     test('should process Gemini models successfully', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Focus on technical content');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Focus on technical content');
 
       const expectedResult = {
         chapters: '1. Introduction\n2. Technical Overview\n3. Conclusion',
@@ -127,7 +131,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should handle Gemini processing without tabId', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-flash', 'Generate chapters');
+      const modelId = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Generate chapters');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         chapters: 'Generated chapters',
@@ -146,7 +151,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should require API key for Gemini models', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
       const noGeminiCredentials = new ApiCredentials('', 'test-openrouter-key');
 
       await expect(chapterGenerator.generateChapters(chapterGeneration, noGeminiCredentials))
@@ -156,7 +162,8 @@ describe('ChapterGenerator', () => {
 
   describe('OpenRouter model processing', () => {
     test('should process OpenRouter models successfully', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'deepseek/deepseek-r1-0528', 'Analyze content');
+      const modelId = new ModelId('deepseek/deepseek-r1-0528', 'OpenRouter', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Analyze content');
 
       const expectedResult = {
         chapters: '1. Opening\n2. Main Discussion\n3. Summary',
@@ -181,7 +188,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should handle free OpenRouter models without API key', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'deepseek/deepseek-r1-0528:free', 'Test instructions');
+      const modelId = new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
       const noOpenRouterCredentials = new ApiCredentials('test-gemini-key', '');
 
       mockOpenRouterAPI.processSubtitles.mockResolvedValue({
@@ -203,7 +211,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should require API key for paid OpenRouter models', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'anthropic/claude-3.5-sonnet', 'Test instructions');
+      const modelId = new ModelId('anthropic/claude-3.5-sonnet', 'OpenRouter', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
       const noOpenRouterCredentials = new ApiCredentials('test-gemini-key', '');
 
       await expect(chapterGenerator.generateChapters(chapterGeneration, noOpenRouterCredentials))
@@ -213,7 +222,8 @@ describe('ChapterGenerator', () => {
 
   describe('unsupported model handling', () => {
     test('should handle unknown models that return invalid responses', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'unknown/model', 'Test instructions');
+      const modelId = new ModelId('unknown/model', 'OpenRouter', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       mockOpenRouterAPI.processSubtitles.mockResolvedValue(null);
 
@@ -224,7 +234,8 @@ describe('ChapterGenerator', () => {
 
   describe('API response validation', () => {
     test('should handle empty API response', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue(null);
 
@@ -235,7 +246,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should handle API response without chapters', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         finishReason: 'STOP',
@@ -249,7 +261,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should handle API response with empty chapters', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         chapters: '',
@@ -263,7 +276,8 @@ describe('ChapterGenerator', () => {
 
   describe('video URL handling', () => {
     test('should prepend video URL when available', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         chapters: '1. Chapter One\n2. Chapter Two',
@@ -277,7 +291,8 @@ describe('ChapterGenerator', () => {
 
     test('should handle video without URL', async () => {
       const videoWithoutUrl = new VideoTranscript('Test content', 'Test Video', 'Test Author');
-      const chapterGeneration = new ChapterGeneration(videoWithoutUrl, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoWithoutUrl, modelId, 'Test instructions');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         chapters: '1. Chapter One\n2. Chapter Two',
@@ -293,7 +308,8 @@ describe('ChapterGenerator', () => {
 
   describe('error handling and state management', () => {
     test('should mark generation as failed on API error', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', 'Test instructions');
+      const modelId = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
       const apiError = new Error('API rate limit exceeded');
 
       mockGeminiAPI.processSubtitles.mockRejectedValue(apiError);
@@ -306,7 +322,8 @@ describe('ChapterGenerator', () => {
     });
 
     test('should mark generation as failed on network error', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'deepseek/deepseek-r1-0528', 'Test instructions');
+      const modelId = new ModelId('deepseek/deepseek-r1-0528', 'OpenRouter', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Test instructions');
       const networkError = new Error('Network timeout');
 
       mockOpenRouterAPI.processSubtitles.mockRejectedValue(networkError);
@@ -320,18 +337,21 @@ describe('ChapterGenerator', () => {
 
   describe('model capability checking', () => {
     test('should check if generation is possible with valid model and credentials', async () => {
-      const canGenerate = await chapterGenerator.canGenerateChapters('gemini-2.5-pro', credentials);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const canGenerate = await chapterGenerator.canGenerateChapters(geminiModel, credentials);
       expect(canGenerate).toBe(true);
     });
 
-    test('should return true for unknown models (treated as free)', async () => {
-      const canGenerate = await chapterGenerator.canGenerateChapters('invalid-model', credentials);
-      expect(canGenerate).toBe(true);
+    test('should return false for unknown models', async () => {
+      const unknownModel = new ModelId('invalid-model', 'Unknown', false);
+      const canGenerate = await chapterGenerator.canGenerateChapters(unknownModel, credentials);
+      expect(canGenerate).toBe(false);
     });
 
     test('should return false for model without required credentials', async () => {
       const noCredentials = new ApiCredentials('', '');
-      const canGenerate = await chapterGenerator.canGenerateChapters('gemini-2.5-pro', noCredentials);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const canGenerate = await chapterGenerator.canGenerateChapters(geminiModel, noCredentials);
       expect(canGenerate).toBe(false);
     });
   });
@@ -372,11 +392,12 @@ describe('ChapterGenerator', () => {
         finishReason: 'STOP'
       });
 
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
       const result = await chapterGenerator.processWithLegacyAPI(
         'Legacy transcript content',
         'Legacy instructions',
         'legacy-gemini-key',
-        'gemini-2.5-pro',
+        geminiModel,
         789
       );
 
@@ -397,11 +418,12 @@ describe('ChapterGenerator', () => {
         finishReason: 'stop'
       });
 
+      const openRouterModel = new ModelId('deepseek/deepseek-r1-0528', 'OpenRouter', false);
       const result = await chapterGenerator.processWithLegacyAPI(
         'Legacy transcript content',
         'Legacy instructions',
         'legacy-openrouter-key',
-        'deepseek/deepseek-r1-0528',
+        openRouterModel,
         789
       );
 
@@ -419,11 +441,12 @@ describe('ChapterGenerator', () => {
     test('should handle legacy API errors gracefully', async () => {
       mockGeminiAPI.processSubtitles.mockRejectedValue(new Error('Legacy API error'));
 
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
       const result = await chapterGenerator.processWithLegacyAPI(
         'Legacy transcript content',
         'Legacy instructions',
         'legacy-key',
-        'gemini-2.5-pro',
+        geminiModel,
         789
       );
 
@@ -435,7 +458,8 @@ describe('ChapterGenerator', () => {
 
   describe('edge cases', () => {
     test('should handle empty custom instructions', async () => {
-      const chapterGeneration = new ChapterGeneration(videoTranscript, 'gemini-2.5-pro', '');
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(videoTranscript, geminiModel, '');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         chapters: 'Generated without instructions',
@@ -458,7 +482,8 @@ describe('ChapterGenerator', () => {
     test('should handle very large transcript content', async () => {
       const largeContent = 'A'.repeat(100000);
       const largeVideoTranscript = new VideoTranscript(largeContent, 'Large Video', 'Test Author');
-      const chapterGeneration = new ChapterGeneration(largeVideoTranscript, 'gemini-2.5-pro', 'Summarize this large content');
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const chapterGeneration = new ChapterGeneration(largeVideoTranscript, geminiModel, 'Summarize this large content');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
         chapters: 'Summary of large content',

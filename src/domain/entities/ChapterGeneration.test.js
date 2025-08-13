@@ -8,6 +8,7 @@
 
 const ChapterGeneration = require('./ChapterGeneration');
 const VideoTranscript = require('./VideoTranscript');
+const ModelId = require('../values/ModelId');
 
 describe('ChapterGeneration Entity', () => {
   let mockVideoTranscript;
@@ -23,9 +24,10 @@ describe('ChapterGeneration Entity', () => {
 
   describe('constructor and initialization', () => {
     test('should create with valid parameters', () => {
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
       const generation = new ChapterGeneration(
         mockVideoTranscript,
-        'gemini-2.5-pro',
+        geminiModel,
         'Custom instructions'
       );
 
@@ -41,14 +43,16 @@ describe('ChapterGeneration Entity', () => {
     });
 
     test('should validate VideoTranscript instance', () => {
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
       expect(() => {
-        new ChapterGeneration('invalid', 'gemini-2.5-pro');
+        new ChapterGeneration('invalid', geminiModel);
       }).toThrow('videoTranscript must be a VideoTranscript instance');
     });
 
     test('should generate unique IDs', () => {
-      const generation1 = new ChapterGeneration(mockVideoTranscript, 'gemini-2.5-pro');
-      const generation2 = new ChapterGeneration(mockVideoTranscript, 'gemini-2.5-pro');
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const generation1 = new ChapterGeneration(mockVideoTranscript, geminiModel);
+      const generation2 = new ChapterGeneration(mockVideoTranscript, geminiModel);
 
       expect(generation1.id).not.toBe(generation2.id);
       expect(typeof generation1.id).toBe('number');
@@ -59,7 +63,8 @@ describe('ChapterGeneration Entity', () => {
     let generation;
 
     beforeEach(() => {
-      generation = new ChapterGeneration(mockVideoTranscript, 'gemini-2.5-pro');
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      generation = new ChapterGeneration(mockVideoTranscript, geminiModel);
     });
 
     test('should start with pending status', () => {
@@ -109,14 +114,15 @@ describe('ChapterGeneration Entity', () => {
 
   describe('custom instructions', () => {
     test('should detect presence of custom instructions', () => {
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
       const withInstructions = new ChapterGeneration(
         mockVideoTranscript,
-        'gemini-2.5-pro',
+        geminiModel,
         'Focus on technical details'
       );
       const withoutInstructions = new ChapterGeneration(
         mockVideoTranscript,
-        'gemini-2.5-pro'
+        geminiModel
       );
 
       expect(withInstructions.hasCustomInstructions()).toBe(true);
@@ -126,7 +132,8 @@ describe('ChapterGeneration Entity', () => {
 
   describe('duration calculations', () => {
     test('should calculate duration correctly', () => {
-      const generation = new ChapterGeneration(mockVideoTranscript, 'gemini-2.5-pro');
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const generation = new ChapterGeneration(mockVideoTranscript, geminiModel);
 
       const durationMs = generation.getDurationMs();
       const durationSeconds = generation.getDurationSeconds();
@@ -138,9 +145,10 @@ describe('ChapterGeneration Entity', () => {
 
   describe('serialization', () => {
     test('should convert to session results format', () => {
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
       const generation = new ChapterGeneration(
         mockVideoTranscript,
-        'gemini-2.5-pro',
+        geminiModel,
         'Custom instructions'
       );
       generation.markCompleted('1. Intro\n2. Content');
@@ -149,7 +157,11 @@ describe('ChapterGeneration Entity', () => {
 
       expect(results.resultId).toBe(generation.id);
       expect(results.chapters).toBe('1. Intro\n2. Content');
-      expect(results.model).toBe('gemini-2.5-pro');
+      expect(results.model).toEqual({
+        value: 'gemini-2.5-pro',
+        provider: 'Gemini',
+        isFree: false
+      });
       expect(results.customInstructions).toBe('Custom instructions');
       expect(results.status).toBe('completed');
     });

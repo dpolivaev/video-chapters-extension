@@ -333,49 +333,8 @@ class ResultsView {
     }
   }
   getModelDisplayName(model, removeFree = false) {
-    if (model.includes('gemini-2.5-pro')) {
-      return 'Gemini 2.5 Pro';
-    }
-    if (model.includes('gemini-2.5-flash')) {
-      return 'Gemini 2.5 Flash';
-    }
-    if (model.includes('deepseek-r1-0528:free')) {
-      if (removeFree) {
-        return 'DeepSeek R1';
-      } else {
-        const freeText = getLocalizedMessage('free') || 'Free';
-        return 'DeepSeek R1 (' + freeText + ')';
-      }
-    }
-    if (model.includes('deepseek-r1-0528')) {
-      return 'DeepSeek R1';
-    }
-    if (model.includes('deepseek-r1')) {
-      return 'DeepSeek R1';
-    }
-    if (model.includes('claude-3.5-sonnet')) {
-      return 'Claude 3.5 Sonnet';
-    }
-    if (model.includes('claude-3.5-haiku')) {
-      return 'Claude 3.5 Haiku';
-    }
-    if (model.includes('gpt-4o-mini')) {
-      return 'GPT-4o Mini';
-    }
-    if (model.includes('gpt-4o')) {
-      return 'GPT-4o';
-    }
-    if (model.includes('llama-3.3-70b')) {
-      return 'Llama 3.3 70B';
-    }
-    const parts = model.split('/');
-    const modelPart = parts[parts.length - 1];
-    if (removeFree) {
-      return modelPart.replace(/:free$/, '');
-    } else {
-      const freeText = getLocalizedMessage('free') || 'Free';
-      return modelPart.replace(/:free$/, ' (' + freeText + ')');
-    }
+    const modelId = ModelId.fromJSON(model);
+    return removeFree ? modelId.getDisplayNameWithoutFree() : modelId.getDisplayName();
   }
 
   getDisclaimerModelName(model) {

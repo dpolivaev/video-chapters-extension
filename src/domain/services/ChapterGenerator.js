@@ -6,6 +6,11 @@
  * Licensed under GPL3 or later
  */
 
+// Load ModelId for Node.js environment (tests), skip if already loaded in browser
+if (typeof ModelId === 'undefined' && typeof require !== 'undefined') {
+  const ModelId = require('../values/ModelId');
+}
+
 class ChapterGenerator {
   constructor(geminiAPI, openRouterAPI) {
     this.geminiAPI = geminiAPI;
@@ -35,7 +40,7 @@ class ChapterGenerator {
     try {
       const modelId = chapterGeneration.modelId;
       const processedContent = chapterGeneration.videoTranscript.toProcessedContent();
-      const apiKey = credentials.getKeyForModel(modelId.toString());
+      const apiKey = credentials.getKeyForModel(modelId);
 
       if (modelId.requiresApiKey() && !apiKey) {
         throw new Error(`API key required for model: ${modelId.getDisplayName()}`);
@@ -80,8 +85,11 @@ class ChapterGenerator {
 
   async canGenerateChapters(modelId, credentials) {
     try {
-      const model = new ModelId(modelId);
-      return credentials.canUseModel(model.toString());
+      // modelId should be a ModelId instance, not a string
+      if (!(modelId instanceof ModelId)) {
+        throw new Error('modelId must be a ModelId instance');
+      }
+      return credentials.canUseModel(modelId);
     } catch (error) {
       return false;
     }
@@ -97,8 +105,12 @@ class ChapterGenerator {
   async processWithLegacyAPI(processedContent, customInstructions, apiKey, modelId, tabId) {
     try {
       const videoTranscript = new VideoTranscript(processedContent, 'Legacy Video', 'Legacy Author');
+      // modelId should be a ModelId instance, not a string
+      if (!(modelId instanceof ModelId)) {
+        throw new Error('modelId must be a ModelId instance');
+      }
       const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, customInstructions);
-      const credentials = modelId.includes('gemini-')
+      const credentials = modelId.isGemini()
         ? new ApiCredentials(apiKey, '')
         : new ApiCredentials('', apiKey);
 

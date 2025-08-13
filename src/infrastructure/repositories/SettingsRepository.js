@@ -34,7 +34,8 @@ class SettingsRepository {
       ...additionalSettings,
       apiKey: credentials.geminiKey,
       openRouterApiKey: credentials.openRouterKey,
-      model: selectedModel.toString()
+      model: selectedModel.toString(),
+      selectedModel: selectedModel.toJSON()
     };
 
     try {
@@ -64,7 +65,7 @@ class SettingsRepository {
 
       return {
         credentials: new ApiCredentials(settings.apiKey, settings.openRouterApiKey),
-        selectedModel: new ModelId(settings.model),
+        selectedModel: settings.selectedModel ? ModelId.fromJSON(settings.selectedModel) : new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true),
         additionalSettings: {
           historyLimit: settings.historyLimit,
           autoSaveInstructions: settings.autoSaveInstructions,
@@ -74,7 +75,7 @@ class SettingsRepository {
     } catch (error) {
       return {
         credentials: new ApiCredentials(),
-        selectedModel: new ModelId(this.defaultSettings.model),
+        selectedModel: new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true),
         additionalSettings: {
           historyLimit: this.defaultSettings.historyLimit,
           autoSaveInstructions: this.defaultSettings.autoSaveInstructions,
@@ -123,9 +124,9 @@ class SettingsRepository {
         legacySettings.openRouterApiKey || ''
       );
 
-      const selectedModel = new ModelId(
-        legacySettings.model || this.defaultSettings.model
-      );
+      const selectedModel = legacySettings.selectedModel
+        ? ModelId.fromJSON(legacySettings.selectedModel)
+        : new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
 
       const additionalSettings = {
         historyLimit: legacySettings.historyLimit || this.defaultSettings.historyLimit,

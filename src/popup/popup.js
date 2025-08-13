@@ -122,16 +122,25 @@ class PopupView {
     }
   }
   async applySettingsToUI() {
-    console.log('PopupView: applySettingsToUI called');
-    console.log('PopupView: Current settings:', this.settings);
     if (!this.settings) {
       console.log('PopupView: No settings to apply');
       return;
     }
     const modelSelect = document.getElementById('modelSelect');
-    console.log('PopupView: Setting model select value:', this.settings.model);
     await this.loadModels();
-    modelSelect.value = this.settings.model || 'deepseek/deepseek-r1-0528:free';
+
+    // Restore selected model from settings - wait for models to load first
+    let modelValue = 'deepseek/deepseek-r1-0528:free'; // fallback
+    if (this.settings.selectedModel) {
+      // New format: ModelId JSON object
+      const savedModel = ModelId.fromJSON(this.settings.selectedModel);
+      modelValue = savedModel.value;
+    } else if (this.settings.model) {
+      // Legacy format: string value
+      modelValue = this.settings.model;
+    }
+
+    modelSelect.value = modelValue;
     this.updateApiKeyField();
     this.restoreCustomInstructions();
     console.log('PopupView: Updating generate button state from applySettingsToUI');
@@ -150,13 +159,27 @@ class PopupView {
         modelSelect.innerHTML = '';
         const models = response.data;
 
-        this.allModels = models;
-        const providers = {};
-        models.forEach(model => {
-          if (!providers[model.provider]) {
-            providers[model.provider] = [];
+        // Convert plain objects to ModelId instances
+        this.allModels = models.map(model => {
+          if (model instanceof ModelId) {
+            return model;
           }
-          providers[model.provider].push(model);
+          // Backend returns plain objects due to JSON serialization
+          return ModelId.fromJSON(model);
+        });
+
+        // Create index for fast lookup by string value
+        this.modelIndex = new Map();
+        this.allModels.forEach(modelId => {
+          this.modelIndex.set(modelId.value, modelId);
+        });
+
+        const providers = {};
+        this.allModels.forEach(modelId => {
+          if (!providers[modelId.provider]) {
+            providers[modelId.provider] = [];
+          }
+          providers[modelId.provider].push(modelId);
         });
 
         if (providers.OpenRouter) {
@@ -170,14 +193,14 @@ class PopupView {
             if (!a.isFree && b.isFree) {
               return 1;
             }
-            return a.name.localeCompare(b.name);
+            return a.getDisplayName().localeCompare(b.getDisplayName());
           });
 
-          providers.OpenRouter.forEach((model, _index) => {
+          providers.OpenRouter.forEach((modelId, _index) => {
             const option = document.createElement('option');
-            option.value = model.id;
-            option.textContent = model.name; // Use the name as-is from the API
-            option.title = model.description;
+            option.value = modelId.value;
+            option.textContent = modelId.getDisplayName();
+            option.title = modelId.getDisplayName();
             openRouterGroup.appendChild(option);
           });
 
@@ -187,11 +210,11 @@ class PopupView {
         if (providers.Gemini) {
           const geminiGroup = document.createElement('optgroup');
           geminiGroup.label = 'Gemini';
-          providers.Gemini.forEach(model => {
+          providers.Gemini.forEach(modelId => {
             const option = document.createElement('option');
-            option.value = model.id;
-            option.textContent = model.name;
-            option.title = model.description;
+            option.value = modelId.value;
+            option.textContent = modelId.getDisplayName();
+            option.title = modelId.getDisplayName();
             geminiGroup.appendChild(option);
           });
           modelSelect.appendChild(geminiGroup);
@@ -211,24 +234,22 @@ class PopupView {
     modelSelect.innerHTML = '<option value="">Error loading models</option>';
   }
   updateApiKeyField() {
-    const modelSelect = document.getElementById('modelSelect');
     const dynamicApiKeyInput = document.getElementById('dynamicApiKeyInput');
     const apiKeyLabel = document.getElementById('apiKeyLabel');
     const apiKeyInfo = document.getElementById('apiKeyInfo');
     const apiKeyGroup = document.getElementById('apiKeyGroup');
-    const selectedModel = modelSelect.value;
-    if (selectedModel.includes('gemini-')) {
+    if (this.isDirectGeminiModel()) {
       apiKeyLabel.textContent = 'Gemini API Key:';
       dynamicApiKeyInput.placeholder = 'Enter your Gemini API key';
       dynamicApiKeyInput.value = this.settings?.apiKey || '';
       apiKeyInfo.style.display = 'none';
       apiKeyGroup.style.display = 'block';
-    } else if (this.isOpenRouterModel(selectedModel)) {
-      const modelInfo = this.getModelInfo(selectedModel);
+    } else if (this.isOpenRouterModel()) {
+      const selectedModel = this.getSelectedModel();
       apiKeyLabel.textContent = 'OpenRouter API Key:';
       dynamicApiKeyInput.placeholder = 'Enter your OpenRouter API key';
       dynamicApiKeyInput.value = this.settings?.openRouterApiKey || '';
-      if (modelInfo && modelInfo.isFree) {
+      if (selectedModel && selectedModel.isFree) {
         apiKeyInfo.innerHTML = '<small>Free model - no usage cost, but API key required for authentication</small>';
         apiKeyInfo.style.display = 'block';
       } else {
@@ -244,17 +265,18 @@ class PopupView {
       apiKeyGroup.style.display = 'block';
     }
   }
-  getModelInfo(modelId) {
-    return this.allModels.find(model => model.id === modelId);
+  getSelectedModel() {
+    const modelSelect = document.getElementById('modelSelect');
+    const selectedValue = modelSelect.value;
+    return this.modelIndex ? this.modelIndex.get(selectedValue) : null;
   }
-  isOpenRouterModel(modelId) {
-    try {
-      const model = new ModelId(modelId);
-      return model.isOpenRouter();
-    } catch (error) {
-      const modelInfo = this.getModelInfo(modelId);
-      return modelInfo && modelInfo.provider === 'OpenRouter';
-    }
+  isOpenRouterModel() {
+    const selectedModel = this.getSelectedModel();
+    return selectedModel ? selectedModel.isOpenRouter() : false;
+  }
+  isDirectGeminiModel() {
+    const selectedModel = this.getSelectedModel();
+    return selectedModel ? selectedModel.isGemini() : false;
   }
   async restoreCustomInstructions() {
     try {
@@ -453,16 +475,15 @@ class PopupView {
       return;
     }
     const dynamicApiKey = document.getElementById('dynamicApiKeyInput').value.trim();
-    const model = document.getElementById('modelSelect').value;
     const customInstructions = document.getElementById('instructionsTextarea').value.trim();
     let apiKey = '';
-    if (model.includes('gemini-')) {
+    if (this.isDirectGeminiModel()) {
       apiKey = dynamicApiKey;
       if (!apiKey) {
         this.showNotification(getLocalizedMessage('gemini_api_key_required'), 'error');
         return;
       }
-    } else if (this.isOpenRouterModel(model)) {
+    } else if (this.isOpenRouterModel()) {
       apiKey = dynamicApiKey;
       if (!apiKey) {
         this.showNotification(getLocalizedMessage('openrouter_api_key_required'), 'error');
@@ -486,9 +507,13 @@ class PopupView {
       let resultId;
 
       if (this.currentVideo.videoTranscript) {
+        const selectedModelId = this.getSelectedModel();
+        if (!selectedModelId) {
+          throw new Error('No model selected');
+        }
         const chapterGeneration = new ChapterGeneration(
           this.currentVideo.videoTranscript,
-          model,
+          selectedModelId,
           customInstructions
         );
         resultId = chapterGeneration.id;
@@ -499,6 +524,10 @@ class PopupView {
         this._lastResultId = resultId;
 
         const videoUrl = this.currentVideo.url;
+        const selectedModelId = this.getSelectedModel();
+        if (!selectedModelId) {
+          throw new Error('No model selected');
+        }
         sessionResults = {
           resultId,
           processedContent: {
@@ -506,7 +535,7 @@ class PopupView {
           },
           chapters: videoUrl + '\n\n',
           timestamp: resultId,
-          model,
+          model: selectedModelId.toJSON(),
           customInstructions,
           videoMetadata: {
             title: this.currentVideo.title,
@@ -527,7 +556,7 @@ class PopupView {
         processedContent,
         customInstructions,
         apiKey,
-        model,
+        modelId: this.getSelectedModel(),
         resultId,
         newResultId
       });
@@ -621,15 +650,13 @@ class PopupView {
   }
   async clearDynamicApiKey() {
     try {
-      const modelSelect = document.getElementById('modelSelect');
-      const selectedModel = modelSelect.value;
       document.getElementById('dynamicApiKeyInput').value = '';
       await this.saveSettings();
-      if (selectedModel.includes('gemini-')) {
+      if (this.isDirectGeminiModel()) {
         this.showNotification(getLocalizedMessage('api_key_cleared_gemini'), 'success');
-      } else if (this.isOpenRouterModel(selectedModel)) {
-        const modelInfo = this.getModelInfo(selectedModel);
-        if (modelInfo && !modelInfo.isFree) {
+      } else if (this.isOpenRouterModel()) {
+        const selectedModel = this.getSelectedModel();
+        if (selectedModel && !selectedModel.isFree) {
           this.showNotification(getLocalizedMessage('api_key_cleared_openrouter'), 'success');
         } else {
           this.showNotification(getLocalizedMessage('api_key_cleared'), 'success');
@@ -678,25 +705,24 @@ class PopupView {
     console.log('PopupView: updateGenerateButtonState called');
     const generateBtn = document.getElementById('generateBtn');
     const dynamicApiKey = document.getElementById('dynamicApiKeyInput').value.trim();
-    const model = document.getElementById('modelSelect').value;
     console.log('PopupView: Dynamic API key present:', !!dynamicApiKey);
     console.log('PopupView: isProcessing:', this.isProcessing);
     console.log('PopupView: currentVideo present:', !!this.currentVideo);
     let canUseModel = false;
     let reasonDisabled = '';
-    if (model.includes('gemini-')) {
+    if (this.isDirectGeminiModel()) {
       canUseModel = !!dynamicApiKey;
       if (!canUseModel) {
         reasonDisabled = getLocalizedMessage('gemini_api_key_required');
       }
-    } else if (this.isOpenRouterModel(model)) {
+    } else if (this.isOpenRouterModel()) {
       canUseModel = !!dynamicApiKey;
       if (!canUseModel) {
         reasonDisabled = getLocalizedMessage('openrouter_api_key_required');
       }
     } else {
       canUseModel = false;
-      reasonDisabled = 'Unknown model selected';
+      reasonDisabled = 'Please select a model';
     }
     const shouldEnable = canUseModel && !this.isProcessing && this.currentVideo;
     console.log('PopupView: Should enable generate button:', shouldEnable);
@@ -713,18 +739,18 @@ class PopupView {
   }
   async saveSettings() {
     try {
-      const modelSelect = document.getElementById('modelSelect');
       const dynamicApiKeyInput = document.getElementById('dynamicApiKeyInput');
-      const selectedModel = modelSelect.value;
+      const selectedModelId = this.getSelectedModel();
       const dynamicApiKey = dynamicApiKeyInput.value.trim();
       const existingSettings = this.settings || {};
       const settings = {
         ...existingSettings,
-        model: selectedModel
+        selectedModel: selectedModelId ? selectedModelId.toJSON() : null,
+        model: selectedModelId ? selectedModelId.value : 'deepseek/deepseek-r1-0528:free' // Legacy compatibility
       };
-      if (selectedModel.includes('gemini-')) {
+      if (this.isDirectGeminiModel()) {
         settings.apiKey = dynamicApiKey;
-      } else if (this.isOpenRouterModel(selectedModel)) {
+      } else if (this.isOpenRouterModel()) {
         settings.openRouterApiKey = dynamicApiKey;
       }
       const response = await browser.runtime.sendMessage({

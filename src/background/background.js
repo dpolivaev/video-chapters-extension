@@ -40,7 +40,6 @@ JsModuleImporter.importScriptsIfNeeded([
   '../infrastructure/repositories/SessionRepository.js',
   '../infrastructure/repositories/TabRegistry.js',
   '../infrastructure/repositories/SettingsRepository.js',
-  '../domain/services/ChapterGenerator.js',
   'prompt-generator.js',
   'BaseLLM.js',
   '../infrastructure/adapters/BrowserHttpAdapter.js',
@@ -48,8 +47,9 @@ JsModuleImporter.importScriptsIfNeeded([
   '../domain/services/GeminiChapterGenerator.js',
   '../domain/services/OpenRouterChapterGenerator.js',
   '../infrastructure/adapters/GeminiApiAdapter.js',
-  '../infrastructure/adapters/OpenRouterApiAdapter.js'
-], ['SessionRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration']);
+  '../infrastructure/adapters/OpenRouterApiAdapter.js',
+  '../domain/services/ChapterGenerator.js'
+], ['SessionRepository', 'TabRegistry', 'SettingsRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration', 'GeminiApiAdapter', 'OpenRouterApiAdapter', 'ChapterGenerator']);
 
 
 const sessionRepository = new SessionRepository();
@@ -260,11 +260,11 @@ class BackgroundService {
   }
   async handleChapterGeneration(request, sendResponse, sender) {
     try {
-      const {customInstructions, apiKey, model, resultId} = request;
+      const {customInstructions, apiKey, modelId, resultId} = request;
       const tabId = sender?.tab?.id || null;
 
-      if (!model || typeof model !== 'string' || model.trim() === '') {
-        throw new Error(`Model parameter is required and must be a non-empty string. Received: ${JSON.stringify(model)}`);
+      if (!modelId || !modelId.value || !modelId.provider) {
+        throw new Error(`ModelId parameter is required and must be a valid ModelId object. Received: ${JSON.stringify(modelId)}`);
       }
 
       const existingSession = sessionRepository.findById(resultId);
@@ -272,7 +272,9 @@ class BackgroundService {
         throw new Error(`Session ${resultId} not found`);
       }
 
-      const newGenerationSession = this.createNewGenerationSession(existingSession, model, customInstructions);
+      // Recreate ModelId object from received data (JSON serialization strips methods)
+      const fullModelId = new ModelId(modelId.value, modelId.provider, modelId.isFree);
+      const newGenerationSession = this.createNewGenerationSession(existingSession, fullModelId, customInstructions);
 
       if (request.newResultId) {
         newGenerationSession.id = request.newResultId;
@@ -280,8 +282,7 @@ class BackgroundService {
 
       sessionRepository.save(newGenerationSession);
 
-      const modelId = new ModelId(model);
-      const credentials = modelId.isGemini()
+      const credentials = fullModelId.isGemini()
         ? new ApiCredentials(apiKey, '')
         : new ApiCredentials('', apiKey);
       const completedSession = await this.chapterGenerator.generateChapters(
@@ -427,6 +428,9 @@ class BackgroundService {
       const geminiModels = this.getGeminiModels();
       const allModels = [...openRouterModels, ...geminiModels];
 
+      // Cache for fast lookup
+      this.cachedModels = allModels;
+
       sendResponse({
         success: true,
         data: allModels
@@ -466,7 +470,8 @@ class BackgroundService {
         .map(model => this.transformToStandardModelFormat(model));
     } catch (error) {
       console.error('BackgroundService: OpenRouter API fetch failed:', error);
-      throw error;
+      // Return empty array when OpenRouter API is unavailable
+      return [];
     }
   }
 
@@ -501,15 +506,7 @@ class BackgroundService {
 
   transformToStandardModelFormat(model) {
     const isFree = this.determineIfModelIsFree(model);
-    return {
-      id: model.id,
-      name: model.name,
-      description: model.description || `${model.name} model via OpenRouter`,
-      provider: 'OpenRouter',
-      isFree,
-      category: isFree ? 'free' : 'paid',
-      capabilities: ['general']
-    };
+    return new ModelId(model.id, 'OpenRouter', isFree);
   }
 
   determineIfModelIsFree(model) {
@@ -521,24 +518,8 @@ class BackgroundService {
 
   getGeminiModels() {
     return [
-      {
-        id: 'gemini-2.5-pro',
-        name: 'Gemini 2.5 Pro',
-        description: 'Google Gemini 2.5 Pro - Most capable model',
-        provider: 'Gemini',
-        isFree: false,
-        category: 'premium',
-        capabilities: ['reasoning', 'coding', 'analysis']
-      },
-      {
-        id: 'gemini-2.5-flash',
-        name: 'Gemini 2.5 Flash',
-        description: 'Google Gemini 2.5 Flash - Faster model',
-        provider: 'Gemini',
-        isFree: false,
-        category: 'fast',
-        capabilities: ['speed', 'general']
-      }
+      new ModelId('gemini-2.5-pro', 'Gemini', false),
+      new ModelId('gemini-2.5-flash', 'Gemini', false)
     ];
   }
 
@@ -622,6 +603,7 @@ class BackgroundService {
 
     return newSession;
   }
+
 
   async handleGetResultsTabStatus(currentVideoTabId, sendResponse) {
     try {

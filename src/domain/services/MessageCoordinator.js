@@ -38,9 +38,23 @@ class MessageCoordinator {
     );
     const credentials = new ApiCredentials(apiKey, '');
 
+    // Convert string model to ModelId instance
+    let provider, isFree;
+    if (model.startsWith('gemini-')) {
+      provider = 'Gemini';
+      isFree = false;
+    } else if (model.includes('/')) {
+      provider = 'OpenRouter';
+      isFree = model.endsWith(':free');
+    } else {
+      provider = 'OpenRouter';
+      isFree = false;
+    }
+    const modelId = new ModelId(model, provider, isFree);
+
     const chapterGeneration = new ChapterGeneration(
       videoTranscript,
-      model,
+      modelId,
       customInstructions
     );
 
