@@ -257,7 +257,21 @@
                 return {
                     name: 'Firefox',
                     url: 'https://addons.mozilla.org/en-US/firefox/addon/video-chapters-generator/',
-                    text: 'Install for Firefox'
+                    text: 'Install Extension'
+                };
+            }
+            
+            // Chrome-based browsers: Chrome, Edge, Brave, Opera, Vivaldi, etc.
+            if (userAgent.indexOf('chrome') !== -1 || 
+                userAgent.indexOf('chromium') !== -1 || 
+                userAgent.indexOf('edge') !== -1 ||
+                userAgent.indexOf('brave') !== -1 ||
+                userAgent.indexOf('opera') !== -1 ||
+                userAgent.indexOf('vivaldi') !== -1) {
+                return {
+                    name: 'Chrome-based',
+                    url: 'https://chromewebstore.google.com/detail/efeedenbkpjjodfndanbacfdnmogooio?utm_source=github-pages',
+                    text: 'Install Extension'
                 };
             }
             
