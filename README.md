@@ -30,21 +30,10 @@ Organize YouTube videos into chapters with AI-powered headlines and timecode gen
 
 ## Installation
 
-### Chrome Web Store
+* [Chrome Web Store](https://chromewebstore.google.com/detail/efeedenbkpjjodfndanbacfdnmogooio?utm_source=github-pages)
+* [Firefox Web Store](https://addons.mozilla.org/en-US/firefox/addon/video-chapters-generator/)
 
-*To be published*
-
-### Firefox Web Store
-
-https://addons.mozilla.org/en-US/firefox/addon/video-chapters-generator/
-
-### Firefox Add-on
-
-Download the latest Firefox add-on (.xpi file) from the [GitHub Releases](https://github.com/dpolivaev/video-chapters-extension/releases) section and install it directly in Firefox.
-
-### Manual Installation
-
-For developers or advanced users, see [DEVELOPMENT.md](https://github.com/dpolivaev/video-chapters-extension/blob/main/DEVELOPMENT.md) for manual installation instructions.
+* For developers or advanced users, see [DEVELOPMENT.md](https://github.com/dpolivaev/video-chapters-extension/blob/main/DEVELOPMENT.md) for manual installation instructions.
 
 ---
 
