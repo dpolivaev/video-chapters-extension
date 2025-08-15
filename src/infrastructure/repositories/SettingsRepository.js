@@ -32,7 +32,7 @@ class SettingsRepository {
       throw new Error('selectedModel must be a ModelId instance');
     }
 
-    const settings = {
+    const allSettings = {
       ...this.defaultSettings,
       ...additionalSettings,
       apiKey: credentials.geminiKey,
@@ -42,8 +42,10 @@ class SettingsRepository {
     };
 
     try {
-      await this.storageAdapter.setUserSettings(settings);
-      return settings;
+      // Split settings between sync and local storage
+      await this._saveSyncSettings(allSettings);
+      await this._saveLocalSettings(allSettings);
+      return allSettings;
     } catch (error) {
       throw new Error(`Failed to save settings: ${error.message}`);
     }
@@ -51,11 +53,17 @@ class SettingsRepository {
 
   async load() {
     try {
-      const storedSettings = await this.storageAdapter.getUserSettings() || {};
+      // Load from both sync and local storage and merge
+      const syncSettings = await this._loadSyncSettings();
+      const localSettings = await this._loadLocalSettings();
+
+      // Clean up orphaned historyLimit from sync storage if it exists
+      await this._cleanupOrphanedHistoryLimit(syncSettings);
 
       const settings = {
         ...this.defaultSettings,
-        ...storedSettings
+        ...syncSettings,
+        ...localSettings
       };
 
       if (!settings.apiKey && !settings.openRouterApiKey) {
@@ -161,9 +169,56 @@ class SettingsRepository {
   async reset() {
     try {
       await this.storageAdapter.removeUserSettings();
+      await this.storageAdapter.removeHistoryLimit();
       return this.defaultSettings;
     } catch (error) {
       throw new Error(`Failed to reset settings: ${error.message}`);
+    }
+  }
+
+  // Private helper methods for dual storage management
+
+  async _cleanupOrphanedHistoryLimit(syncSettings) {
+    // Clean up orphaned historyLimit from sync storage during migration
+    if (syncSettings && syncSettings.historyLimit !== undefined) {
+      try {
+        // Migrate the value to local storage if not already there
+        const localLimit = await this.storageAdapter.getHistoryLimit();
+        if (localLimit === undefined) {
+          await this.storageAdapter.setHistoryLimit(syncSettings.historyLimit);
+        }
+
+        // Remove historyLimit from sync storage by re-saving without it
+        const { historyLimit: _, ...cleanSyncSettings } = syncSettings;
+        if (Object.keys(cleanSyncSettings).length > 0) {
+          await this.storageAdapter.setUserSettings(cleanSyncSettings);
+        }
+      } catch (error) {
+        // Don't fail the load operation if cleanup fails
+        console.warn('Failed to cleanup orphaned historyLimit from sync storage:', error.message);
+      }
+    }
+  }
+
+  async _loadSyncSettings() {
+    return await this.storageAdapter.getUserSettings() || {};
+  }
+
+  async _loadLocalSettings() {
+    const historyLimit = await this.storageAdapter.getHistoryLimit();
+    return {
+      ...(historyLimit !== undefined && { historyLimit })
+    };
+  }
+
+  async _saveSyncSettings(allSettings) {
+    const { historyLimit: _, ...syncSettings } = allSettings;
+    await this.storageAdapter.setUserSettings(syncSettings);
+  }
+
+  async _saveLocalSettings(allSettings) {
+    if (allSettings.historyLimit !== undefined) {
+      await this.storageAdapter.setHistoryLimit(allSettings.historyLimit);
     }
   }
 }

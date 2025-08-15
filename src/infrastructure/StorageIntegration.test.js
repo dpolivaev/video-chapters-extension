@@ -50,7 +50,7 @@ describe('Storage Layer Integration', () => {
 
   describe('historyLimit synchronization', () => {
     test('should respect history limit from settings when adding instructions', async () => {
-      // Setup settings with custom history limit
+      // Setup settings with custom history limit - now historyLimit is in local storage
       const settingsData = {
         apiKey: 'test-key',
         openRouterApiKey: '',
@@ -60,7 +60,6 @@ describe('Storage Layer Integration', () => {
           provider: 'Gemini',
           isFree: false
         },
-        historyLimit: 3,
         autoSaveInstructions: true,
         theme: 'auto',
         uiLanguage: ''
@@ -73,7 +72,18 @@ describe('Storage Layer Integration', () => {
         { id: 1, content: 'First instruction', timestamp: '2022-01-19T08:00:00.000Z', name: '', isCustomName: false },
         { id: 2, content: 'Second instruction', timestamp: '2022-01-19T09:00:00.000Z', name: '', isCustomName: false }
       ];
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: existingHistory });
+
+      // Mock local storage to return both instruction history and history limit
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: existingHistory });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 3 });
+          }
+          return Promise.resolve({});
+        });
       mockBrowserStorage.storage.local.set.mockResolvedValue();
 
       // Add a third instruction - should still fit within limit
@@ -117,17 +127,8 @@ describe('Storage Layer Integration', () => {
     });
 
     test('should use updated history limit immediately after settings change', async () => {
-      // Initial settings with limit 5
-      const initialSettings = {
-        historyLimit: 5,
-        autoSaveInstructions: true,
-        theme: 'auto',
-        uiLanguage: ''
-      };
-
-      // Updated settings with limit 2
+      // Updated settings without historyLimit (now in local storage)
       const updatedSettings = {
-        historyLimit: 2,
         autoSaveInstructions: true,
         theme: 'auto',
         uiLanguage: ''
@@ -136,11 +137,9 @@ describe('Storage Layer Integration', () => {
       const credentials = new ApiCredentials('test-key', '');
       const model = new ModelId('gemini-2.5-pro', 'Gemini', false);
 
-      // Mock the initial load to return initial settings
+      // Mock sync storage to return settings without historyLimit
       mockBrowserStorage.storage.sync.get
-        .mockResolvedValueOnce({ userSettings: { ...initialSettings, apiKey: 'test-key', model: 'gemini-2.5-pro', selectedModel: model.toJSON() } })
-        .mockResolvedValueOnce({ userSettings: { ...updatedSettings, apiKey: 'test-key', model: 'gemini-2.5-pro', selectedModel: model.toJSON() } });
-
+        .mockResolvedValue({ userSettings: { ...updatedSettings, apiKey: 'test-key', model: 'gemini-2.5-pro', selectedModel: model.toJSON() } });
       mockBrowserStorage.storage.sync.set.mockResolvedValue();
 
       // Setup existing history with 4 items
@@ -151,39 +150,55 @@ describe('Storage Layer Integration', () => {
         name: '',
         isCustomName: false
       }));
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: existingHistory });
+
+      // Mock local storage to return instruction history and history limit separately
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: existingHistory });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 2 });
+          }
+          return Promise.resolve({});
+        });
       mockBrowserStorage.storage.local.set.mockResolvedValue();
 
       // Update settings to change history limit
-      await settingsRepository.save(credentials, model, updatedSettings);
+      await settingsRepository.save(credentials, model, { historyLimit: 2, ...updatedSettings });
 
       // Add new instruction - should respect the new limit of 2
       await instructionHistoryRepository.addInstruction('New instruction after limit change');
 
-      // Verify the final instruction history reflects the new limit
-      // The addInstruction method checks the limit but doesn't automatically trim existing history
-      // This would need to be done by calling setHistoryLimit separately
-      const savedHistory = mockBrowserStorage.storage.local.set.mock.calls[0][0].instructionHistory;
-      expect(savedHistory).toHaveLength(5); // Original 4 + 1 new = 5 total (no auto-trim)
-      expect(savedHistory[0]).toEqual(expect.objectContaining({ content: 'New instruction after limit change' }));
+      // Verify the final instruction history respects the limit of 2
+      // The addInstruction method should limit to 2 items (new instruction + 1 from existing)
+      const savedInstructionHistory = mockBrowserStorage.storage.local.set.mock.calls.find(call => call[0].instructionHistory)?.[0]?.instructionHistory;
+      expect(savedInstructionHistory).toHaveLength(2);
+      expect(savedInstructionHistory[0]).toEqual(expect.objectContaining({ content: 'New instruction after limit change' }));
     });
 
     test('should handle settings repository failure gracefully when getting history limit', async () => {
-      // Mock settings repository to fail
-      mockBrowserStorage.storage.sync.get.mockRejectedValue(new Error('Settings load failed'));
-
-      // Setup existing history
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: [] });
+      // Mock local storage getHistoryLimit to fail
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: [] });
+          }
+          if (key === 'historyLimit') {
+            return Promise.reject(new Error('Local storage failed'));
+          }
+          return Promise.resolve({});
+        });
       mockBrowserStorage.storage.local.set.mockResolvedValue();
 
       // Mock console.error to avoid test noise
       jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      // Add instruction - should use default limit (10) when settings fail
+      // Add instruction - should use default limit (10) when local storage fails
       await instructionHistoryRepository.addInstruction('Test instruction');
 
       // The console.error is called within the getHistoryLimit method
-      // Since we're mocking the settingsRepository.load to fail, this should be called
+      expect(console.error).toHaveBeenCalledWith('Error loading history limit from local storage:', expect.any(Error));
       expect(mockBrowserStorage.storage.local.set).toHaveBeenCalledWith({
         instructionHistory: [expect.objectContaining({ content: 'Test instruction' })]
       });
@@ -198,38 +213,35 @@ describe('Storage Layer Integration', () => {
 
       // Mock storage operations
       mockBrowserStorage.storage.sync.set.mockResolvedValue();
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: [] });
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: [] });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 7 });
+          }
+          return Promise.resolve({});
+        });
       mockBrowserStorage.storage.local.set.mockResolvedValue();
 
       // Save settings
       await settingsRepository.save(credentials, model, additionalSettings);
 
-      // Mock the settings load for history repository
-      mockBrowserStorage.storage.sync.get.mockResolvedValue({
-        userSettings: {
-          apiKey: 'gemini-key',
-          openRouterApiKey: 'openrouter-key',
-          model: 'anthropic/claude-3.5-sonnet',
-          selectedModel: model.toJSON(),
-          historyLimit: 7,
-          autoSaveInstructions: true,
-          theme: 'dark',
-          uiLanguage: ''
-        }
-      });
-
       // Add instruction with the new limit
       await instructionHistoryRepository.addInstruction('Test instruction');
 
-      // Verify settings were saved to sync storage
+      // Verify settings were saved to sync storage (without historyLimit)
       expect(mockBrowserStorage.storage.sync.set).toHaveBeenCalledWith({
         userSettings: expect.objectContaining({
           apiKey: 'gemini-key',
           openRouterApiKey: 'openrouter-key',
-          historyLimit: 7,
           theme: 'dark'
         })
       });
+
+      // Verify historyLimit was saved to local storage
+      expect(mockBrowserStorage.storage.local.set).toHaveBeenCalledWith({ historyLimit: 7 });
 
       // Verify instruction was saved to local storage
       expect(mockBrowserStorage.storage.local.set).toHaveBeenCalledWith({
@@ -238,12 +250,22 @@ describe('Storage Layer Integration', () => {
     });
 
     test('should handle mixed storage types correctly', async () => {
-      // Settings go to sync storage, history goes to local storage
-      const settingsData = { historyLimit: 15 };
+      // Settings go to sync storage (without historyLimit), history and historyLimit go to local storage
+      const settingsData = { apiKey: 'test-key', autoSaveInstructions: true };
       const historyData = [{ id: 1, content: 'Test', timestamp: '2022-01-20T10:00:00.000Z', name: '', isCustomName: false }];
+      const historyLimit = 15;
 
       mockBrowserStorage.storage.sync.get.mockResolvedValue({ userSettings: settingsData });
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: historyData });
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: historyData });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit });
+          }
+          return Promise.resolve({});
+        });
 
       // Load from both repositories
       const settings = await settingsRepository.load();
@@ -251,6 +273,7 @@ describe('Storage Layer Integration', () => {
 
       // Verify correct storage APIs were called
       expect(mockBrowserStorage.storage.sync.get).toHaveBeenCalledWith('userSettings');
+      expect(mockBrowserStorage.storage.local.get).toHaveBeenCalledWith('historyLimit');
       expect(mockBrowserStorage.storage.local.get).toHaveBeenCalledWith('instructionHistory');
 
       // Verify data integrity
@@ -281,6 +304,9 @@ describe('Storage Layer Integration', () => {
       const model = new ModelId('gemini-2.5-flash', 'Gemini', false);
       const settings = { historyLimit: 3, autoSaveInstructions: true };
 
+      // Track instruction history as it grows
+      let currentHistory = [];
+
       // Mock all storage operations
       mockBrowserStorage.storage.sync.set.mockResolvedValue();
       mockBrowserStorage.storage.sync.get.mockResolvedValue({
@@ -289,14 +315,31 @@ describe('Storage Layer Integration', () => {
           openRouterApiKey: '',
           model: 'gemini-2.5-flash',
           selectedModel: model.toJSON(),
-          historyLimit: 3,
           autoSaveInstructions: true,
           theme: 'auto',
           uiLanguage: ''
         }
       });
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: [] });
-      mockBrowserStorage.storage.local.set.mockResolvedValue();
+
+      // Mock local storage operations
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: currentHistory });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 3 });
+          }
+          return Promise.resolve({});
+        });
+
+      mockBrowserStorage.storage.local.set
+        .mockImplementation((data) => {
+          if (data.instructionHistory) {
+            currentHistory = data.instructionHistory;
+          }
+          return Promise.resolve();
+        });
 
       // Step 1: Save settings
       await settingsRepository.save(credentials, model, settings);
@@ -308,10 +351,9 @@ describe('Storage Layer Integration', () => {
       await instructionHistoryRepository.addInstruction('Fourth instruction'); // Should trigger limit
 
       // Step 3: Verify final state
-      const finalHistory = mockBrowserStorage.storage.local.set.mock.calls.slice(-1)[0][0].instructionHistory;
-      expect(finalHistory).toHaveLength(3); // Respects limit
-      expect(finalHistory[0]).toEqual(expect.objectContaining({ content: 'Fourth instruction' }));
-      expect(finalHistory[2]).toEqual(expect.objectContaining({ content: 'Second instruction' }));
+      expect(currentHistory).toHaveLength(3); // Respects limit
+      expect(currentHistory[0]).toEqual(expect.objectContaining({ content: 'Fourth instruction' }));
+      expect(currentHistory[2]).toEqual(expect.objectContaining({ content: 'Second instruction' }));
     });
 
     test('should handle instruction renaming with settings integration', async () => {
@@ -445,26 +487,42 @@ describe('Storage Layer Integration', () => {
 
   describe('performance and efficiency', () => {
     test('should minimize storage operations during bulk instruction operations', async () => {
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: [] });
+      // Mock local storage for both instruction history and history limit
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: [] });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 10 });
+          }
+          return Promise.resolve({});
+        });
       mockBrowserStorage.storage.local.set.mockResolvedValue();
-      mockBrowserStorage.storage.sync.get.mockResolvedValue({
-        userSettings: { historyLimit: 10 }
-      });
 
-      // Each addInstruction should result in exactly one get and one set operation
+      // Each addInstruction should result in exactly two gets (history + limit) and one set operation
       await instructionHistoryRepository.addInstruction('First');
-      expect(mockBrowserStorage.storage.local.get).toHaveBeenCalledTimes(1);
+      expect(mockBrowserStorage.storage.local.get).toHaveBeenCalledTimes(2); // history + limit
       expect(mockBrowserStorage.storage.local.set).toHaveBeenCalledTimes(1);
 
       // Reset mocks to test second operation
       mockBrowserStorage.storage.local.get.mockClear();
       mockBrowserStorage.storage.local.set.mockClear();
-      mockBrowserStorage.storage.local.get.mockResolvedValue({
-        instructionHistory: [{ id: 1, content: 'First', timestamp: '2022-01-20T10:00:00.000Z', name: '', isCustomName: false }]
-      });
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({
+              instructionHistory: [{ id: 1, content: 'First', timestamp: '2022-01-20T10:00:00.000Z', name: '', isCustomName: false }]
+            });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 10 });
+          }
+          return Promise.resolve({});
+        });
 
       await instructionHistoryRepository.addInstruction('Second');
-      expect(mockBrowserStorage.storage.local.get).toHaveBeenCalledTimes(1);
+      expect(mockBrowserStorage.storage.local.get).toHaveBeenCalledTimes(2); // history + limit
       expect(mockBrowserStorage.storage.local.set).toHaveBeenCalledTimes(1);
     });
 
@@ -505,10 +563,24 @@ describe('Storage Layer Integration', () => {
 
       // Save settings
       await settingsRepository.save(credentials, model, additionalSettings);
-      const savedSettings = mockBrowserStorage.storage.sync.set.mock.calls[0][0].userSettings;
+
+      // Get the saved sync settings (without historyLimit)
+      const savedSyncSettings = mockBrowserStorage.storage.sync.set.mock.calls[0][0].userSettings;
+      // Get the saved local storage historyLimit
+      const savedHistoryLimit = mockBrowserStorage.storage.local.set.mock.calls[0][0].historyLimit;
 
       // Mock the saved data for load
-      mockBrowserStorage.storage.sync.get.mockResolvedValue({ userSettings: savedSettings });
+      mockBrowserStorage.storage.sync.get.mockResolvedValue({ userSettings: savedSyncSettings });
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: [] });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: savedHistoryLimit });
+          }
+          return Promise.resolve({});
+        });
 
       // Load settings back
       const loadedSettings = await settingsRepository.load();
@@ -528,11 +600,17 @@ describe('Storage Layer Integration', () => {
     });
 
     test('should validate instruction entry data integrity through storage cycle', async () => {
-      mockBrowserStorage.storage.local.get.mockResolvedValue({ instructionHistory: [] });
+      mockBrowserStorage.storage.local.get
+        .mockImplementation((key) => {
+          if (key === 'instructionHistory') {
+            return Promise.resolve({ instructionHistory: [] });
+          }
+          if (key === 'historyLimit') {
+            return Promise.resolve({ historyLimit: 10 });
+          }
+          return Promise.resolve({});
+        });
       mockBrowserStorage.storage.local.set.mockResolvedValue();
-      mockBrowserStorage.storage.sync.get.mockResolvedValue({
-        userSettings: { historyLimit: 10 }
-      });
 
       // Add instruction
       const addedInstruction = await instructionHistoryRepository.addInstruction('Typed instruction');

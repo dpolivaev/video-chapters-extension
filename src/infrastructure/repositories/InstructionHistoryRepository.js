@@ -85,8 +85,7 @@ class InstructionHistoryRepository {
   }
 
   async setHistoryLimit(limit) {
-    // History limit is managed by SettingsRepository, not stored separately
-    // This method only trims existing history to the new limit
+    await this.storageAdapter.setHistoryLimit(limit);
     const history = await this.getHistory();
     if (history.length > limit) {
       history.splice(limit);
@@ -96,10 +95,10 @@ class InstructionHistoryRepository {
 
   async getHistoryLimit() {
     try {
-      const settings = await this.settingsRepository.load();
-      return settings.additionalSettings.historyLimit || this.defaultLimit;
+      const limit = await this.storageAdapter.getHistoryLimit();
+      return limit !== undefined && limit !== null ? limit : this.defaultLimit;
     } catch (error) {
-      console.error('Error loading history limit from settings:', error);
+      console.error('Error loading history limit from local storage:', error);
       return this.defaultLimit;
     }
   }

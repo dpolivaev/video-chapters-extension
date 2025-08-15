@@ -18,7 +18,10 @@ describe('SettingsRepository', () => {
     mockStorageAdapter = {
       getUserSettings: jest.fn(),
       setUserSettings: jest.fn(),
-      removeUserSettings: jest.fn()
+      removeUserSettings: jest.fn(),
+      getHistoryLimit: jest.fn(),
+      setHistoryLimit: jest.fn(),
+      removeHistoryLimit: jest.fn()
     };
     repository = new SettingsRepository(mockStorageAdapter);
   });
@@ -62,11 +65,11 @@ describe('SettingsRepository', () => {
         openRouterApiKey: 'test-openrouter-key',
         model: 'gemini-2.5-pro',
         selectedModel: sampleModel.toJSON(),
-        historyLimit: 15,
         autoSaveInstructions: true,
         theme: 'dark',
         uiLanguage: ''
       });
+      expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(15);
       expect(result).toEqual(expect.objectContaining({
         apiKey: 'test-gemini-key',
         openRouterApiKey: 'test-openrouter-key',
@@ -84,12 +87,12 @@ describe('SettingsRepository', () => {
 
       expect(mockStorageAdapter.setUserSettings).toHaveBeenCalledWith(
         expect.objectContaining({
-          historyLimit: 20,
           autoSaveInstructions: true, // default preserved
           theme: 'auto', // default preserved
           uiLanguage: '' // default preserved
         })
       );
+      expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(20);
     });
 
     test('should save with empty additional settings', async () => {
@@ -103,12 +106,12 @@ describe('SettingsRepository', () => {
           openRouterApiKey: 'test-openrouter-key',
           model: 'gemini-2.5-pro',
           selectedModel: sampleModel.toJSON(),
-          historyLimit: 10,
           autoSaveInstructions: true,
           theme: 'auto',
           uiLanguage: ''
         })
       );
+      expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(10);
     });
 
     test('should require ApiCredentials instance', async () => {
@@ -541,6 +544,202 @@ describe('SettingsRepository', () => {
       expect(typeof loaded.additionalSettings.theme).toBe('string');
       expect(loaded.credentials instanceof ApiCredentials).toBe(true);
       expect(loaded.selectedModel instanceof ModelId).toBe(true);
+    });
+  });
+
+  describe('dual storage behavior', () => {
+    test('should save historyLimit to local storage and other settings to sync storage', async () => {
+      const credentials = new ApiCredentials('test-key', 'router-key');
+      const model = new ModelId('test-model', 'Test', false);
+      const additionalSettings = { historyLimit: 15, uiLanguage: 'es' };
+
+      mockStorageAdapter.setUserSettings.mockResolvedValue();
+      mockStorageAdapter.setHistoryLimit.mockResolvedValue();
+
+      await repository.save(credentials, model, additionalSettings);
+
+      // Verify sync storage gets everything except historyLimit
+      expect(mockStorageAdapter.setUserSettings).toHaveBeenCalledWith({
+        apiKey: 'test-key',
+        openRouterApiKey: 'router-key',
+        model: 'test-model',
+        selectedModel: model.toJSON(),
+        autoSaveInstructions: true,
+        theme: 'auto',
+        uiLanguage: 'es'
+      });
+
+      // Verify local storage gets only historyLimit
+      expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(15);
+    });
+
+    test('should load from both sync and local storage and merge results', async () => {
+      // Mock sync storage data
+      mockStorageAdapter.getUserSettings.mockResolvedValue({
+        apiKey: 'sync-key',
+        openRouterApiKey: 'sync-router',
+        model: 'sync-model',
+        selectedModel: { modelString: 'sync-model', providerName: 'Sync', isFree: true },
+        uiLanguage: 'fr',
+        autoSaveInstructions: false,
+        theme: 'dark'
+      });
+
+      // Mock local storage data
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(25);
+
+      const result = await repository.load();
+
+      expect(result.credentials.geminiKey).toBe('sync-key');
+      expect(result.credentials.openRouterKey).toBe('sync-router');
+      expect(result.additionalSettings.historyLimit).toBe(25);
+      expect(result.additionalSettings.uiLanguage).toBe('fr');
+      expect(result.additionalSettings.autoSaveInstructions).toBe(false);
+      expect(result.additionalSettings.theme).toBe('dark');
+    });
+
+    test('should use default historyLimit when local storage is empty', async () => {
+      mockStorageAdapter.getUserSettings.mockResolvedValue({
+        apiKey: 'test-key',
+        model: 'test-model'
+      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(undefined);
+
+      const result = await repository.load();
+
+      expect(result.additionalSettings.historyLimit).toBe(10); // default value
+    });
+
+    test('should handle missing local storage gracefully', async () => {
+      mockStorageAdapter.getUserSettings.mockResolvedValue({
+        apiKey: 'test-key'
+      });
+      mockStorageAdapter.getHistoryLimit.mockRejectedValue(new Error('Storage error'));
+
+      const result = await repository.load();
+
+      expect(result.additionalSettings.historyLimit).toBe(10); // fallback to default
+    });
+
+    test('should reset both sync and local storage', async () => {
+      mockStorageAdapter.removeUserSettings.mockResolvedValue();
+      mockStorageAdapter.removeHistoryLimit.mockResolvedValue();
+
+      await repository.reset();
+
+      expect(mockStorageAdapter.removeUserSettings).toHaveBeenCalled();
+      expect(mockStorageAdapter.removeHistoryLimit).toHaveBeenCalled();
+    });
+
+    test('should not save historyLimit to local storage if not provided', async () => {
+      const credentials = new ApiCredentials('test-key', '');
+      const model = new ModelId('test-model', 'Test', true);
+      // No additional settings provided
+
+      mockStorageAdapter.setUserSettings.mockResolvedValue();
+      mockStorageAdapter.setHistoryLimit.mockResolvedValue();
+
+      await repository.save(credentials, model);
+
+      expect(mockStorageAdapter.setUserSettings).toHaveBeenCalled();
+      expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(10); // default value
+    });
+  });
+
+  describe('orphaned historyLimit cleanup', () => {
+    test('should migrate historyLimit from sync to local storage during load', async () => {
+      // Mock sync storage with orphaned historyLimit
+      const syncSettingsWithHistoryLimit = {
+        apiKey: 'test-key',
+        model: 'test-model',
+        historyLimit: 25, // orphaned value in sync storage
+        theme: 'dark'
+      };
+      mockStorageAdapter.getUserSettings.mockResolvedValue(syncSettingsWithHistoryLimit);
+
+      // Mock local storage without historyLimit
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(undefined);
+      mockStorageAdapter.setHistoryLimit.mockResolvedValue();
+      mockStorageAdapter.setUserSettings.mockResolvedValue();
+
+      await repository.load();
+
+      // Verify migration: historyLimit saved to local storage
+      expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(25);
+
+      // Verify cleanup: sync storage re-saved without historyLimit
+      expect(mockStorageAdapter.setUserSettings).toHaveBeenCalledWith({
+        apiKey: 'test-key',
+        model: 'test-model',
+        theme: 'dark'
+        // historyLimit should be removed
+      });
+    });
+
+    test('should not migrate historyLimit if already exists in local storage', async () => {
+      // Mock sync storage with orphaned historyLimit
+      const syncSettingsWithHistoryLimit = {
+        apiKey: 'test-key',
+        historyLimit: 25, // orphaned value in sync storage
+        theme: 'light'
+      };
+      mockStorageAdapter.getUserSettings.mockResolvedValue(syncSettingsWithHistoryLimit);
+
+      // Mock local storage already has historyLimit
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(15);
+      mockStorageAdapter.setHistoryLimit.mockResolvedValue();
+      mockStorageAdapter.setUserSettings.mockResolvedValue();
+
+      await repository.load();
+
+      // Verify no migration: local storage historyLimit not overwritten
+      expect(mockStorageAdapter.setHistoryLimit).not.toHaveBeenCalled();
+
+      // Verify cleanup: sync storage still cleaned up
+      expect(mockStorageAdapter.setUserSettings).toHaveBeenCalledWith({
+        apiKey: 'test-key',
+        theme: 'light'
+        // historyLimit should be removed
+      });
+    });
+
+    test('should handle cleanup failure gracefully', async () => {
+      // Mock sync storage with orphaned historyLimit
+      const syncSettingsWithHistoryLimit = {
+        apiKey: 'test-key',
+        historyLimit: 25
+      };
+      mockStorageAdapter.getUserSettings.mockResolvedValue(syncSettingsWithHistoryLimit);
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(undefined);
+
+      // Mock cleanup operations to fail
+      mockStorageAdapter.setHistoryLimit.mockRejectedValue(new Error('Local storage error'));
+      mockStorageAdapter.setUserSettings.mockRejectedValue(new Error('Sync storage error'));
+
+      // Mock console.warn to avoid test noise
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Load should still work despite cleanup failure
+      const result = await repository.load();
+
+      expect(result.additionalSettings.historyLimit).toBe(25); // Still uses the value
+      expect(console.warn).toHaveBeenCalledWith('Failed to cleanup orphaned historyLimit from sync storage:', 'Local storage error');
+    });
+
+    test('should skip cleanup when no historyLimit in sync storage', async () => {
+      // Mock sync storage without historyLimit
+      const syncSettings = {
+        apiKey: 'test-key',
+        theme: 'auto'
+      };
+      mockStorageAdapter.getUserSettings.mockResolvedValue(syncSettings);
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(10);
+
+      await repository.load();
+
+      // Verify no cleanup operations performed
+      expect(mockStorageAdapter.setHistoryLimit).not.toHaveBeenCalled();
+      expect(mockStorageAdapter.setUserSettings).not.toHaveBeenCalledWith(expect.anything());
     });
   });
 });

@@ -364,4 +364,44 @@ describe('BrowserStorageAdapter', () => {
       }
     });
   });
+
+  describe('historyLimit methods', () => {
+    test('should get history limit from local storage', async () => {
+      const expectedLimit = 15;
+      mockBrowser.storage.local.get.mockResolvedValue({ historyLimit: expectedLimit });
+
+      const result = await adapter.getHistoryLimit();
+
+      expect(mockBrowser.storage.local.get).toHaveBeenCalledWith('historyLimit');
+      expect(result).toBe(expectedLimit);
+    });
+
+    test('should set history limit in local storage', async () => {
+      const limit = 20;
+      mockBrowser.storage.local.set.mockResolvedValue();
+
+      await adapter.setHistoryLimit(limit);
+
+      expect(mockBrowser.storage.local.set).toHaveBeenCalledWith({ historyLimit: limit });
+    });
+
+    test('should remove history limit from local storage', async () => {
+      mockBrowser.storage.local.remove.mockResolvedValue();
+
+      await adapter.removeHistoryLimit();
+
+      expect(mockBrowser.storage.local.remove).toHaveBeenCalledWith('historyLimit');
+    });
+
+    test('should handle errors in history limit operations', async () => {
+      const testError = new Error('Storage error');
+      mockBrowser.storage.local.get.mockRejectedValue(testError);
+      mockBrowser.storage.local.set.mockRejectedValue(testError);
+      mockBrowser.storage.local.remove.mockRejectedValue(testError);
+
+      await expect(adapter.getHistoryLimit()).rejects.toThrow('Failed to get local storage key \'historyLimit\': Storage error');
+      await expect(adapter.setHistoryLimit(10)).rejects.toThrow('Failed to set local storage key \'historyLimit\': Storage error');
+      await expect(adapter.removeHistoryLimit()).rejects.toThrow('Failed to remove local storage key \'historyLimit\': Storage error');
+    });
+  });
 });

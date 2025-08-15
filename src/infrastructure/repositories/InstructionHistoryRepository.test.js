@@ -17,7 +17,10 @@ describe('InstructionHistoryRepository', () => {
   beforeEach(() => {
     mockStorageAdapter = {
       getInstructionHistory: jest.fn(),
-      setInstructionHistory: jest.fn()
+      setInstructionHistory: jest.fn(),
+      getHistoryLimit: jest.fn(),
+      setHistoryLimit: jest.fn(),
+      removeHistoryLimit: jest.fn()
     };
 
     mockSettingsRepository = {
@@ -62,9 +65,7 @@ describe('InstructionHistoryRepository', () => {
   describe('addInstruction', () => {
     test('should add new instruction to empty history', async () => {
       mockStorageAdapter.getInstructionHistory.mockResolvedValue([]);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 10 }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(10);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       const result = await repository.addInstruction('Generate detailed chapters');
@@ -91,9 +92,7 @@ describe('InstructionHistoryRepository', () => {
         { id: 1, content: 'Old instruction', timestamp: '2022-01-19T10:00:00.000Z', name: '', isCustomName: false }
       ];
       mockStorageAdapter.getInstructionHistory.mockResolvedValue(existingHistory);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 10 }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(10);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       await repository.addInstruction('New instruction');
@@ -112,9 +111,7 @@ describe('InstructionHistoryRepository', () => {
 
     test('should trim instruction content before adding', async () => {
       mockStorageAdapter.getInstructionHistory.mockResolvedValue([]);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 10 }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(10);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       await repository.addInstruction('  Padded instruction content  ');
@@ -132,9 +129,7 @@ describe('InstructionHistoryRepository', () => {
         { id: 2, content: 'Duplicate content', timestamp: '2022-01-19T09:00:00.000Z', name: '', isCustomName: false }
       ];
       mockStorageAdapter.getInstructionHistory.mockResolvedValue(existingHistory);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 10 }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(10);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       await repository.addInstruction('Duplicate content');
@@ -156,9 +151,7 @@ describe('InstructionHistoryRepository', () => {
         { id: 1, content: 'Duplicate content', timestamp: '2022-01-19T09:00:00.000Z', name: 'My Custom Name', isCustomName: true }
       ];
       mockStorageAdapter.getInstructionHistory.mockResolvedValue(existingHistory);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 10 }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(10);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       await repository.addInstruction('Duplicate content');
@@ -180,9 +173,7 @@ describe('InstructionHistoryRepository', () => {
         isCustomName: false
       }));
       mockStorageAdapter.getInstructionHistory.mockResolvedValue(existingHistory);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 3 }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(3);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       await repository.addInstruction('New instruction');
@@ -195,7 +186,7 @@ describe('InstructionHistoryRepository', () => {
       expect(savedHistory[2].content).toBe('Instruction 2');
     });
 
-    test('should use default limit when settings load fails', async () => {
+    test('should use default limit when storage adapter fails', async () => {
       const existingHistory = Array.from({length: 15}, (_, i) => ({
         id: i + 1,
         content: `Instruction ${i + 1}`,
@@ -204,7 +195,7 @@ describe('InstructionHistoryRepository', () => {
         isCustomName: false
       }));
       mockStorageAdapter.getInstructionHistory.mockResolvedValue(existingHistory);
-      mockSettingsRepository.load.mockRejectedValue(new Error('Settings load failed'));
+      mockStorageAdapter.getHistoryLimit.mockRejectedValue(new Error('Storage error'));
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       // Mock console.error to avoid test noise
@@ -214,14 +205,12 @@ describe('InstructionHistoryRepository', () => {
 
       const savedHistory = mockStorageAdapter.setInstructionHistory.mock.calls[0][0];
       expect(savedHistory).toHaveLength(10); // default limit
-      expect(console.error).toHaveBeenCalledWith('Error loading history limit from settings:', expect.any(Error));
+      expect(console.error).toHaveBeenCalledWith('Error loading history limit from local storage:', expect.any(Error));
     });
 
-    test('should handle missing historyLimit in settings', async () => {
+    test('should handle missing historyLimit in storage', async () => {
       mockStorageAdapter.getInstructionHistory.mockResolvedValue([]);
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: {} // no historyLimit
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(undefined);
       mockStorageAdapter.setInstructionHistory.mockResolvedValue();
 
       await repository.addInstruction('Test instruction');
@@ -486,28 +475,24 @@ describe('InstructionHistoryRepository', () => {
   });
 
   describe('getHistoryLimit', () => {
-    test('should return limit from settings', async () => {
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: 25 }
-      });
+    test('should return limit from storage adapter', async () => {
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(25);
 
       const limit = await repository.getHistoryLimit();
 
       expect(limit).toBe(25);
     });
 
-    test('should return default limit when not set in settings', async () => {
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: {}
-      });
+    test('should return default limit when not set in storage', async () => {
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(undefined);
 
       const limit = await repository.getHistoryLimit();
 
       expect(limit).toBe(10);
     });
 
-    test('should return default limit when settings load fails', async () => {
-      mockSettingsRepository.load.mockRejectedValue(new Error('Settings error'));
+    test('should return default limit when storage adapter fails', async () => {
+      mockStorageAdapter.getHistoryLimit.mockRejectedValue(new Error('Storage error'));
 
       // Mock console.error to avoid test noise
       jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -515,13 +500,11 @@ describe('InstructionHistoryRepository', () => {
       const limit = await repository.getHistoryLimit();
 
       expect(limit).toBe(10);
-      expect(console.error).toHaveBeenCalledWith('Error loading history limit from settings:', expect.any(Error));
+      expect(console.error).toHaveBeenCalledWith('Error loading history limit from local storage:', expect.any(Error));
     });
 
     test('should return default limit when historyLimit is null', async () => {
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: null }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(null);
 
       const limit = await repository.getHistoryLimit();
 
@@ -529,9 +512,7 @@ describe('InstructionHistoryRepository', () => {
     });
 
     test('should return default limit when historyLimit is undefined', async () => {
-      mockSettingsRepository.load.mockResolvedValue({
-        additionalSettings: { historyLimit: undefined }
-      });
+      mockStorageAdapter.getHistoryLimit.mockResolvedValue(undefined);
 
       const limit = await repository.getHistoryLimit();
 

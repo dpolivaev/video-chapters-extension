@@ -12,7 +12,8 @@ class BrowserStorageAdapter {
     this.STORAGE_KEYS = {
       USER_SETTINGS: 'userSettings',
       INSTRUCTION_HISTORY: 'instructionHistory',
-      LAST_CUSTOM_INSTRUCTIONS: 'lastCustomInstructions'
+      LAST_CUSTOM_INSTRUCTIONS: 'lastCustomInstructions',
+      HISTORY_LIMIT: 'historyLimit'
     };
   }
 
@@ -96,6 +97,18 @@ class BrowserStorageAdapter {
 
   removeLastCustomInstructions() {
     return this.removeLocalStorage(this.STORAGE_KEYS.LAST_CUSTOM_INSTRUCTIONS);
+  }
+
+  getHistoryLimit() {
+    return this.getLocalStorage(this.STORAGE_KEYS.HISTORY_LIMIT);
+  }
+
+  setHistoryLimit(limit) {
+    return this.setLocalStorage(this.STORAGE_KEYS.HISTORY_LIMIT, limit);
+  }
+
+  removeHistoryLimit() {
+    return this.removeLocalStorage(this.STORAGE_KEYS.HISTORY_LIMIT);
   }
 }
 
