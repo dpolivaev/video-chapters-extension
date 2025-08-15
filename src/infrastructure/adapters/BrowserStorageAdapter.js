@@ -98,3 +98,7 @@ class BrowserStorageAdapter {
     return this.removeLocalStorage(this.STORAGE_KEYS.LAST_CUSTOM_INSTRUCTIONS);
   }
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = BrowserStorageAdapter;
+}

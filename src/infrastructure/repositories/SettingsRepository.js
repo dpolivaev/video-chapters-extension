@@ -168,3 +168,7 @@ class SettingsRepository {
   }
 }
 
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SettingsRepository;
+}
+

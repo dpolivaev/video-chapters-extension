@@ -23,6 +23,12 @@ const domainClasses = {
   VideoTranscript: './src/domain/entities/VideoTranscript',
   ChapterGeneration: './src/domain/entities/ChapterGeneration',
   BrowserTab: './src/domain/entities/BrowserTab',
+  InstructionEntry: './src/domain/entities/InstructionEntry',
+
+  // Infrastructure
+  BrowserStorageAdapter: './src/infrastructure/adapters/BrowserStorageAdapter',
+  SettingsRepository: './src/infrastructure/repositories/SettingsRepository',
+  InstructionHistoryRepository: './src/infrastructure/repositories/InstructionHistoryRepository',
 
   // Services (that don't have complex dependencies)
   NetworkCommunicator: './src/domain/services/NetworkCommunicator',
@@ -54,3 +60,8 @@ function loadClassFromFile(filePath) {
 loadClassFromFile('src/domain/services/NetworkCommunicator.js');
 loadClassFromFile('src/domain/services/GeminiChapterGenerator.js');
 loadClassFromFile('src/domain/services/OpenRouterChapterGenerator.js');
+
+// Load infrastructure classes
+loadClassFromFile('src/infrastructure/adapters/BrowserStorageAdapter.js');
+loadClassFromFile('src/infrastructure/repositories/SettingsRepository.js');
+loadClassFromFile('src/infrastructure/repositories/InstructionHistoryRepository.js');
