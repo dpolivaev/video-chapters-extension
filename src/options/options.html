@@ -32,52 +32,95 @@
   <div class="container">
     <div class="header">
       <h1>__MSG_extension_settings_title__</h1>
-      <button class="help-btn" id="helpBtn" title="__MSG_help_button_tooltip__"></button>
-    </div>
-    <div class="input-row">
-      <label for="apiKey">__MSG_gemini_api_key_label__</label>
-      <input type="password" id="apiKey" placeholder="__MSG_gemini_api_key_placeholder__" />
-    </div>
-    <div class="input-row">
-      <label for="openRouterApiKey">__MSG_openrouter_api_key_label__</label>
-      <input type="password" id="openRouterApiKey" placeholder="__MSG_openrouter_api_key_placeholder__" />
+      <div class="header-actions">
+        <button id="saveAll" class="save-btn">__MSG_save_button__</button>
+        <button class="help-btn" id="helpBtn" title="__MSG_help_button_tooltip__"></button>
+      </div>
     </div>
     
-    <section class="setting-group">
-      <h2>__MSG_language_settings_title__</h2>
-      <div class="input-row">
-        <label for="languageSelect">__MSG_language_selector_label__</label>
-        <select id="languageSelect">
-          <option value="">__MSG_language_browser_ui__</option>
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-          <option value="it">Italiano</option>
-          <option value="ru">Русский</option>
-          <option value="pt">Português</option>
-          <option value="uk">Українська</option>
-          <option value="he">עברית</option>
-          <option value="zh-CN">中文 (简体)</option>
-          <option value="ar">العربية</option>
-          <option value="ko">한국어</option>
-        </select>
+    <div id="status" class="status-message"></div>
+    
+    <section class="setting-group api-keys-section">
+      <h2>__MSG_api_keys_section_title__</h2>
+      <div class="api-key-field">
+        <label for="apiKey">__MSG_gemini_api_key_label__</label>
+        <div class="key-input-row">
+          <input type="password" id="apiKey" placeholder="__MSG_gemini_api_key_placeholder__" />
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="get-key-btn" id="geminiKeyBtn">
+            __MSG_get_gemini_api_key__
+          </a>
+        </div>
+      </div>
+      <div class="api-key-field">
+        <label for="openRouterApiKey">__MSG_openrouter_api_key_label__</label>
+        <div class="key-input-row">
+          <input type="password" id="openRouterApiKey" placeholder="__MSG_openrouter_api_key_placeholder__" />
+          <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" class="get-key-btn" id="openRouterKeyBtn">
+            __MSG_create_openrouter_account__
+          </a>
+        </div>
       </div>
     </section>
     
-    <div class="save-section">
-      <button id="saveAll" class="save-all-btn">__MSG_save_button__</button>
-      <div id="status"></div>
+    <div class="main-grid">
+      <div class="left-column">
+        <section class="setting-group">
+          <h2>__MSG_language_settings_title__</h2>
+          <div class="field">
+            <label for="languageSelect">__MSG_language_selector_label__</label>
+            <select id="languageSelect">
+              <option value="">__MSG_language_browser_ui__</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="it">Italiano</option>
+              <option value="ru">Русский</option>
+              <option value="pt">Português</option>
+              <option value="uk">Українська</option>
+              <option value="he">עברית</option>
+              <option value="zh-CN">中文 (简体)</option>
+              <option value="ar">العربية</option>
+              <option value="ko">한국어</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="setting-group">
+          <h2>__MSG_history_modal_title__</h2>
+          <div class="field">
+            <label for="historyLimitInput">__MSG_history_limit_label__</label>
+            <div class="number-input-container">
+              <input type="number" id="historyLimitInput" min="1" max="50" value="10" />
+              <span class="input-suffix">__MSG_history_limit_versions__</span>
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      <div class="right-column">
+        <section class="setting-group about-section">
+          <div class="about-content">
+            <div class="info-row">
+              <span class="label">__MSG_version_label__</span>
+              <span id="version">__MSG_unknown__</span>
+            </div>
+            <div class="info-row">
+              <span class="label">__MSG_build_time_label__</span>
+              <span id="buildTime">__MSG_unknown__</span>
+            </div>
+            <div class="info-row">
+              <span class="label">__MSG_created_by_label__</span>
+            </div>
+            <div class="links">
+              <a href="https://github.com/dpolivaev/video-chapters-extension" target="_blank" rel="noopener noreferrer">__MSG_about_github_link_text__</a>
+              <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">__MSG_about_license_link_text__</a>
+            </div>
+            <div class="license">__MSG_about_license_text__</div>
+          </div>
+        </section>
+      </div>
     </div>
-    
-    <section class="setting-group">
-      <h2>__MSG_about_section_title__</h2>
-      <p>__MSG_version_label__ <span id="version">__MSG_unknown__</span></p>
-      <p>__MSG_created_by_label__</p>
-      <p>__MSG_build_time_label__ <span id="buildTime">__MSG_unknown__</span></p>
-      <p><a href="https://github.com/dpolivaev/video-chapters-extension" target="_blank" rel="noopener noreferrer">__MSG_about_github_link_text__</a></p>
-      <p><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener noreferrer">__MSG_about_license_link_text__</a> (__MSG_about_license_text__)</p>
-    </section>
   </div>
   <script src="options.js"></script>
 </body>

@@ -17,6 +17,7 @@
   "history_limit_versions": { "message": "개 버전 보관" },
   "no_history_found": { "message": "이전 지시사항이 없습니다." },
   "extension_settings_title": { "message": "확장 프로그램 설정" },
+  "api_keys_section_title": { "message": "API 키" },
   "gemini_api_key_label": { "message": "Gemini API 키:" },
   "gemini_api_key_placeholder": { "message": "Gemini API 키를 입력하세요 (선택사항)" },
   "save_button": { "message": "저장" },
@@ -56,8 +57,8 @@
   "api_key_cleared": { "message": "API 키가 삭제되었습니다" },
   "error_clearing_api_key": { "message": "API 키 삭제 오류" },
   "error_saving_settings": { "message": "설정 저장 오류" },
-  "settings_saved_successfully": { "message": "설정이 성공적으로 저장되었습니다!" },
   "error_loading_settings": { "message": "설정 로드 오류!" },
+  "settings_saved_successfully": { "message": "설정이 성공적으로 저장되었습니다!" },
   "unknown": { "message": "알 수 없음" },
   "chapter_generation_failed": { "message": "챕터 생성에 실패했습니다." },
   "please_try_again": { "message": "다시 시도하세요." },
@@ -105,5 +106,5 @@
   "disclaimer": { "message": "챕터 타임코드와 제목은 \"%EXTENSION_LINK%\" — 무료 오픈소스 브라우저 확장 프로그램 — 가 AI 모델 \"$1\"을 사용하여 생성했습니다." },
   "language_settings_title": { "message": "언어 설정" },
   "language_selector_label": { "message": "인터페이스 언어:" },
-  "language_browser_ui": { "message": "브라우저 UI 언어" },
+  "language_browser_ui": { "message": "브라우저 UI 언어" }
 }

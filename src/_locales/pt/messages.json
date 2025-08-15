@@ -17,6 +17,7 @@
   "history_limit_versions": { "message": "versões" },
   "no_history_found": { "message": "Nenhuma instrução anterior encontrada." },
   "extension_settings_title": { "message": "Configurações da Extensão" },
+  "api_keys_section_title": { "message": "Chaves da API" },
   "gemini_api_key_label": { "message": "Chave da API Gemini:" },
   "gemini_api_key_placeholder": { "message": "Digite sua chave da API Gemini (opcional)" },
   "save_button": { "message": "Salvar" },
@@ -56,8 +57,8 @@
   "api_key_cleared": { "message": "Chave da API removida" },
   "error_clearing_api_key": { "message": "Erro ao remover chave da API" },
   "error_saving_settings": { "message": "Erro ao salvar configurações" },
-  "settings_saved_successfully": { "message": "Configurações salvas com sucesso!" },
   "error_loading_settings": { "message": "Erro ao carregar configurações!" },
+  "settings_saved_successfully": { "message": "Configurações salvas com sucesso!" },
   "unknown": { "message": "Desconhecido" },
   "chapter_generation_failed": { "message": "Falha na geração de capítulos." },
   "please_try_again": { "message": "Por favor, tente novamente." },
@@ -105,5 +106,5 @@
   "disclaimer": { "message": "Os códigos de tempo e títulos dos capítulos foram gerados por \"%EXTENSION_LINK%\" — a extensão do navegador gratuita e de código aberto — usando o modelo de IA \"$1\"." },
   "language_settings_title": { "message": "Configurações de Idioma" },
   "language_selector_label": { "message": "Idioma da Interface:" },
-  "language_browser_ui": { "message": "Idioma da Interface do Navegador" },
+  "language_browser_ui": { "message": "Idioma da Interface do Navegador" }
 }

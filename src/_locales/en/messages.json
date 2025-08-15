@@ -17,6 +17,7 @@
   "history_limit_versions": { "message": "versions" },
   "no_history_found": { "message": "No previous instructions found." },
   "extension_settings_title": { "message": "Extension Settings" },
+  "api_keys_section_title": { "message": "API Keys" },
   "gemini_api_key_label": { "message": "Gemini API Key:" },
   "gemini_api_key_placeholder": { "message": "Enter your Gemini API key (optional)" },
   "save_button": { "message": "Save" },

@@ -45,7 +45,8 @@ Example Custom Instructions:
 "For each headline, provide both thesis and counter-argument"
 
 ✨ SMART & RELIABLE:
-• Session-based storage (no data persistence)
+• Settings sync across devices when signed into browser (instruction history stays local)
+• Session-based result storage (no data persistence)
 • Cross-browser compatibility (Chrome & Firefox)
 • Localized interface in 12 languages
 • Privacy-focused: data only sent to your chosen AI provider
@@ -54,7 +55,7 @@ Example Custom Instructions:
 
 🛡️ PRIVACY & SECURITY:
 • No extension servers - all data stays local or goes to your chosen AI
-• API keys stored securely in browser storage only
+• API keys stored securely in browser sync storage (optional device sync)
 • You control which AI service processes your data
 • Session-only results with no persistent storage
 • Open source code available on GitHub

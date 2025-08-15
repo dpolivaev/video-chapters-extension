@@ -19,7 +19,7 @@ youtube, chapters, timecodes, ai, transcripts, video, productivity, content-crea
 
 **activeTab**: Required to detect YouTube videos and extract transcript data from the current tab.
 
-**storage**: Used to store user preferences (API keys, model selection, custom instructions) locally in the browser.
+**storage**: Used to store user preferences (API keys, model selection, custom instructions) in browser sync storage, enabling settings to sync across devices when signed into browser. Instruction history and results are stored in local storage only and do not sync.
 
 **tabs**: Needed to manage navigation between video tabs and results tabs, enabling the side-by-side workflow feature.
 

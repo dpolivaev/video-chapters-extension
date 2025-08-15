@@ -14,6 +14,7 @@ Organize YouTube videos into chapters with AI-powered headlines and timecode gen
 * **Direct Video Navigation**: Jump directly to any chapter timestamp from the results page
 * **Cross-Browser Support**: Works on both Chrome (Manifest V3) and Firefox (Manifest V2)
 * **Multi-Language Interface**: Localized in 12 languages (English, Spanish, French, German, Italian, Russian, Ukrainian, Hebrew, Chinese Simplified, Portuguese, Arabic, Korean)
+* **Settings Synchronization**: Your API keys and preferences sync automatically across all your devices when signed into your browser (instruction history remains local to each device)
 * **Session-Based Results**: Results are stored only for the current browser session
 * **Open Source**: Full transparency with code available on GitHub
 
@@ -129,7 +130,7 @@ You can also try running without any custom instructions to see the default AI b
   - **Google Gemini models**: Data sent directly to Google's Gemini API (ai.google.dev)
   - **OpenRouter models**: Data sent to OpenRouter API (openrouter.ai), which forwards to the selected model provider (Anthropic, OpenAI, Meta, DeepSeek, etc.)
   - **User Control**: You explicitly choose which AI service processes your data by selecting the model
-* **Local Storage Only**: All your settings and results are stored solely in your browser's local storage
+* **Secure Storage**: Settings are stored in your browser's sync storage (syncs across your devices when signed in) while instruction history and results remain in local storage only
 * **No Extension Server**: The extension does not operate its own servers or collect any user data
 * **Transcript Retrieval**: Subtitles are retrieved from YouTube using the same method the browser uses when users open the transcript panel
 * **Minimal Permissions**: The extension requests only the permissions necessary for YouTube integration and session storage
@@ -175,7 +176,7 @@ This extension is distributed under GPL v3.0 license, which is compatible with C
 * Includes complete source code access via GitHub repository
 * **Data Transmission Disclosure**: Sends YouTube video transcripts to user-selected AI providers (Google Gemini API or OpenRouter API) for chapter generation only
 * Uses established YouTube transcript extraction methods with author permission
-* Maintains user privacy with local-only settings and session storage
+* Maintains user privacy with browser sync storage for settings (optional device sync) and local-only storage for instruction history and results
 
 ---
 

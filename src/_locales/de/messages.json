@@ -17,6 +17,7 @@
   "history_limit_versions": { "message": "Versionen" },
   "no_history_found": { "message": "Keine vorherigen Anweisungen gefunden." },
   "extension_settings_title": { "message": "Erweiterungseinstellungen" },
+  "api_keys_section_title": { "message": "API-Schlüssel" },
   "gemini_api_key_label": { "message": "Gemini API-Schlüssel:" },
   "gemini_api_key_placeholder": { "message": "Gemini API-Schlüssel eingeben (optional)" },
   "save_button": { "message": "Speichern" },

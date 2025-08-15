@@ -39,6 +39,9 @@ async function loadApiKeys() {
       const settings = response.data;
       document.getElementById('apiKey').value = settings.apiKey || '';
       document.getElementById('openRouterApiKey').value = settings.openRouterApiKey || '';
+
+      // Update help button visibility
+      updateApiHelpVisibility();
     } else {
       throw new Error(response?.error || 'Failed to load settings');
     }
@@ -48,19 +51,45 @@ async function loadApiKeys() {
   }
 }
 
+function updateApiHelpVisibility() {
+  const geminiKey = document.getElementById('apiKey').value;
+  const openRouterKey = document.getElementById('openRouterApiKey').value;
+
+  const geminiBtn = document.getElementById('geminiKeyBtn');
+  const openRouterBtn = document.getElementById('openRouterKeyBtn');
+
+  if (geminiBtn) {
+    geminiBtn.classList.toggle('hidden', geminiKey.length > 0);
+  }
+
+  if (openRouterBtn) {
+    openRouterBtn.classList.toggle('hidden', openRouterKey.length > 0);
+  }
+}
+
 async function saveAllSettings() {
   try {
     const apiKey = document.getElementById('apiKey').value;
     const openRouterApiKey = document.getElementById('openRouterApiKey').value;
     const languageSelect = document.getElementById('languageSelect');
     const selectedLanguage = languageSelect.value;
+    const historyLimitInput = document.getElementById('historyLimitInput');
+    const historyLimit = parseInt(historyLimitInput.value);
+
+    // Validate history limit
+    if (isNaN(historyLimit) || historyLimit < 1 || historyLimit > 50) {
+      showStatus('History limit must be between 1 and 50', 'error');
+      historyLimitInput.value = 10;
+      return;
+    }
 
     const response = await browser.runtime.sendMessage({
       action: 'saveSettings',
       settings: {
         apiKey,
         openRouterApiKey,
-        uiLanguage: selectedLanguage
+        uiLanguage: selectedLanguage,
+        historyLimit
       }
     });
 
@@ -94,6 +123,12 @@ async function loadLanguageSettings() {
         const language = settings.uiLanguage || '';
         languageSelect.value = language;
         initialLanguage = language; // Store initial value for comparison
+      }
+
+      // Load history limit setting
+      const historyLimitInput = document.getElementById('historyLimitInput');
+      if (historyLimitInput) {
+        historyLimitInput.value = settings.historyLimit || 10;
       }
     } else {
       throw new Error(response?.error || 'Failed to load settings');
@@ -149,18 +184,26 @@ function showStatus(message, type = 'info') {
   const statusEl = document.getElementById('status');
   if (statusEl) {
     statusEl.textContent = message;
-    statusEl.className = type;
+    statusEl.className = `status-message ${type} show`;
+
+    // Clear the message after 4 seconds
     setTimeout(() => {
-      statusEl.textContent = '';
-      statusEl.className = '';
-    }, 3e3);
+      statusEl.classList.remove('show');
+      // Wait for fade out animation to complete before clearing
+      setTimeout(() => {
+        if (!statusEl.classList.contains('show')) {
+          statusEl.textContent = '';
+          statusEl.className = 'status-message';
+        }
+      }, 300);
+    }, 4000);
   }
 }
 
 function setupEventListeners() {
-  const saveAllButton = document.getElementById('saveAll');
-  if (saveAllButton) {
-    saveAllButton.addEventListener('click', saveAllSettings);
+  const saveButton = document.getElementById('saveAll');
+  if (saveButton) {
+    saveButton.addEventListener('click', saveAllSettings);
   }
 
   const apiKeyInput = document.getElementById('apiKey');
@@ -170,6 +213,7 @@ function setupEventListeners() {
         saveAllSettings();
       }
     });
+    apiKeyInput.addEventListener('input', updateApiHelpVisibility);
   }
 
   const openRouterApiKeyInput = document.getElementById('openRouterApiKey');
@@ -179,6 +223,7 @@ function setupEventListeners() {
         saveAllSettings();
       }
     });
+    openRouterApiKeyInput.addEventListener('input', updateApiHelpVisibility);
   }
 
   const helpButton = document.getElementById('helpBtn');
