@@ -280,8 +280,10 @@ class PopupView {
   }
   async restoreCustomInstructions() {
     try {
-      const result = await browser.storage.local.get('lastCustomInstructions');
-      const lastInstructions = result.lastCustomInstructions;
+      const response = await browser.runtime.sendMessage({
+        action: 'getLastCustomInstructions'
+      });
+      const lastInstructions = response.success ? response.data : null;
       if (lastInstructions && lastInstructions.trim()) {
         const instructionsTextarea = document.getElementById('instructionsTextarea');
         instructionsTextarea.value = lastInstructions;
@@ -688,13 +690,13 @@ class PopupView {
     try {
       const instructionsTextarea = document.getElementById('instructionsTextarea');
       const customInstructions = instructionsTextarea.value.trim();
+      await browser.runtime.sendMessage({
+        action: 'saveLastCustomInstructions',
+        instructions: customInstructions
+      });
       if (customInstructions) {
-        await browser.storage.local.set({
-          lastCustomInstructions: customInstructions
-        });
         console.log('PopupView: Custom instructions saved to storage');
       } else {
-        await browser.storage.local.remove('lastCustomInstructions');
         console.log('PopupView: Custom instructions removed from storage');
       }
     } catch (error) {

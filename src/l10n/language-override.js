@@ -34,10 +34,11 @@ class LanguageOverride {
 
   async initializeLanguageOverride() {
     try {
-      const result = await browser.storage.sync.get('userSettings');
-      const settings = result.userSettings || {};
-      if (settings.uiLanguage) {
-        this.overrideLanguage = settings.uiLanguage;
+      const response = await browser.runtime.sendMessage({
+        action: 'getUserLanguage'
+      });
+      if (response.success && response.data) {
+        this.overrideLanguage = response.data;
         await this.loadMessages(this.overrideLanguage);
       }
       this.initialized = true;

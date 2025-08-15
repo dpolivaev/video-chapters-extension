@@ -28,6 +28,9 @@ module.exports = {
     SessionRepository: 'readonly',
     TabRegistry: 'readonly',
     SettingsRepository: 'readonly',
+    BrowserStorageAdapter: 'readonly',
+    InstructionHistoryRepository: 'readonly',
+    InstructionEntry: 'readonly',
     ChapterGenerator: 'readonly',
     MessageCoordinator: 'readonly',
     PromptGenerator: 'writable',
@@ -53,7 +56,7 @@ module.exports = {
       vars: 'all',
       args: 'after-used',
       argsIgnorePattern: '^_',
-      varsIgnorePattern: '^(_|BaseLLM|retryHandler|GeminiAPI|OpenRouterAPI|PromptGenerator|cleanVideoURL|browser|_backgroundService|ModelId|BrowserHttpAdapter|BrowserMessageAdapter|GeminiApiAdapter|OpenRouterApiAdapter|SessionRepository|SettingsRepository|TabRegistry)$'
+      varsIgnorePattern: '^(_|BaseLLM|retryHandler|GeminiAPI|OpenRouterAPI|PromptGenerator|cleanVideoURL|browser|_backgroundService|ModelId|BrowserHttpAdapter|BrowserMessageAdapter|GeminiApiAdapter|OpenRouterApiAdapter|SessionRepository|SettingsRepository|TabRegistry|BrowserStorageAdapter|InstructionHistoryRepository|InstructionEntry)$'
     }],
     'no-undef': 'error',
     'no-console': 'off',

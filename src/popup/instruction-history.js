@@ -20,7 +20,7 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* global InstructionEntry, InstructionNameEditController */
+/* global InstructionNameEditController */
 if (typeof browser === 'undefined') {
   const browser = chrome;
 }

@@ -20,7 +20,6 @@
  * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* global InstructionEntry */
 
 if (typeof importScripts !== 'undefined') {
   importScripts('../lang/JsModuleImporter.js');
@@ -37,9 +36,11 @@ JsModuleImporter.importScriptsIfNeeded([
   '../domain/entities/ChapterGeneration.js',
   '../domain/entities/BrowserTab.js',
   '../domain/entities/InstructionEntry.js',
+  '../infrastructure/adapters/BrowserStorageAdapter.js',
   '../infrastructure/repositories/SessionRepository.js',
   '../infrastructure/repositories/TabRegistry.js',
   '../infrastructure/repositories/SettingsRepository.js',
+  '../infrastructure/repositories/InstructionHistoryRepository.js',
   'prompt-generator.js',
   'BaseLLM.js',
   '../infrastructure/adapters/BrowserHttpAdapter.js',
@@ -49,12 +50,14 @@ JsModuleImporter.importScriptsIfNeeded([
   '../infrastructure/adapters/GeminiApiAdapter.js',
   '../infrastructure/adapters/OpenRouterApiAdapter.js',
   '../domain/services/ChapterGenerator.js'
-], ['SessionRepository', 'TabRegistry', 'SettingsRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration', 'GeminiApiAdapter', 'OpenRouterApiAdapter', 'ChapterGenerator']);
+], ['BrowserStorageAdapter', 'SessionRepository', 'TabRegistry', 'SettingsRepository', 'InstructionHistoryRepository', 'VideoUrl', 'ModelId', 'ChapterGeneration', 'GeminiApiAdapter', 'OpenRouterApiAdapter', 'ChapterGenerator']);
 
 
+const storageAdapter = new BrowserStorageAdapter();
 const sessionRepository = new SessionRepository();
 const tabRegistry = new TabRegistry();
-const settingsRepository = new SettingsRepository();
+const settingsRepository = new SettingsRepository(storageAdapter);
+const instructionHistoryRepository = new InstructionHistoryRepository(storageAdapter, settingsRepository);
 
 class BackgroundService {
   constructor() {
@@ -253,6 +256,22 @@ class BackgroundService {
           return true;
         }
 
+        case 'getLastCustomInstructions':
+          this.handleGetLastCustomInstructions(request, sendResponse);
+          return true;
+
+        case 'saveLastCustomInstructions':
+          this.handleSaveLastCustomInstructions(request, sendResponse);
+          return true;
+
+        case 'removeLastCustomInstructions':
+          this.handleRemoveLastCustomInstructions(request, sendResponse);
+          return true;
+
+        case 'getUserLanguage':
+          this.handleGetUserLanguage(request, sendResponse);
+          return true;
+
         default:
           return false;
       }
@@ -316,7 +335,7 @@ class BackgroundService {
   async handleSaveInstruction(request, sendResponse) {
     try {
       const {content: content} = request;
-      await instructionHistory.addInstruction(content);
+      await instructionHistoryRepository.addInstruction(content);
       sendResponse({
         success: true
       });
@@ -329,12 +348,12 @@ class BackgroundService {
   }
   async handleGetInstructionHistory(request, sendResponse) {
     try {
-      const historyResult = await browser.storage.local.get('instructionHistory');
+      const history = await instructionHistoryRepository.getHistory();
       const settings = await settingsRepository.loadSettings();
       sendResponse({
         success: true,
         data: {
-          history: historyResult.instructionHistory || [],
+          history,
           limit: settings.historyLimit || 10
         }
       });
@@ -348,12 +367,7 @@ class BackgroundService {
   async handleDeleteInstruction(request, sendResponse) {
     try {
       const {id: id} = request;
-      const result = await browser.storage.local.get('instructionHistory');
-      const history = result.instructionHistory || [];
-      const updatedHistory = history.filter(instruction => instruction.id !== id);
-      await browser.storage.local.set({
-        instructionHistory: updatedHistory
-      });
+      await instructionHistoryRepository.deleteInstruction(id);
       sendResponse({
         success: true
       });
@@ -368,7 +382,7 @@ class BackgroundService {
     try {
       const { id, name } = request;
       this.validateRenameParameters(id, name);
-      await instructionHistory.renameInstruction(id, name);
+      await instructionHistoryRepository.renameInstruction(id, name);
       sendResponse({
         success: true
       });
@@ -744,160 +758,80 @@ class BackgroundService {
   async createNewVideoTab(videoUrl) {
     await browser.tabs.create({ url: videoUrl });
   }
-}
 
-class InstructionHistoryManager {
-  constructor() {
-    this.defaultLimit = 10;
-  }
-  async addInstruction(content) {
-    const trimmedContent = content.trim();
-    const result = await browser.storage.local.get('instructionHistory');
-    const history = result.instructionHistory || [];
-    const limit = await this.getHistoryLimit();
-
-    const instructionToAdd = this.createOrUpdateInstruction(trimmedContent, history);
-    const updatedHistory = this.addToHistoryWithLimit(instructionToAdd, history, limit);
-
-    await browser.storage.local.set({
-      instructionHistory: updatedHistory
-    });
-    return instructionToAdd;
-  }
-
-  createOrUpdateInstruction(content, history) {
-    const existingIndex = history.findIndex(instruction => instruction.content.trim() === content);
-
-    if (existingIndex !== -1) {
-      const existing = history.splice(existingIndex, 1)[0];
-      return new InstructionEntry(
-        existing.id,
-        content,
-        (new Date).toISOString(),
-        existing.name || '',
-        !!existing.isCustomName
-      ).toStorageObject();
-    }
-
-    return new InstructionEntry(
-      Date.now(),
-      content,
-      (new Date).toISOString()
-    ).toStorageObject();
-  }
-
-  addToHistoryWithLimit(instruction, history, limit) {
-    history.unshift(instruction);
-    history.splice(limit);
-    return history;
-  }
-  async renameInstruction(id, name) {
-    const result = await browser.storage.local.get('instructionHistory');
-    const history = result.instructionHistory || [];
-    const entryIndex = history.findIndex(item => item.id === id);
-
-    if (entryIndex === -1) {
-      return;
-    }
-
-    const currentEntry = InstructionEntry.fromStorageObject(history[entryIndex]);
-    const updatedEntry = currentEntry.updateName(name);
-    history[entryIndex] = updatedEntry.toStorageObject();
-
-    await browser.storage.local.set({
-      instructionHistory: history
-    });
-  }
-  async getHistory() {
-    const result = await browser.storage.local.get('instructionHistory');
-    return result.instructionHistory || [];
-  }
-  async deleteInstruction(id) {
-    const result = await browser.storage.local.get('instructionHistory');
-    const history = result.instructionHistory || [];
-    const filteredHistory = history.filter(instruction => instruction.id !== id);
-    await browser.storage.local.set({
-      instructionHistory: filteredHistory
-    });
-    return filteredHistory;
-  }
-  async setHistoryLimit(limit) {
-    await browser.storage.local.set({
-      historyLimit: limit
-    });
-    const result = await browser.storage.local.get('instructionHistory');
-    const history = result.instructionHistory || [];
-    if (history.length > limit) {
-      history.splice(limit);
-      await browser.storage.local.set({
-        instructionHistory: history
+  async handleGetLastCustomInstructions(request, sendResponse) {
+    try {
+      const instructions = await storageAdapter.getLastCustomInstructions();
+      sendResponse({
+        success: true,
+        data: instructions
+      });
+    } catch (error) {
+      console.error('Error getting last custom instructions:', error);
+      sendResponse({
+        success: false,
+        error: error.message
       });
     }
   }
-  async getHistoryLimit() {
+
+  async handleSaveLastCustomInstructions(request, sendResponse) {
     try {
-      const settings = await settingsRepository.load();
-      return settings.additionalSettings.historyLimit || this.defaultLimit;
+      const { instructions } = request;
+      if (instructions && instructions.trim()) {
+        await storageAdapter.setLastCustomInstructions(instructions);
+      } else {
+        await storageAdapter.removeLastCustomInstructions();
+      }
+      sendResponse({
+        success: true
+      });
     } catch (error) {
-      console.error('Error loading history limit from settings:', error);
-      return this.defaultLimit;
+      console.error('Error saving last custom instructions:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
     }
   }
-}
 
-class SettingsManager {
-  constructor() {
-    this.defaultSettings = {
-      apiKey: '',
-      openRouterApiKey: '',
-      model: 'deepseek/deepseek-r1-0528:free',
-      historyLimit: 10,
-      autoSaveInstructions: true,
-      theme: 'auto'
-    };
+  async handleRemoveLastCustomInstructions(request, sendResponse) {
+    try {
+      await storageAdapter.removeLastCustomInstructions();
+      sendResponse({
+        success: true
+      });
+    } catch (error) {
+      console.error('Error removing last custom instructions:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
   }
-  async saveSettings(settings) {
-    const currentSettings = await this.loadSettings();
-    const updatedSettings = {
-      ...currentSettings,
-      ...settings
-    };
-    await browser.storage.sync.set({
-      userSettings: updatedSettings
-    });
-    return updatedSettings;
-  }
-  async loadSettings() {
-    const result = await browser.storage.sync.get('userSettings');
-    return {
-      ...this.defaultSettings,
-      ...result.userSettings || {}
-    };
-  }
-  async getSetting(key) {
-    const settings = await this.loadSettings();
-    return settings[key];
-  }
-  async setSetting(key, value) {
-    const settings = await this.loadSettings();
-    settings[key] = value;
-    await browser.storage.sync.set({
-      userSettings: settings
-    });
-    return value;
+
+  async handleGetUserLanguage(request, sendResponse) {
+    try {
+      const settings = await settingsRepository.load();
+      sendResponse({
+        success: true,
+        data: settings.additionalSettings.uiLanguage
+      });
+    } catch (error) {
+      console.error('Error getting user language:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
   }
 }
 
 const _backgroundService = new BackgroundService();
 
-const instructionHistory = new InstructionHistoryManager;
-
-const settingsManager = new SettingsManager;
-
-
 browser.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install') {
-    settingsManager.saveSettings({});
+    settingsRepository.saveSettings({});
   }
 });
 

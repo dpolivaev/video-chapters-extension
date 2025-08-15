@@ -7,9 +7,11 @@
  */
 
 class SettingsRepository {
-  constructor(browserAPI = browser) {
-    this.browser = browserAPI;
-    this.storageKey = 'userSettings';
+  constructor(storageAdapter) {
+    if (!storageAdapter) {
+      throw new Error('storageAdapter is required');
+    }
+    this.storageAdapter = storageAdapter;
     this.defaultSettings = {
       apiKey: '',
       openRouterApiKey: '',
@@ -40,10 +42,7 @@ class SettingsRepository {
     };
 
     try {
-      await this.browser.storage.sync.set({
-        [this.storageKey]: settings
-      });
-
+      await this.storageAdapter.setUserSettings(settings);
       return settings;
     } catch (error) {
       throw new Error(`Failed to save settings: ${error.message}`);
@@ -52,8 +51,7 @@ class SettingsRepository {
 
   async load() {
     try {
-      const result = await this.browser.storage.sync.get(this.storageKey);
-      const storedSettings = result[this.storageKey] || {};
+      const storedSettings = await this.storageAdapter.getUserSettings() || {};
 
       const settings = {
         ...this.defaultSettings,
@@ -162,7 +160,7 @@ class SettingsRepository {
 
   async reset() {
     try {
-      await this.browser.storage.sync.remove(this.storageKey);
+      await this.storageAdapter.removeUserSettings();
       return this.defaultSettings;
     } catch (error) {
       throw new Error(`Failed to reset settings: ${error.message}`);
