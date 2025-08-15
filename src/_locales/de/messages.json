@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "API-Schlüssel gelöscht" },
   "error_clearing_api_key": { "message": "Fehler beim Löschen des API-Schlüssels" },
   "error_saving_settings": { "message": "Fehler beim Speichern der Einstellungen" },
+  "settings_saved_successfully": { "message": "Einstellungen erfolgreich gespeichert!" },
   "error_loading_settings": { "message": "Fehler beim Laden der Einstellungen!" },
-  "gemini_api_key_saved": { "message": "Gemini API-Schlüssel gespeichert!" },
-  "error_saving_gemini_api_key": { "message": "Fehler beim Speichern des Gemini API-Schlüssels!" },
-  "openrouter_api_key_saved": { "message": "OpenRouter API-Schlüssel gespeichert!" },
-  "error_saving_openrouter_api_key": { "message": "Fehler beim Speichern des OpenRouter API-Schlüssels!" },
   "unknown": { "message": "Unbekannt" },
   "chapter_generation_failed": { "message": "Kapitelmarken-Generierung fehlgeschlagen." },
   "please_try_again": { "message": "Bitte versuchen Sie es erneut." },
@@ -104,6 +101,5 @@
   "language_settings_title": { "message": "Spracheinstellungen" },
   "language_selector_label": { "message": "Sprache der Benutzeroberfläche:" },
   "language_browser_ui": { "message": "Browser-Benutzeroberflächensprache" },
-  "language_saved": { "message": "Spracheinstellung gespeichert! Seite wird neu geladen..." },
   "free": { "message": "Kostenlos" }
 } 

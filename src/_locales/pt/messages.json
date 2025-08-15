@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "Chave da API removida" },
   "error_clearing_api_key": { "message": "Erro ao remover chave da API" },
   "error_saving_settings": { "message": "Erro ao salvar configurações" },
+  "settings_saved_successfully": { "message": "Configurações salvas com sucesso!" },
   "error_loading_settings": { "message": "Erro ao carregar configurações!" },
-  "gemini_api_key_saved": { "message": "Chave da API Gemini salva!" },
-  "error_saving_gemini_api_key": { "message": "Erro ao salvar chave da API Gemini!" },
-  "openrouter_api_key_saved": { "message": "Chave da API OpenRouter salva!" },
-  "error_saving_openrouter_api_key": { "message": "Erro ao salvar chave da API OpenRouter!" },
   "unknown": { "message": "Desconhecido" },
   "chapter_generation_failed": { "message": "Falha na geração de capítulos." },
   "please_try_again": { "message": "Por favor, tente novamente." },
@@ -109,5 +106,4 @@
   "language_settings_title": { "message": "Configurações de Idioma" },
   "language_selector_label": { "message": "Idioma da Interface:" },
   "language_browser_ui": { "message": "Idioma da Interface do Navegador" },
-  "language_saved": { "message": "Configuração de idioma salva! Recarregando página..." }
 }

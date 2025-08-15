@@ -32,61 +32,71 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadApiKeys() {
   try {
-    const result = await browser.storage.sync.get('userSettings');
-    const settings = result.userSettings || {};
-    document.getElementById('apiKey').value = settings.apiKey || '';
-    document.getElementById('openRouterApiKey').value = settings.openRouterApiKey || '';
+    const response = await browser.runtime.sendMessage({
+      action: 'loadSettings'
+    });
+    if (response && response.success) {
+      const settings = response.data;
+      document.getElementById('apiKey').value = settings.apiKey || '';
+      document.getElementById('openRouterApiKey').value = settings.openRouterApiKey || '';
+    } else {
+      throw new Error(response?.error || 'Failed to load settings');
+    }
   } catch (error) {
     console.error('Error loading API keys:', error);
     showStatus(getLocalizedMessage('error_loading_settings'), 'error');
   }
 }
 
-async function saveApiKey() {
+async function saveAllSettings() {
   try {
     const apiKey = document.getElementById('apiKey').value;
-    const result = await browser.storage.sync.get('userSettings');
-    const existingSettings = result.userSettings || {};
-    const updatedSettings = {
-      ...existingSettings,
-      apiKey
-    };
-    await browser.storage.sync.set({
-      userSettings: updatedSettings
-    });
-    showStatus(getLocalizedMessage('gemini_api_key_saved'), 'success');
-  } catch (error) {
-    console.error('Error saving Gemini API key:', error);
-    showStatus(getLocalizedMessage('error_saving_gemini_api_key'), 'error');
-  }
-}
-
-async function saveOpenRouterApiKey() {
-  try {
     const openRouterApiKey = document.getElementById('openRouterApiKey').value;
-    const result = await browser.storage.sync.get('userSettings');
-    const existingSettings = result.userSettings || {};
-    const updatedSettings = {
-      ...existingSettings,
-      openRouterApiKey
-    };
-    await browser.storage.sync.set({
-      userSettings: updatedSettings
+    const languageSelect = document.getElementById('languageSelect');
+    const selectedLanguage = languageSelect.value;
+
+    const response = await browser.runtime.sendMessage({
+      action: 'saveSettings',
+      settings: {
+        apiKey,
+        openRouterApiKey,
+        uiLanguage: selectedLanguage
+      }
     });
-    showStatus(getLocalizedMessage('openrouter_api_key_saved'), 'success');
+
+    if (!response || !response.success) {
+      throw new Error(response?.error || 'Failed to save settings');
+    }
+
+    showStatus(getLocalizedMessage('settings_saved_successfully'), 'success');
+
+    // Reload page if language was changed
+    if (selectedLanguage !== getInitialLanguage()) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   } catch (error) {
-    console.error('Error saving OpenRouter API key:', error);
-    showStatus(getLocalizedMessage('error_saving_openrouter_api_key'), 'error');
+    console.error('Error saving settings:', error);
+    showStatus(getLocalizedMessage('error_saving_settings'), 'error');
   }
 }
 
 async function loadLanguageSettings() {
   try {
-    const result = await browser.storage.sync.get('userSettings');
-    const settings = result.userSettings || {};
-    const languageSelect = document.getElementById('languageSelect');
-    if (languageSelect) {
-      languageSelect.value = settings.uiLanguage || '';
+    const response = await browser.runtime.sendMessage({
+      action: 'loadSettings'
+    });
+    if (response && response.success) {
+      const settings = response.data;
+      const languageSelect = document.getElementById('languageSelect');
+      if (languageSelect) {
+        const language = settings.uiLanguage || '';
+        languageSelect.value = language;
+        initialLanguage = language; // Store initial value for comparison
+      }
+    } else {
+      throw new Error(response?.error || 'Failed to load settings');
     }
   } catch (error) {
     console.error('Error loading language settings:', error);
@@ -94,31 +104,10 @@ async function loadLanguageSettings() {
   }
 }
 
-async function saveLanguageSettings() {
-  try {
-    const languageSelect = document.getElementById('languageSelect');
-    const selectedLanguage = languageSelect.value;
+let initialLanguage = '';
 
-    const result = await browser.storage.sync.get('userSettings');
-    const existingSettings = result.userSettings || {};
-    const updatedSettings = {
-      ...existingSettings,
-      uiLanguage: selectedLanguage
-    };
-
-    await browser.storage.sync.set({
-      userSettings: updatedSettings
-    });
-
-    showStatus(getLocalizedMessage('language_saved'), 'success');
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  } catch (error) {
-    console.error('Error saving language settings:', error);
-    showStatus(getLocalizedMessage('error_saving_settings'), 'error');
-  }
+function getInitialLanguage() {
+  return initialLanguage;
 }
 
 async function loadVersionInfo() {
@@ -169,37 +158,32 @@ function showStatus(message, type = 'info') {
 }
 
 function setupEventListeners() {
-  const saveButton = document.getElementById('save');
-  if (saveButton) {
-    saveButton.addEventListener('click', saveApiKey);
+  const saveAllButton = document.getElementById('saveAll');
+  if (saveAllButton) {
+    saveAllButton.addEventListener('click', saveAllSettings);
   }
-  const saveOpenRouterButton = document.getElementById('saveOpenRouter');
-  if (saveOpenRouterButton) {
-    saveOpenRouterButton.addEventListener('click', saveOpenRouterApiKey);
-  }
+
   const apiKeyInput = document.getElementById('apiKey');
   if (apiKeyInput) {
     apiKeyInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
-        saveApiKey();
+        saveAllSettings();
       }
     });
   }
+
   const openRouterApiKeyInput = document.getElementById('openRouterApiKey');
   if (openRouterApiKeyInput) {
     openRouterApiKeyInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
-        saveOpenRouterApiKey();
+        saveAllSettings();
       }
     });
   }
+
   const helpButton = document.getElementById('helpBtn');
   if (helpButton) {
     helpButton.addEventListener('click', openHelp);
-  }
-  const saveLanguageButton = document.getElementById('saveLanguage');
-  if (saveLanguageButton) {
-    saveLanguageButton.addEventListener('click', saveLanguageSettings);
   }
 }
 

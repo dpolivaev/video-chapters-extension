@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "API key cleared" },
   "error_clearing_api_key": { "message": "Error clearing API key" },
   "error_saving_settings": { "message": "Error saving settings" },
+  "settings_saved_successfully": { "message": "Settings saved successfully!" },
   "error_loading_settings": { "message": "Error loading settings!" },
-  "gemini_api_key_saved": { "message": "Gemini API Key saved!" },
-  "error_saving_gemini_api_key": { "message": "Error saving Gemini API key!" },
-  "openrouter_api_key_saved": { "message": "OpenRouter API Key saved!" },
-  "error_saving_openrouter_api_key": { "message": "Error saving OpenRouter API key!" },
   "unknown": { "message": "Unknown" },
   "chapter_generation_failed": { "message": "Chapter generation failed." },
   "please_try_again": { "message": "Please try again." },
@@ -108,6 +105,5 @@
   "disclaimer": { "message": "The chapter timestamps and titles were created using \"%EXTENSION_LINK%\" — a free and open-source browser extension — powered by the \"$1\" AI model." },
   "language_settings_title": { "message": "Language Settings" },
   "language_selector_label": { "message": "Interface Language:" },
-  "language_browser_ui": { "message": "Browser UI Language" },
-  "language_saved": { "message": "Language setting saved! Reloading page..." }
+  "language_browser_ui": { "message": "Browser UI Language" }
 } 

@@ -16,7 +16,8 @@ class SettingsRepository {
       model: 'deepseek/deepseek-r1-0528:free',
       historyLimit: 10,
       autoSaveInstructions: true,
-      theme: 'auto'
+      theme: 'auto',
+      uiLanguage: ''
     };
   }
 
@@ -69,7 +70,8 @@ class SettingsRepository {
         additionalSettings: {
           historyLimit: settings.historyLimit,
           autoSaveInstructions: settings.autoSaveInstructions,
-          theme: settings.theme
+          theme: settings.theme,
+          uiLanguage: settings.uiLanguage
         }
       };
     } catch (error) {
@@ -79,7 +81,8 @@ class SettingsRepository {
         additionalSettings: {
           historyLimit: this.defaultSettings.historyLimit,
           autoSaveInstructions: this.defaultSettings.autoSaveInstructions,
-          theme: this.defaultSettings.theme
+          theme: this.defaultSettings.theme,
+          uiLanguage: this.defaultSettings.uiLanguage
         }
       };
     }
@@ -119,21 +122,25 @@ class SettingsRepository {
 
   async saveSettings(legacySettings) {
     try {
+      // Load existing settings first to preserve what's not being updated
+      const currentSettings = await this.load();
+
       const credentials = new ApiCredentials(
-        legacySettings.apiKey || '',
-        legacySettings.openRouterApiKey || ''
+        legacySettings.apiKey !== undefined ? legacySettings.apiKey : currentSettings.credentials.geminiKey,
+        legacySettings.openRouterApiKey !== undefined ? legacySettings.openRouterApiKey : currentSettings.credentials.openRouterKey
       );
 
       const selectedModel = legacySettings.selectedModel
         ? ModelId.fromJSON(legacySettings.selectedModel)
-        : new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
+        : currentSettings.selectedModel;
 
       const additionalSettings = {
-        historyLimit: legacySettings.historyLimit || this.defaultSettings.historyLimit,
+        historyLimit: legacySettings.historyLimit !== undefined ? legacySettings.historyLimit : currentSettings.additionalSettings.historyLimit,
         autoSaveInstructions: legacySettings.autoSaveInstructions !== undefined
           ? legacySettings.autoSaveInstructions
-          : this.defaultSettings.autoSaveInstructions,
-        theme: legacySettings.theme || this.defaultSettings.theme
+          : currentSettings.additionalSettings.autoSaveInstructions,
+        theme: legacySettings.theme !== undefined ? legacySettings.theme : currentSettings.additionalSettings.theme,
+        uiLanguage: legacySettings.uiLanguage !== undefined ? legacySettings.uiLanguage : currentSettings.additionalSettings.uiLanguage
       };
 
       return this.save(credentials, selectedModel, additionalSettings);

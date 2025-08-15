@@ -37,14 +37,11 @@
     <div class="input-row">
       <label for="apiKey">__MSG_gemini_api_key_label__</label>
       <input type="password" id="apiKey" placeholder="__MSG_gemini_api_key_placeholder__" />
-      <button id="save">__MSG_save_button__</button>
     </div>
     <div class="input-row">
       <label for="openRouterApiKey">__MSG_openrouter_api_key_label__</label>
       <input type="password" id="openRouterApiKey" placeholder="__MSG_openrouter_api_key_placeholder__" />
-      <button id="saveOpenRouter">__MSG_save_button__</button>
     </div>
-    <div id="status"></div>
     
     <section class="setting-group">
       <h2>__MSG_language_settings_title__</h2>
@@ -65,9 +62,13 @@
           <option value="ar">العربية</option>
           <option value="ko">한국어</option>
         </select>
-        <button id="saveLanguage">__MSG_save_button__</button>
       </div>
     </section>
+    
+    <div class="save-section">
+      <button id="saveAll" class="save-all-btn">__MSG_save_button__</button>
+      <div id="status"></div>
+    </div>
     
     <section class="setting-group">
       <h2>__MSG_about_section_title__</h2>

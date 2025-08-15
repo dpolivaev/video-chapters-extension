@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "Clé API effacée" },
   "error_clearing_api_key": { "message": "Erreur lors de l'effacement de la clé API" },
   "error_saving_settings": { "message": "Erreur lors de l'enregistrement des paramètres" },
+  "settings_saved_successfully": { "message": "Paramètres enregistrés avec succès !" },
   "error_loading_settings": { "message": "Erreur lors du chargement des paramètres !" },
-  "gemini_api_key_saved": { "message": "Clé Gemini API enregistrée !" },
-  "error_saving_gemini_api_key": { "message": "Erreur lors de l'enregistrement de la clé Gemini API !" },
-  "openrouter_api_key_saved": { "message": "Clé OpenRouter API enregistrée !" },
-  "error_saving_openrouter_api_key": { "message": "Erreur lors de l'enregistrement de la clé OpenRouter API !" },
   "unknown": { "message": "Inconnu" },
   "chapter_generation_failed": { "message": "Échec de la génération des chapitres." },
   "please_try_again": { "message": "Veuillez réessayer." },
@@ -104,6 +101,5 @@
   "language_settings_title": { "message": "Paramètres de langue" },
   "language_selector_label": { "message": "Langue de l'interface :" },
   "language_browser_ui": { "message": "Langue de l'interface du navigateur" },
-  "language_saved": { "message": "Paramètre de langue sauvegardé ! Rechargement de la page..." },
   "free": { "message": "Gratuit" }
 } 

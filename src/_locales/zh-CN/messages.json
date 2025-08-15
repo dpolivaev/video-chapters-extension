@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "API 密钥已清除" },
   "error_clearing_api_key": { "message": "清除 API 密钥时出错" },
   "error_saving_settings": { "message": "保存设置时出错" },
+  "settings_saved_successfully": { "message": "设置已成功保存！" },
   "error_loading_settings": { "message": "加载设置时出错！" },
-  "gemini_api_key_saved": { "message": "Gemini API 密钥已保存！" },
-  "error_saving_gemini_api_key": { "message": "保存 Gemini API 密钥时出错！" },
-  "openrouter_api_key_saved": { "message": "OpenRouter API 密钥已保存！" },
-  "error_saving_openrouter_api_key": { "message": "保存 OpenRouter API 密钥时出错！" },
   "unknown": { "message": "未知" },
   "chapter_generation_failed": { "message": "章节生成失败。" },
   "please_try_again": { "message": "请重试。" },
@@ -104,6 +101,5 @@
   "language_settings_title": { "message": "语言设置" },
   "language_selector_label": { "message": "界面语言：" },
   "language_browser_ui": { "message": "浏览器界面语言" },
-  "language_saved": { "message": "语言设置已保存！正在重新加载页面..." },
   "free": { "message": "免费" }
 } 

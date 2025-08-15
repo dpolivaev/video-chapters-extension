@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "API-ключ удален" },
   "error_clearing_api_key": { "message": "Ошибка при удалении API-ключа" },
   "error_saving_settings": { "message": "Ошибка при сохранении настроек" },
+  "settings_saved_successfully": { "message": "Настройки успешно сохранены!" },
   "error_loading_settings": { "message": "Ошибка при загрузке настроек!" },
-  "gemini_api_key_saved": { "message": "Ключ Gemini API сохранен!" },
-  "error_saving_gemini_api_key": { "message": "Ошибка при сохранении ключа Gemini API!" },
-  "openrouter_api_key_saved": { "message": "Ключ OpenRouter API сохранен!" },
-  "error_saving_openrouter_api_key": { "message": "Ошибка при сохранении ключа OpenRouter API!" },
   "unknown": { "message": "Неизвестно" },
   "chapter_generation_failed": { "message": "Не удалось сгенерировать главы." },
   "please_try_again": { "message": "Пожалуйста, попробуйте снова." },
@@ -104,6 +101,5 @@
   "language_settings_title": { "message": "Настройки языка" },
   "language_selector_label": { "message": "Язык интерфейса:" },
   "language_browser_ui": { "message": "Язык интерфейса браузера" },
-  "language_saved": { "message": "Настройка языка сохранена! Перезагрузка страницы..." },
   "free": { "message": "Бесплатно" }
 } 

@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "מפתח API נמחק" },
   "error_clearing_api_key": { "message": "שגיאה במחיקת מפתח API" },
   "error_saving_settings": { "message": "שגיאה בשמירת הגדרות" },
+  "settings_saved_successfully": { "message": "ההגדרות נשמרו בהצלחה!" },
   "error_loading_settings": { "message": "שגיאה בטעינת הגדרות!" },
-  "gemini_api_key_saved": { "message": "מפתח Gemini API נשמר!" },
-  "error_saving_gemini_api_key": { "message": "שגיאה בשמירת מפתח Gemini API!" },
-  "openrouter_api_key_saved": { "message": "מפתח OpenRouter API נשמר!" },
-  "error_saving_openrouter_api_key": { "message": "שגיאה בשמירת מפתח OpenRouter API!" },
   "unknown": { "message": "לא ידוע" },
   "chapter_generation_failed": { "message": "יצירת פרקים נכשלה." },
   "please_try_again": { "message": "אנא נסה שוב." },
@@ -104,6 +101,5 @@
   "language_settings_title": { "message": "הגדרות שפה" },
   "language_selector_label": { "message": "שפת ממשק:" },
   "language_browser_ui": { "message": "שפת ממשק הדפדפן" },
-  "language_saved": { "message": "הגדרת שפה נשמרה! טוען מחדש את העמוד..." },
   "free": { "message": "חינם" }
 } 

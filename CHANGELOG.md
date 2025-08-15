@@ -5,6 +5,12 @@ All notable changes to the Video Chapters Generator extension will be documented
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.19]
+
+### Fixed
+- Settings loss bug where API keys and language preferences were lost when modifying instruction history limit
+- Options page redesigned with single SAVE button for cleaner user experience
+
 ## [1.3.17]
 
 ### Fixed

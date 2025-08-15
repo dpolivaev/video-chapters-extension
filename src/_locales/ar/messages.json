@@ -56,11 +56,8 @@
   "api_key_cleared": { "message": "تم مسح مفتاح API" },
   "error_clearing_api_key": { "message": "خطأ في مسح مفتاح API" },
   "error_saving_settings": { "message": "خطأ في حفظ الإعدادات" },
+  "settings_saved_successfully": { "message": "تم حفظ الإعدادات بنجاح!" },
   "error_loading_settings": { "message": "خطأ في تحميل الإعدادات!" },
-  "gemini_api_key_saved": { "message": "تم حفظ مفتاح API لـ Gemini!" },
-  "error_saving_gemini_api_key": { "message": "خطأ في حفظ مفتاح API لـ Gemini!" },
-  "openrouter_api_key_saved": { "message": "تم حفظ مفتاح API لـ OpenRouter!" },
-  "error_saving_openrouter_api_key": { "message": "خطأ في حفظ مفتاح API لـ OpenRouter!" },
   "unknown": { "message": "غير معروف" },
   "chapter_generation_failed": { "message": "فشل في إنشاء الفصول." },
   "please_try_again": { "message": "يرجى المحاولة مرة أخرى." },
@@ -109,5 +106,4 @@
   "language_settings_title": { "message": "إعدادات اللغة" },
   "language_selector_label": { "message": "لغة الواجهة:" },
   "language_browser_ui": { "message": "لغة واجهة المتصفح" },
-  "language_saved": { "message": "تم حفظ إعداد اللغة! جاري إعادة تحميل الصفحة..." }
 }
