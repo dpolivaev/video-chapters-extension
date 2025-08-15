@@ -752,9 +752,9 @@ class InstructionHistoryManager {
   }
   async addInstruction(content) {
     const trimmedContent = content.trim();
-    const result = await browser.storage.local.get([ 'instructionHistory', 'historyLimit' ]);
+    const result = await browser.storage.local.get('instructionHistory');
     const history = result.instructionHistory || [];
-    const limit = result.historyLimit || this.defaultLimit;
+    const limit = await this.getHistoryLimit();
 
     const instructionToAdd = this.createOrUpdateInstruction(trimmedContent, history);
     const updatedHistory = this.addToHistoryWithLimit(instructionToAdd, history, limit);
@@ -835,8 +835,13 @@ class InstructionHistoryManager {
     }
   }
   async getHistoryLimit() {
-    const result = await browser.storage.local.get('historyLimit');
-    return result.historyLimit || this.defaultLimit;
+    try {
+      const settings = await settingsRepository.load();
+      return settings.additionalSettings.historyLimit || this.defaultLimit;
+    } catch (error) {
+      console.error('Error loading history limit from settings:', error);
+      return this.defaultLimit;
+    }
   }
 }
 
