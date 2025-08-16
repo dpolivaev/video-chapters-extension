@@ -760,29 +760,15 @@ body {
   border-top: 1px solid var(--border-color);
 }
 
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.chat-header h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
 .token-summary {
   font-size: 12px;
   color: var(--text-muted);
-  padding: 4px 8px;
+  padding: 6px 8px;
   background: var(--background-subtle);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 .chat-messages {
@@ -929,11 +915,6 @@ body {
 
 /* Mobile responsiveness for chat */
 @media (max-width: 768px) {
-  .chat-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
   .chat-input-container {
     flex-direction: column;
     align-items: stretch;

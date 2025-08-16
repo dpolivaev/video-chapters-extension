@@ -48,7 +48,6 @@
   "error_extracting_transcript": { "message": "Error extracting transcript" },
   "error_initializing_extension": { "message": "Error initializing extension" },
   "gemini_api_key_required": { "message": "Please enter your Gemini API key for this model" },
-  "continue_conversation": { "message": "Continue Conversation" },
   "ask_followup_question": { "message": "Ask a follow-up question..." },
   "send_button": { "message": "Send" },
   "user": { "message": "User" },
