@@ -74,7 +74,7 @@ class ChapterGenerator {
         throw new Error('Invalid response from AI provider');
       }
 
-      chapterGeneration.markCompleted(result.chapters);
+      chapterGeneration.markCompleted(result.chapters, result.inputTokens || 0, result.outputTokens || 0);
       return chapterGeneration;
 
     } catch (error) {

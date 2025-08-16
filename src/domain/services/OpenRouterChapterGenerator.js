@@ -182,6 +182,16 @@ class OpenRouterChapterGenerator {
     };
   }
 
+  buildConversationBody(messages, model) {
+    return {
+      model,
+      messages,
+      temperature: this.GENERATION_TEMPERATURE,
+      max_tokens: this.MAX_RESPONSE_TOKENS,
+      top_p: this.TOP_P_SAMPLING
+    };
+  }
+
   async categorizeUnauthorizedError(model) {
     const isFreeModel = await this.isModelFree(model);
     if (isFreeModel) {
@@ -242,14 +252,29 @@ class OpenRouterChapterGenerator {
       throw new Error('Empty response from AI');
     }
 
-    return {
+    const result = {
       chapters: text.trim(),
       finishReason: choice.finish_reason,
       model: responseData.model || 'unknown'
     };
+
+    // Add token usage information if available
+    if (responseData.usage) {
+      result.inputTokens = responseData.usage.prompt_tokens || 0;
+      result.outputTokens = responseData.usage.completion_tokens || 0;
+    }
+
+    return result;
   }
 
   async processSubtitles(processedContent, customInstructions, apiKey, model = this.DEFAULT_FREE_MODEL) {
+    // Convert string prompt to conversation format for unified handling
+    const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
+    const messages = [{ role: 'user', content: prompt }];
+    return this.processConversation(messages, apiKey, model);
+  }
+
+  async processConversation(messages, apiKey, model = this.DEFAULT_FREE_MODEL) {
     this.validateApiKeyRequired(apiKey);
 
     const isValidModel = await this.validateModel(model);
@@ -257,17 +282,30 @@ class OpenRouterChapterGenerator {
       throw new Error(`Invalid model: ${model}. Please check the model name.`);
     }
 
-    const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
+    // Handle both array of messages and single string prompt
+    let conversationMessages;
+    if (Array.isArray(messages)) {
+      conversationMessages = messages;
+    } else {
+      // If it's a string, treat it as first user message
+      conversationMessages = [{ role: 'user', content: messages }];
+    }
+
     const url = this.buildChatCompletionsUrl();
     const headers = this.buildOpenRouterHeaders(apiKey);
-    const body = this.buildChatCompletionBody(prompt, model);
+    const body = this.buildConversationBody(conversationMessages, model);
 
     try {
       const responseData = await this.networkCommunicator.post(url, headers, body);
-      console.log('OpenRouterChapterGenerator: Raw API response:', responseData);
       this.validateHttpResponse(responseData);
       const result = this.parseApiResponse(responseData);
-      console.log('OpenRouterChapterGenerator: Parsed result:', result);
+
+      // Add token usage information from the response
+      if (responseData.usage) {
+        result.inputTokens = responseData.usage.prompt_tokens || 0;
+        result.outputTokens = responseData.usage.completion_tokens || 0;
+      }
+
       return result;
     } catch (error) {
       if (error.isHttpError) {

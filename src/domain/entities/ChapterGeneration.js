@@ -20,6 +20,8 @@ class ChapterGeneration {
     this.status = 'pending';
     this.chapters = null;
     this.error = null;
+    this.inputTokens = 0;
+    this.outputTokens = 0;
     this.createdAt = new Date();
     this.completedAt = null;
   }
@@ -51,7 +53,7 @@ class ChapterGeneration {
     return modelId;
   }
 
-  markCompleted(chapters) {
+  markCompleted(chapters, inputTokens = 0, outputTokens = 0) {
     if (this.status !== 'pending') {
       throw new Error(`Cannot complete generation with status: ${this.status}`);
     }
@@ -62,6 +64,8 @@ class ChapterGeneration {
 
     this.status = 'completed';
     this.chapters = chapters.trim();
+    this.inputTokens = inputTokens || 0;
+    this.outputTokens = outputTokens || 0;
     this.completedAt = new Date();
     this.error = null;
   }
@@ -121,7 +125,9 @@ class ChapterGeneration {
       customInstructions: this.customInstructions,
       videoMetadata: this.getVideoMetadata(),
       status: this.status,
-      error: this.error
+      error: this.error,
+      inputTokens: this.inputTokens || 0,
+      outputTokens: this.outputTokens || 0
     };
   }
 
@@ -170,7 +176,7 @@ class ChapterGeneration {
     if (results.error) {
       generation.markFailed(results.error);
     } else if (results.chapters && results.chapters !== results.videoMetadata?.url) {
-      generation.markCompleted(results.chapters);
+      generation.markCompleted(results.chapters, results.inputTokens || 0, results.outputTokens || 0);
     }
 
     return generation;

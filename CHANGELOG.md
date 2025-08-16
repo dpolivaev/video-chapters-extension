@@ -5,6 +5,19 @@ All notable changes to the Video Chapters Generator extension will be documented
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0]
+
+### Added
+- Interactive chat interface for follow-up questions about generated chapters
+- Complete conversation history tracking with AI model responses
+- Token usage tracking showing cumulative input/output tokens across entire conversation
+- Professional chat styling with message threading and timestamps
+
+### Changed
+- Unified API architecture with single processConversation method for both string prompts and conversation arrays
+- Enhanced session management to preserve conversation context and token counts
+- Improved cross-provider support for both Gemini and OpenRouter models
+
 ## [1.3.19]
 
 ### Fixed

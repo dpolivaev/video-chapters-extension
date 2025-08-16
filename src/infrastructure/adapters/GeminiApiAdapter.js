@@ -40,7 +40,12 @@ class GeminiApiAdapter extends BaseLLM {
   }
 
   async processSubtitles(processedContent, customInstructions = '', apiKey, model = 'gemini-2.5-pro') {
-    return this.geminiChapterGenerator.processSubtitles(processedContent, customInstructions, apiKey, model);
+    // Check if processedContent is an array (conversation messages) or string (single prompt)
+    if (Array.isArray(processedContent)) {
+      return this.geminiChapterGenerator.processConversation(processedContent, apiKey, model);
+    } else {
+      return this.geminiChapterGenerator.processSubtitles(processedContent, customInstructions, apiKey, model);
+    }
   }
 
   async makeAPICall(prompt, apiKey, model) {

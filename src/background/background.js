@@ -272,6 +272,10 @@ class BackgroundService {
           this.handleGetUserLanguage(request, sendResponse);
           return true;
 
+        case 'sendChatMessage':
+          this.handleChatMessage(request, sendResponse);
+          return true;
+
         default:
           return false;
       }
@@ -824,6 +828,112 @@ class BackgroundService {
         error: error.message
       });
     }
+  }
+
+  async handleChatMessage(request, sendResponse) {
+    try {
+      const { resultId, message, chatHistory } = request;
+
+      if (!resultId || !message) {
+        throw new Error('ResultId and message are required for chat');
+      }
+
+      // Get the original session to get model and settings
+      const session = sessionRepository.findById(resultId);
+      if (!session) {
+        // Try to find by active session as fallback
+        const activeSession = sessionRepository.getActiveSession();
+        if (activeSession && activeSession.id.toString() === resultId.toString()) {
+          const sessionResults = activeSession.toSessionResults();
+          await this.processChatMessage(message, chatHistory, sessionResults, sendResponse);
+          return;
+        }
+        throw new Error(`Session ${resultId} not found. Available sessions: ${Array.from(sessionRepository.sessions.keys()).join(', ')}`);
+      }
+
+      const sessionResults = session.toSessionResults();
+      await this.processChatMessage(message, chatHistory, sessionResults, sendResponse);
+
+    } catch (error) {
+      console.error('Chat message error:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
+  }
+
+  async processChatMessage(message, chatHistory, sessionResults, sendResponse) {
+    try {
+      const modelId = new ModelId(sessionResults.model.value, sessionResults.model.provider, sessionResults.model.isFree);
+
+      // Get API key from settings (not stored in session for security)
+      const settingsData = await settingsRepository.load();
+      const credentials = settingsData.credentials;
+
+      const apiKey = modelId.isGemini()
+        ? credentials.geminiKey
+        : credentials.openRouterKey;
+
+      if (!apiKey) {
+        throw new Error(`API key required for model: ${modelId.getDisplayName()}. Please configure your ${modelId.isGemini() ? 'Gemini' : 'OpenRouter'} API key in extension settings.`);
+      }
+
+      // Build conversation messages from chat history
+      const conversationMessages = this.buildConversationMessages(chatHistory, sessionResults);
+
+      // Generate response using the appropriate API adapter with conversation messages
+      let response;
+
+      if (modelId.isGemini()) {
+        response = await this.geminiAPI.processSubtitles(
+          conversationMessages, // Pass array of messages instead of string
+          '', // No custom instructions for chat
+          apiKey,
+          modelId.toString()
+        );
+      } else if (modelId.isOpenRouter()) {
+        response = await this.openRouterAPI.processSubtitles(
+          conversationMessages, // Pass array of messages instead of string
+          '', // No custom instructions for chat
+          apiKey,
+          modelId.toString()
+        );
+      } else {
+        throw new Error(`Unsupported model provider: ${modelId.provider}`);
+      }
+
+      sendResponse({
+        success: true,
+        content: response.chapters,
+        inputTokens: response.inputTokens || 0,
+        outputTokens: response.outputTokens || 0
+      });
+
+    } catch (error) {
+      console.error('Error processing chat message:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
+  }
+
+  buildConversationMessages(chatHistory, _sessionResults) {
+    // Convert chat history to conversation messages format
+    const messages = [];
+
+    // Add all messages from chat history maintaining proper conversation structure
+    if (chatHistory && chatHistory.length > 0) {
+      chatHistory.forEach(msg => {
+        messages.push({
+          role: msg.role,
+          content: msg.content
+        });
+      });
+    }
+
+    return messages;
   }
 }
 

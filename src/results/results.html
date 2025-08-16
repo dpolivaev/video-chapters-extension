@@ -122,6 +122,34 @@
           <div class="content-display">
             <div id="chaptersHtml" class="content-html"></div>
           </div>
+          
+          <!-- Chat Section -->
+          <div class="chat-section" id="chatSection" style="display: none;">
+            <div class="chat-header">
+              <h4>__MSG_continue_conversation__</h4>
+              <div class="token-summary" id="tokenSummary">
+                __MSG_tokens_used__: <span id="inputTokens">0</span> __MSG_input_tokens__, <span id="outputTokens">0</span> __MSG_output_tokens__
+              </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages"></div>
+            
+            <div class="chat-input-section">
+              <div class="chat-input-container">
+                <textarea id="chatInput" class="chat-input" placeholder="__MSG_ask_followup_question__" rows="3"></textarea>
+                <button id="sendChatBtn" class="btn-primary chat-send-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                  </svg>
+                  __MSG_send_button__
+                </button>
+              </div>
+              <div class="chat-loading" id="chatLoading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <span>__MSG_generating_response__</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>

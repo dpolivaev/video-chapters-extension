@@ -89,6 +89,46 @@ class GeminiChapterGenerator {
     };
   }
 
+  buildConversationBody(messages) {
+    // Convert chat messages to Gemini format
+    const contents = messages.map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user', // Gemini uses 'model' instead of 'assistant'
+      parts: [
+        {
+          text: msg.content
+        }
+      ]
+    }));
+
+    return {
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192
+      },
+      safetySettings: [
+        {
+          category: 'HARM_CATEGORY_HARASSMENT',
+          threshold: 'BLOCK_NONE'
+        },
+        {
+          category: 'HARM_CATEGORY_HATE_SPEECH',
+          threshold: 'BLOCK_NONE'
+        },
+        {
+          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+          threshold: 'BLOCK_NONE'
+        },
+        {
+          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+          threshold: 'BLOCK_NONE'
+        }
+      ]
+    };
+  }
+
   buildHttpHeaders() {
     return {
       'Content-Type': 'application/json'
@@ -141,15 +181,30 @@ class GeminiChapterGenerator {
       throw new Error('Empty response from AI');
     }
 
-    return {
+    const result = {
       chapters: text.trim(),
       finishReason: candidate.finishReason,
       safetyRatings: candidate.safetyRatings,
       model: responseData.modelVersion || 'unknown'
     };
+
+    // Add token usage information if available
+    if (responseData.usageMetadata) {
+      result.inputTokens = responseData.usageMetadata.promptTokenCount || 0;
+      result.outputTokens = responseData.usageMetadata.candidatesTokenCount || 0;
+    }
+
+    return result;
   }
 
   async processSubtitles(processedContent, customInstructions, apiKey, model = 'gemini-2.5-pro') {
+    // Convert string prompt to conversation format for unified handling
+    const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
+    const messages = [{ role: 'user', content: prompt }];
+    return this.processConversation(messages, apiKey, model);
+  }
+
+  async processConversation(messages, apiKey, model = 'gemini-2.5-pro') {
     if (!this.validateApiKey(apiKey)) {
       throw new Error('API key is required');
     }
@@ -159,15 +214,31 @@ class GeminiChapterGenerator {
       throw new Error(`Invalid model: ${model}. Available models: ${availableIds.join(', ')}`);
     }
 
-    const prompt = this.promptGenerator.buildPrompt(processedContent, customInstructions);
+    // Handle both array of messages and single string prompt
+    let conversationMessages;
+    if (Array.isArray(messages)) {
+      conversationMessages = messages;
+    } else {
+      // If it's a string, treat it as first user message
+      conversationMessages = [{ role: 'user', content: messages }];
+    }
+
     const url = this.buildRequestUrl(model, apiKey);
     const headers = this.buildHttpHeaders();
-    const body = this.buildRequestBody(prompt);
+    const body = this.buildConversationBody(conversationMessages);
 
     try {
       const responseData = await this.networkCommunicator.post(url, headers, body);
       this.validateHttpResponse(responseData);
-      return this.parseApiResponse(responseData);
+      const result = this.parseApiResponse(responseData);
+
+      // Add token usage information if available
+      if (responseData.usageMetadata) {
+        result.inputTokens = responseData.usageMetadata.promptTokenCount || 0;
+        result.outputTokens = responseData.usageMetadata.candidatesTokenCount || 0;
+      }
+
+      return result;
     } catch (error) {
       if (error.isHttpError) {
         throw this.categorizeHttpError(error.status, error.responseData);

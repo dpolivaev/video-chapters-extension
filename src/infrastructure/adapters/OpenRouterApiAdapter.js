@@ -21,6 +21,11 @@ class OpenRouterApiAdapter {
     const promptGenerator = new PromptGenerator();
     const generator = new OpenRouterChapterGenerator(networkCommunicator, promptGenerator);
 
-    return generator.processSubtitles(processedContent, customInstructions, apiKey, model);
+    // Check if processedContent is an array (conversation messages) or string (single prompt)
+    if (Array.isArray(processedContent)) {
+      return generator.processConversation(processedContent, apiKey, model);
+    } else {
+      return generator.processSubtitles(processedContent, customInstructions, apiKey, model);
+    }
   }
 }

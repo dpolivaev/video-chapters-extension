@@ -36,6 +36,9 @@ class ResultsView {
     this.status = 'pending';
     this.progress = 0;
     this.progressTimeout = null;
+    this.chatHistory = [];
+    this.totalInputTokens = 0;
+    this.totalOutputTokens = 0;
     this.init();
   }
   async init() {
@@ -231,6 +234,28 @@ class ResultsView {
     document.getElementById('helpBtn').addEventListener('click', () => {
       this.openHelp();
     });
+
+    // Chat event listeners
+    const sendBtn = document.getElementById('sendChatBtn');
+    const chatInput = document.getElementById('chatInput');
+
+    if (sendBtn && chatInput) {
+      sendBtn.addEventListener('click', () => {
+        this.sendChatMessage();
+      });
+
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          this.sendChatMessage();
+        }
+      });
+
+      chatInput.addEventListener('input', () => {
+        this.updateSendButtonState();
+      });
+    }
+
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.matches('textarea')) {
         e.preventDefault();
@@ -296,6 +321,7 @@ class ResultsView {
     this.updateVideoInfo();
     this.updateChaptersDisplay();
     this.updateSubtitlesDisplay();
+    this.setupChatInterface();
     document.getElementById('statusText').textContent = '';
   }
   updateVideoInfo() {
@@ -643,6 +669,202 @@ class ResultsView {
   formatLinkTextWithQuotes(quoteChars) {
     const EXTENSION_NAME = 'Video Chapters Generator';
     return quoteChars.opening + EXTENSION_NAME + quoteChars.closing;
+  }
+
+  setupChatInterface() {
+    if (!this.results || this.status !== 'done') {
+      return;
+    }
+
+    const chatSection = document.getElementById('chatSection');
+    if (chatSection) {
+      chatSection.style.display = 'block';
+
+      // Initialize chat with original generation
+      if (this.chatHistory.length === 0) {
+        this.initializeChatHistory();
+      }
+
+      this.updateTokenDisplay();
+      this.updateSendButtonState();
+      this.renderChatMessages();
+    }
+  }
+
+  initializeChatHistory() {
+    // Initialize with original generation for AI context
+    const originalPrompt = this.buildOriginalPrompt();
+    const originalResponse = this.results.chapters || '';
+
+    this.chatHistory = [
+      {
+        role: 'user',
+        content: originalPrompt,
+        timestamp: this.results.timestamp || Date.now(),
+        isOriginal: true
+      },
+      {
+        role: 'assistant',
+        content: originalResponse,
+        timestamp: this.results.timestamp || Date.now(),
+        inputTokens: this.results.inputTokens || 0,
+        outputTokens: this.results.outputTokens || 0,
+        isOriginal: true
+      }
+    ];
+
+    // Initialize token counts from original generation
+    this.totalInputTokens = this.results.inputTokens || 0;
+    this.totalOutputTokens = this.results.outputTokens || 0;
+  }
+
+  buildOriginalPrompt() {
+    let prompt = 'Break down this video content into chapters and generate timecodes.';
+
+    if (this.results.customInstructions && this.results.customInstructions.trim()) {
+      prompt += '\n\nUser instructions: ' + this.results.customInstructions.trim();
+    }
+
+    return prompt;
+  }
+
+  renderChatMessages() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) {
+      return;
+    }
+
+    chatMessages.innerHTML = '';
+
+    // Skip first 2 messages (original prompt and response) for display
+    const displayMessages = this.chatHistory.slice(2);
+
+    displayMessages.forEach((message) => {
+      const messageElement = this.createMessageElement(message);
+      chatMessages.appendChild(messageElement);
+    });
+
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  createMessageElement(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${message.role}`;
+
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'chat-message-header';
+
+    const roleSpan = document.createElement('span');
+    roleSpan.className = `chat-message-role ${message.role}`;
+    roleSpan.textContent = message.role === 'user' ? getLocalizedMessage('user') : getLocalizedMessage('assistant');
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'chat-message-time';
+    timeSpan.textContent = new Date(message.timestamp).toLocaleTimeString();
+
+    headerDiv.appendChild(roleSpan);
+    headerDiv.appendChild(timeSpan);
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'chat-message-content';
+    contentDiv.textContent = message.content;
+
+    messageDiv.appendChild(headerDiv);
+    messageDiv.appendChild(contentDiv);
+
+    return messageDiv;
+  }
+
+  updateTokenDisplay() {
+    const inputTokensSpan = document.getElementById('inputTokens');
+    const outputTokensSpan = document.getElementById('outputTokens');
+
+    if (inputTokensSpan) {
+      inputTokensSpan.textContent = this.totalInputTokens.toString();
+    }
+    if (outputTokensSpan) {
+      outputTokensSpan.textContent = this.totalOutputTokens.toString();
+    }
+  }
+
+  updateSendButtonState() {
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+
+    if (chatInput && sendBtn) {
+      const hasText = chatInput.value.trim().length > 0;
+      sendBtn.disabled = !hasText;
+    }
+  }
+
+  async sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const message = chatInput.value.trim();
+
+    if (!message) {
+      return;
+    }
+
+    // Add user message to history
+    const userMessage = {
+      role: 'user',
+      content: message,
+      timestamp: Date.now()
+    };
+
+    this.chatHistory.push(userMessage);
+    chatInput.value = '';
+    this.updateSendButtonState();
+    this.renderChatMessages();
+    this.showChatLoading(true);
+
+    try {
+      // Send chat request to background with full conversation history
+      const response = await browser.runtime.sendMessage({
+        action: 'sendChatMessage',
+        resultId: this.resultId,
+        message,
+        chatHistory: this.chatHistory
+      });
+
+      if (response && response.success) {
+        // Add assistant response to history
+        const assistantMessage = {
+          role: 'assistant',
+          content: response.content,
+          timestamp: Date.now(),
+          inputTokens: response.inputTokens || 0,
+          outputTokens: response.outputTokens || 0
+        };
+
+        this.chatHistory.push(assistantMessage);
+        this.totalInputTokens += response.inputTokens || 0;
+        this.totalOutputTokens += response.outputTokens || 0;
+
+        this.renderChatMessages();
+        this.updateTokenDisplay();
+      } else {
+        this.showNotification(response?.error || getLocalizedMessage('chat_error'), 'error');
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      this.showNotification(getLocalizedMessage('chat_error'), 'error');
+    } finally {
+      this.showChatLoading(false);
+    }
+  }
+
+  showChatLoading(show) {
+    const chatLoading = document.getElementById('chatLoading');
+    const sendBtn = document.getElementById('sendChatBtn');
+
+    if (chatLoading) {
+      chatLoading.style.display = show ? 'flex' : 'none';
+    }
+    if (sendBtn) {
+      sendBtn.disabled = show;
+    }
   }
 
 }
