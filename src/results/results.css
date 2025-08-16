@@ -755,8 +755,8 @@ body {
 
 /* Chat Interface Styles */
 .chat-section {
-  margin-top: 32px;
-  padding-top: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-color);
 }
 
