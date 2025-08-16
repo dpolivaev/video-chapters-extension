@@ -257,7 +257,9 @@ describe('OpenRouterChapterGenerator', () => {
       expect(result).toEqual({
         chapters: '1. Introduction\n2. Main Content\n3. Conclusion',
         finishReason: 'stop',
-        model: 'deepseek/deepseek-r1-0528:free'
+        model: 'deepseek/deepseek-r1-0528:free',
+        inputTokens: 100,
+        outputTokens: 50
       });
     });
 

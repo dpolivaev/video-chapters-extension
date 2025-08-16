@@ -301,6 +301,7 @@ describe('GeminiChapterGenerator', () => {
         { 'Content-Type': 'application/json' },
         {
           contents: [{
+            role: 'user',
             parts: [{ text: expectedPrompt }]
           }],
           generationConfig: {
