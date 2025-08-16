@@ -27,7 +27,6 @@
   font-family: var(--mono-font);
   font-size: 13px;
   line-height: 1.5;
-  min-height: 200px;
   max-height: 400px;
   overflow-y: auto;
 }
@@ -351,14 +350,22 @@ body {
 }
 
 .content-display {
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* For chapters tab - don't expand unnecessarily */
+#chaptersTab .content-display {
+  flex: 0 1 auto;
+}
+
+/* For subtitles tab - expand to fill available space */
+#subtitlesTab .content-display {
+  flex: 1;
+}
+
 .content-textarea {
   flex: 1;
-  min-height: 400px;
   padding: 16px;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -647,7 +654,6 @@ body {
   }
   
   .content-textarea {
-    min-height: 300px;
     font-size: 12px;
   }
   
@@ -755,8 +761,8 @@ body {
 
 /* Chat Interface Styles */
 .chat-section {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid var(--border-color);
 }
 
@@ -774,10 +780,17 @@ body {
 .chat-messages {
   max-height: 400px;
   overflow-y: auto;
-  margin-bottom: 16px;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--background-elevated);
+}
+
+.chat-messages.hidden {
+  display: none;
+}
+
+.chat-messages:not(.hidden) {
+  margin-bottom: 16px;
 }
 
 .chat-message {
@@ -834,7 +847,7 @@ body {
 }
 
 .chat-input-section {
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .chat-input-container {

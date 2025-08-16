@@ -739,13 +739,20 @@ class ResultsView {
     // Skip first 2 messages (original prompt and response) for display
     const displayMessages = this.chatHistory.slice(2);
 
-    displayMessages.forEach((message) => {
-      const messageElement = this.createMessageElement(message);
-      chatMessages.appendChild(messageElement);
-    });
+    if (displayMessages.length === 0) {
+      // Hide the container when there are no messages to display
+      chatMessages.classList.add('hidden');
+    } else {
+      // Show the container and add messages
+      chatMessages.classList.remove('hidden');
+      displayMessages.forEach((message) => {
+        const messageElement = this.createMessageElement(message);
+        chatMessages.appendChild(messageElement);
+      });
 
-    // Scroll to bottom
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
   }
 
   createMessageElement(message) {
