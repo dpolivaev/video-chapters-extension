@@ -31,6 +31,17 @@ class InstructionHistoryRepository {
     return instructionToAdd;
   }
 
+  async addInstructionEntry(instructionEntry) {
+    const history = await this.getHistory();
+    const limit = await this.getHistoryLimit();
+
+    const instructionToAdd = this.createOrUpdateInstructionEntry(instructionEntry, history);
+    const updatedHistory = this.addToHistoryWithLimit(instructionToAdd, history, limit);
+
+    await this.storageAdapter.setInstructionHistory(updatedHistory);
+    return instructionToAdd;
+  }
+
   createOrUpdateInstruction(content, history) {
     const existingIndex = history.findIndex(instruction => instruction.content.trim() === content);
 
@@ -49,6 +60,29 @@ class InstructionHistoryRepository {
       Date.now(),
       content,
       (new Date).toISOString()
+    ).toStorageObject();
+  }
+
+  createOrUpdateInstructionEntry(instructionEntry, history) {
+    const existingIndex = history.findIndex(instruction => instruction.content.trim() === instructionEntry.content.trim());
+
+    if (existingIndex !== -1) {
+      const existing = history.splice(existingIndex, 1)[0];
+      return new InstructionEntry(
+        existing.id,
+        instructionEntry.content,
+        (new Date).toISOString(),
+        instructionEntry.name,
+        instructionEntry.isCustomName
+      ).toStorageObject();
+    }
+
+    return new InstructionEntry(
+      instructionEntry.id,
+      instructionEntry.content,
+      instructionEntry.timestamp,
+      instructionEntry.name,
+      instructionEntry.isCustomName
     ).toStorageObject();
   }
 

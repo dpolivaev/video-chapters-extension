@@ -509,7 +509,18 @@ class PopupView {
     }
     try {
       if (customInstructions && window.instructionHistory) {
-        await window.instructionHistory.saveInstruction(customInstructions);
+        const instructionNameInput = document.getElementById('instructionNameInput');
+        const instructionName = instructionNameInput.value.trim();
+
+        const instructionEntry = new InstructionEntry(
+          Date.now(),
+          customInstructions,
+          new Date().toISOString(),
+          instructionName,
+          instructionName.length > 0
+        );
+
+        await window.instructionHistory.saveInstruction(instructionEntry);
       }
       if (!this.currentVideo.processedContent) {
         throw new Error(getLocalizedMessage('no_transcript_available'));

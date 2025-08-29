@@ -346,8 +346,14 @@ class BackgroundService {
   }
   async handleSaveInstruction(request, sendResponse) {
     try {
-      const {content: content} = request;
-      await instructionHistoryRepository.addInstruction(content);
+      const { instructionEntry } = request;
+      if (instructionEntry) {
+        const entry = InstructionEntry.fromStorageObject(instructionEntry);
+        await instructionHistoryRepository.addInstructionEntry(entry);
+      } else {
+        const { content } = request;
+        await instructionHistoryRepository.addInstruction(content);
+      }
       sendResponse({
         success: true
       });

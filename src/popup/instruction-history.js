@@ -267,14 +267,14 @@ class InstructionHistoryView {
       this.limitInput.value = 10;
     }
   }
-  async saveInstruction(content) {
-    if (!content || !content.trim()) {
+  async saveInstruction(instructionEntry) {
+    if (!instructionEntry || !instructionEntry.content || !instructionEntry.content.trim()) {
       return;
     }
     try {
       const response = await browser.runtime.sendMessage({
         action: 'saveInstruction',
-        content: content.trim()
+        instructionEntry: instructionEntry.toStorageObject()
       });
       if (!response || !response.success) {
         throw new Error(response?.error || 'Failed to save instruction');
