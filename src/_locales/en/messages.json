@@ -115,5 +115,6 @@
   "disclaimer": { "message": "The chapter timestamps and titles were created using \"%EXTENSION_LINK%\" — a free and open-source browser extension — powered by the \"$1\" AI model." },
   "language_settings_title": { "message": "Language Settings" },
   "language_selector_label": { "message": "Interface Language:" },
-  "language_browser_ui": { "message": "Browser UI Language" }
+  "language_browser_ui": { "message": "Browser UI Language" },
+  "pricing_tooltip": { "message": "Tokens per 0.01$$ (input/output)" }
 } 

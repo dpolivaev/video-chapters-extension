@@ -24,7 +24,7 @@ describe('ChapterGeneration Entity', () => {
 
   describe('constructor and initialization', () => {
     test('should create with valid parameters', () => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       const generation = new ChapterGeneration(
         mockVideoTranscript,
         geminiModel,
@@ -43,14 +43,14 @@ describe('ChapterGeneration Entity', () => {
     });
 
     test('should validate VideoTranscript instance', () => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       expect(() => {
         new ChapterGeneration('invalid', geminiModel);
       }).toThrow('videoTranscript must be a VideoTranscript instance');
     });
 
     test('should generate unique IDs', () => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       const generation1 = new ChapterGeneration(mockVideoTranscript, geminiModel);
       const generation2 = new ChapterGeneration(mockVideoTranscript, geminiModel);
 
@@ -63,7 +63,7 @@ describe('ChapterGeneration Entity', () => {
     let generation;
 
     beforeEach(() => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       generation = new ChapterGeneration(mockVideoTranscript, geminiModel);
     });
 
@@ -114,7 +114,7 @@ describe('ChapterGeneration Entity', () => {
 
   describe('custom instructions', () => {
     test('should detect presence of custom instructions', () => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       const withInstructions = new ChapterGeneration(
         mockVideoTranscript,
         geminiModel,
@@ -132,7 +132,7 @@ describe('ChapterGeneration Entity', () => {
 
   describe('duration calculations', () => {
     test('should calculate duration correctly', () => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       const generation = new ChapterGeneration(mockVideoTranscript, geminiModel);
 
       const durationMs = generation.getDurationMs();
@@ -145,7 +145,7 @@ describe('ChapterGeneration Entity', () => {
 
   describe('serialization', () => {
     test('should convert to session results format', () => {
-      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini', false);
+      const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       const generation = new ChapterGeneration(
         mockVideoTranscript,
         geminiModel,
@@ -160,7 +160,7 @@ describe('ChapterGeneration Entity', () => {
       expect(results.model).toEqual({
         value: 'gemini-2.5-pro',
         provider: 'Gemini',
-        isFree: false
+        pricing: null
       });
       expect(results.customInstructions).toBe('Custom instructions');
       expect(results.status).toBe('completed');

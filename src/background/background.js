@@ -296,7 +296,7 @@ class BackgroundService {
       }
 
       // Recreate ModelId object from received data (JSON serialization strips methods)
-      const fullModelId = new ModelId(modelId.value, modelId.provider, modelId.isFree);
+      const fullModelId = new ModelId(modelId.value, modelId.provider, modelId.pricing);
       const newGenerationSession = this.createNewGenerationSession(existingSession, fullModelId, customInstructions);
 
       if (request.newResultId) {
@@ -514,6 +514,9 @@ class BackgroundService {
       'deepseek/deepseek-r1-0528',
       'anthropic/claude-3.5-sonnet',
       'anthropic/claude-3.5-haiku',
+      'openai/gpt-5',
+      'openai/gpt-5-mini',
+      'openai/gpt-5-nano',
       'openai/gpt-4o',
       'openai/gpt-4o-mini',
       'meta-llama/llama-3.3-70b-instruct',
@@ -523,8 +526,7 @@ class BackgroundService {
   }
 
   transformToStandardModelFormat(model) {
-    const isFree = this.determineIfModelIsFree(model);
-    return new ModelId(model.id, 'OpenRouter', isFree);
+    return new ModelId(model.id, 'OpenRouter', model.pricing);
   }
 
   determineIfModelIsFree(model) {
@@ -536,8 +538,8 @@ class BackgroundService {
 
   getGeminiModels() {
     return [
-      new ModelId('gemini-2.5-pro', 'Gemini', false),
-      new ModelId('gemini-2.5-flash', 'Gemini', false)
+      new ModelId('gemini-2.5-pro', 'Gemini'),
+      new ModelId('gemini-2.5-flash', 'Gemini')
     ];
   }
 
@@ -865,7 +867,7 @@ class BackgroundService {
 
   async processChatMessage(message, chatHistory, sessionResults, sendResponse) {
     try {
-      const modelId = new ModelId(sessionResults.model.value, sessionResults.model.provider, sessionResults.model.isFree);
+      const modelId = new ModelId(sessionResults.model.value, sessionResults.model.provider, sessionResults.model.pricing);
 
       // Get API key from settings (not stored in session for security)
       const settingsData = await settingsRepository.load();

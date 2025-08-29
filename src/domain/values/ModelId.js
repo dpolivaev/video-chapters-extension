@@ -7,21 +7,27 @@
  */
 
 class ModelId {
-  constructor(id, provider, isFree) {
+  constructor(id, provider, pricing = null) {
     if (!id || typeof id !== 'string') {
       throw new Error('Model ID must be a non-empty string');
     }
     if (!provider || typeof provider !== 'string') {
       throw new Error('Provider must be a non-empty string');
     }
-    if (typeof isFree !== 'boolean') {
-      throw new Error('isFree must be a boolean');
-    }
 
     this.value = id;
     this.provider = provider;
-    this.isFree = isFree;
+    this.pricing = pricing;
     Object.freeze(this);
+  }
+
+  get isFree() {
+    if (!this.pricing) {
+      return false;
+    }
+    const promptPrice = parseFloat(this.pricing.prompt || 0);
+    const completionPrice = parseFloat(this.pricing.completion || 0);
+    return promptPrice === 0 && completionPrice === 0;
   }
 
   static fromJSON(data) {
@@ -39,22 +45,19 @@ class ModelId {
       return ModelId.getDefault();
     }
 
-    if (typeof data.isFree !== 'boolean') {
-      return ModelId.getDefault();
-    }
-
-    return new ModelId(data.value, data.provider, data.isFree);
+    return new ModelId(data.value, data.provider, data.pricing);
   }
 
   static getDefault() {
-    return new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true);
+    const defaultPricing = { prompt: '0', completion: '0' };
+    return new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', defaultPricing);
   }
 
   toJSON() {
     return {
       value: this.value,
       provider: this.provider,
-      isFree: this.isFree
+      pricing: this.pricing
     };
   }
 
@@ -84,85 +87,88 @@ class ModelId {
   }
 
   getDisplayName() {
-    if (this.value.includes('gemini-2.5-pro')) {
-      return 'Gemini 2.5 Pro';
-    }
-    if (this.value.includes('gemini-2.5-flash')) {
-      return 'Gemini 2.5 Flash';
-    }
-    if (this.value.includes('deepseek-r1-0528:free')) {
-      return 'DeepSeek R1 (Free)';
-    }
-    if (this.value.includes('deepseek-r1-0528')) {
-      return 'DeepSeek R1';
-    }
-    if (this.value.includes('claude-3.5-sonnet')) {
-      return 'Claude 3.5 Sonnet';
-    }
-    if (this.value.includes('claude-3.5-haiku')) {
-      return 'Claude 3.5 Haiku';
-    }
-    if (this.value.includes('gpt-4o-mini')) {
-      return 'GPT-4o Mini';
-    }
-    if (this.value.includes('gpt-4o')) {
-      return 'GPT-4o';
-    }
-    if (this.value.includes('llama-3.3-70b')) {
-      return 'Llama 3.3 70B';
+    const baseName = this.getDisplayNameWithoutFree();
+    if (this.isFree) {
+      const freeMessage = chrome.i18n && chrome.i18n.getMessage ? chrome.i18n.getMessage('free') : 'Free';
+      return `${baseName} (${freeMessage})`;
     }
 
-    return this.extractModelNameFromPath();
+    if (this.pricing && this.pricing.prompt) {
+      const promptPrice = parseFloat(this.pricing.prompt);
+      const completionPrice = parseFloat(this.pricing.completion || 0);
+
+      if (promptPrice > 0 || completionPrice > 0) {
+        // Convert to tokens per cent (1 cent = $0.01) and round down to 2 significant digits
+        const roundToTwoDigits = (value) => {
+          if (value < 10) {
+            return Math.floor(value);
+          }
+
+          const digits = Math.floor(Math.log10(value)) + 1;
+          if (digits <= 2) {
+            return Math.floor(value);
+          }
+
+          const divisor = Math.pow(10, digits - 2);
+          return Math.floor(value / divisor) * divisor;
+        };
+
+        const promptTokensPerCent = roundToTwoDigits(0.01 / promptPrice);
+        const completionTokensPerCent = roundToTwoDigits(0.01 / completionPrice);
+
+        if (promptPrice === completionPrice) {
+          return `${baseName} (${promptTokensPerCent})`;
+        } else {
+          return `${baseName} (${promptTokensPerCent}/${completionTokensPerCent})`;
+        }
+      }
+    }
+
+    return baseName;
   }
 
   getDisplayNameWithoutFree() {
-    if (this.value.includes('gemini-2.5-pro')) {
-      return 'Gemini 2.5 Pro';
-    }
-    if (this.value.includes('gemini-2.5-flash')) {
-      return 'Gemini 2.5 Flash';
-    }
-    if (this.value.includes('deepseek-r1-0528')) {
-      return 'DeepSeek R1';
-    }
-    if (this.value.includes('claude-3.5-sonnet')) {
-      return 'Claude 3.5 Sonnet';
-    }
-    if (this.value.includes('claude-3.5-haiku')) {
-      return 'Claude 3.5 Haiku';
-    }
-    if (this.value.includes('gpt-4o-mini')) {
-      return 'GPT-4o Mini';
-    }
-    if (this.value.includes('gpt-4o')) {
-      return 'GPT-4o';
-    }
-    if (this.value.includes('llama-3.3-70b')) {
-      return 'Llama 3.3 70B';
-    }
+    const familyMappings = {
+      'gemini': 'Gemini',
+      'deepseek': 'DeepSeek',
+      'claude': 'Claude',
+      'gpt': 'GPT',
+      'llama': 'Llama'
+    };
 
-    return this.extractModelNameFromPathWithoutFree();
-  }
-
-  extractModelNameFromPath() {
+    // Extract model name from path and remove :free suffix
     const parts = this.value.split('/');
-    const modelPart = parts[parts.length - 1];
-    return this.formatModelName(modelPart);
+    const modelPart = parts[parts.length - 1].replace(/:free$/, '');
+
+    // Split by hyphens, but keep digit-hyphen-digit patterns together
+    const components = modelPart.split(/-(?!\d)|(?<!\d)-/);
+
+    if (components.length === 0) {
+      return modelPart;
+    }
+
+    const result = [];
+    const familyName = components[0].toLowerCase();
+
+    // Map family name
+    if (familyMappings[familyName]) {
+      result.push(familyMappings[familyName]);
+    } else {
+      // Capitalize first letter of unknown family
+      result.push(familyName.charAt(0).toUpperCase() + familyName.slice(1));
+    }
+
+    // Process remaining components (versions, types, etc.)
+    for (let i = 1; i < components.length; i++) {
+      const component = components[i];
+      // Capitalize letters at the beginning and after non-letter characters
+      const formatted = component.replace(/^[a-z]|[^a-zA-Z][a-z]/g, match => match.toUpperCase());
+      result.push(formatted);
+    }
+
+    return result.join(' ');
   }
 
-  extractModelNameFromPathWithoutFree() {
-    const parts = this.value.split('/');
-    const modelPart = parts[parts.length - 1];
-    return this.formatModelNameWithoutFree(modelPart);
-  }
-
-  formatModelName(modelPart) {
-    return modelPart.replace(/:free$/, ' (Free)');
-  }
-
-  formatModelNameWithoutFree(modelPart) {
-    return modelPart.replace(/:free$/, '');
-  }
 }
 
 if (typeof module !== 'undefined' && module.exports) {

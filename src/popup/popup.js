@@ -185,6 +185,7 @@ class PopupView {
         if (providers.OpenRouter) {
 
           const openRouterGroup = document.createElement('optgroup');
+          const pricingTooltip = chrome.i18n.getMessage('pricing_tooltip');
           openRouterGroup.label = 'OpenRouter';
           providers.OpenRouter.sort((a, b) => {
             if (a.isFree && !b.isFree) {
@@ -200,7 +201,9 @@ class PopupView {
             const option = document.createElement('option');
             option.value = modelId.value;
             option.textContent = modelId.getDisplayName();
-            option.title = modelId.getDisplayName();
+            if (! modelId.isFree) {
+              option.title = pricingTooltip;
+            }
             openRouterGroup.appendChild(option);
           });
 
@@ -214,7 +217,6 @@ class PopupView {
             const option = document.createElement('option');
             option.value = modelId.value;
             option.textContent = modelId.getDisplayName();
-            option.title = modelId.getDisplayName();
             geminiGroup.appendChild(option);
           });
           modelSelect.appendChild(geminiGroup);

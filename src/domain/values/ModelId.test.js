@@ -32,15 +32,14 @@ describe('ModelId Value Object', () => {
       expect(() => new ModelId('test', 123, false)).toThrow('Provider must be a non-empty string');
     });
 
-    test('should throw error for invalid isFree', () => {
-      expect(() => new ModelId('test', 'Provider', null)).toThrow('isFree must be a boolean');
-      expect(() => new ModelId('test', 'Provider', undefined)).toThrow('isFree must be a boolean');
-      expect(() => new ModelId('test', 'Provider', 'free')).toThrow('isFree must be a boolean');
-      expect(() => new ModelId('test', 'Provider', 1)).toThrow('isFree must be a boolean');
+    test('should accept optional pricing parameter', () => {
+      expect(() => new ModelId('test', 'Provider')).not.toThrow();
+      expect(() => new ModelId('test', 'Provider', null)).not.toThrow();
+      expect(() => new ModelId('test', 'Provider', { prompt: '0', completion: '0' })).not.toThrow();
     });
 
     test('should be frozen after creation', () => {
-      const modelId = new ModelId('test', 'Provider', true);
+      const modelId = new ModelId('test', 'Provider', { prompt: '0', completion: '0' });
       expect(Object.isFrozen(modelId)).toBe(true);
     });
   });
@@ -69,13 +68,14 @@ describe('ModelId Value Object', () => {
 
   describe('JSON serialization', () => {
     test('should serialize to JSON correctly', () => {
-      const modelId = new ModelId('google/gemini-2.5-pro', 'OpenRouter', false);
+      const pricing = { prompt: '0.000002', completion: '0.000008' };
+      const modelId = new ModelId('google/gemini-2.5-pro', 'OpenRouter', pricing);
       const json = modelId.toJSON();
 
       expect(json).toEqual({
         value: 'google/gemini-2.5-pro',
         provider: 'OpenRouter',
-        isFree: false
+        pricing
       });
     });
 
@@ -83,7 +83,7 @@ describe('ModelId Value Object', () => {
       const jsonData = {
         value: 'deepseek/deepseek-r1-0528:free',
         provider: 'OpenRouter',
-        isFree: true
+        pricing: { prompt: '0', completion: '0' }
       };
 
       const modelId = ModelId.fromJSON(jsonData);
@@ -95,7 +95,8 @@ describe('ModelId Value Object', () => {
     });
 
     test('should maintain data integrity through JSON cycle', () => {
-      const original = new ModelId('anthropic/claude-3.5-sonnet', 'OpenRouter', false);
+      const pricing = { prompt: '0.000003', completion: '0.000015' };
+      const original = new ModelId('anthropic/claude-3.5-sonnet', 'OpenRouter', pricing);
 
       // Serialize to JSON
       const jsonData = original.toJSON();
