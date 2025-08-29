@@ -102,5 +102,6 @@
   "language_settings_title": { "message": "Spracheinstellungen" },
   "language_selector_label": { "message": "Sprache der Benutzeroberfläche:" },
   "language_browser_ui": { "message": "Browser-Benutzeroberflächensprache" },
-  "free": { "message": "Kostenlos" }
+  "free": { "message": "Kostenlos" },
+  "pricing_tooltip": { "message": "Tokens pro 0,01 $ (Eingabe/Ausgabe)" }
 } 

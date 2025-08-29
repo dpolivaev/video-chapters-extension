@@ -33,3 +33,10 @@ Write changelogs for users. Use simple, purpose‑first language and include onl
 3. Write purpose‑focused bullets in simple language.
 4. Place the new section at the top of `CHANGELOG.md`.
 5. Re‑read for user perspective and clarity.
+
+## Commit Message Policy (Mandatory)
+
+- Always write commit messages that describe all changes being committed, not just the work you personally performed.
+- Before committing, analyze all uncommitted changes in the repo (e.g., via `git status` and `git diff --name-only`) and reflect them in the message.
+- Focus on what changed and why from the repository’s perspective; avoid personal phrasing like “I changed…”.
+- Prefer clear, user‑centric summaries for user‑facing changes, and concise notes for internal docs/policy updates.

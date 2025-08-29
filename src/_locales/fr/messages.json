@@ -102,5 +102,6 @@
   "language_settings_title": { "message": "Paramètres de langue" },
   "language_selector_label": { "message": "Langue de l'interface :" },
   "language_browser_ui": { "message": "Langue de l'interface du navigateur" },
-  "free": { "message": "Gratuit" }
+  "free": { "message": "Gratuit" },
+  "pricing_tooltip": { "message": "Jetons par 0,01 $ (entrée/sortie)" }
 } 

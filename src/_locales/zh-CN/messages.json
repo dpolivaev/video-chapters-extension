@@ -102,5 +102,6 @@
   "language_settings_title": { "message": "语言设置" },
   "language_selector_label": { "message": "界面语言：" },
   "language_browser_ui": { "message": "浏览器界面语言" },
-  "free": { "message": "免费" }
+  "free": { "message": "免费" },
+  "pricing_tooltip": { "message": "每 0.01 美元的令牌数（输入/输出）" }
 } 

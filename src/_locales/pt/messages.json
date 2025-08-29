@@ -107,4 +107,6 @@
   "language_settings_title": { "message": "Configurações de Idioma" },
   "language_selector_label": { "message": "Idioma da Interface:" },
   "language_browser_ui": { "message": "Idioma da Interface do Navegador" }
+,
+  "pricing_tooltip": { "message": "Tokens por US$ 0,01 (entrada/saída)" }
 }

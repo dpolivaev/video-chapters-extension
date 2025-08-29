@@ -106,5 +106,6 @@
   "disclaimer": { "message": "챕터 타임코드와 제목은 \"%EXTENSION_LINK%\" — 무료 오픈소스 브라우저 확장 프로그램 — 가 AI 모델 \"$1\"을 사용하여 생성했습니다." },
   "language_settings_title": { "message": "언어 설정" },
   "language_selector_label": { "message": "인터페이스 언어:" },
-  "language_browser_ui": { "message": "브라우저 UI 언어" }
+  "language_browser_ui": { "message": "브라우저 UI 언어" },
+  "pricing_tooltip": { "message": "$0.01당 토큰 (입력/출력)" }
 }

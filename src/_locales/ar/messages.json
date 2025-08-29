@@ -106,5 +106,6 @@
   "disclaimer": { "message": "تم إنشاء رموز الوقت وعناوين الفصول بواسطة \"%EXTENSION_LINK%\" — إضافة المتصفح المجانية مفتوحة المصدر — باستخدام نموذج الذكاء الاصطناعي \"$1\"." },
   "language_settings_title": { "message": "إعدادات اللغة" },
   "language_selector_label": { "message": "لغة الواجهة:" },
-  "language_browser_ui": { "message": "لغة واجهة المتصفح" }
+  "language_browser_ui": { "message": "لغة واجهة المتصفح" },
+  "pricing_tooltip": { "message": "الرموز لكل ‎$0.01‎ (إدخال/إخراج)" }
 }

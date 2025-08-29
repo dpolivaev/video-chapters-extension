@@ -103,4 +103,6 @@
   "language_selector_label": { "message": "Idioma de la interfaz:" },
   "language_browser_ui": { "message": "Idioma de la interfaz del navegador" },
   "free": { "message": "Gratis" }
+ ,
+  "pricing_tooltip": { "message": "Tokens por 0,01 $ (entrada/salida)" }
 } 

@@ -102,5 +102,6 @@
   "language_settings_title": { "message": "Impostazioni lingua" },
   "language_selector_label": { "message": "Lingua dell'interfaccia:" },
   "language_browser_ui": { "message": "Lingua dell'interfaccia del browser" },
-  "free": { "message": "Gratuito" }
+  "free": { "message": "Gratuito" },
+  "pricing_tooltip": { "message": "Token per 0,01 $ (input/output)" }
 } 
