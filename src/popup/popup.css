@@ -172,6 +172,10 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
+.instruction-name-container {
+  margin-bottom: 8px;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -179,10 +183,13 @@ body {
   margin-bottom: 6px;
 }
 
-.section-header label {
-  font-size: 8pt;
-  font-weight: 500;
-  color: var(--text-primary);
+.section-header .section-title-input {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.section-header .btn-link {
+  flex-shrink: 0;
 }
 
 .btn-link {

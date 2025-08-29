@@ -150,7 +150,8 @@ class InstructionHistoryView {
     this.setupNameInputEventListeners(nameInput, entry);
     selectBtn.addEventListener('click', () => {
       this.nameEditController.flushPendingEdit(this.historyList);
-      this.selectInstruction(entry.content);
+      const updatedEntry = entry.updateName(nameInput.value);
+      this.selectInstruction(updatedEntry);
     });
     deleteBtn.addEventListener('click', () => {
       this.deleteInstruction(entry.id, entryDiv);
@@ -186,9 +187,16 @@ class InstructionHistoryView {
   flushLastEditedIfNeeded() {
     this.nameEditController.flushPendingEdit(this.historyList);
   }
-  selectInstruction(content) {
-    this.instructionsTextarea.value = content;
+  selectInstruction(entry) {
+    this.instructionsTextarea.value = entry.content;
     this.onInstructionsChange();
+
+    const instructionNameInput = document.getElementById('instructionNameInput');
+    if (instructionNameInput) {
+      instructionNameInput.value = entry.getNameFieldValue();
+      instructionNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
     this.hideDialog();
     this.instructionsTextarea.focus();
     this.showNotification('Instruction loaded', 'success');

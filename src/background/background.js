@@ -268,6 +268,14 @@ class BackgroundService {
           this.handleRemoveLastCustomInstructions(request, sendResponse);
           return true;
 
+        case 'getCurrentInstructionName':
+          this.handleGetCurrentInstructionName(request, sendResponse);
+          return true;
+
+        case 'saveCurrentInstructionName':
+          this.handleSaveCurrentInstructionName(request, sendResponse);
+          return true;
+
         case 'getUserLanguage':
           this.handleGetUserLanguage(request, sendResponse);
           return true;
@@ -809,6 +817,42 @@ class BackgroundService {
       });
     } catch (error) {
       console.error('Error removing last custom instructions:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
+  }
+
+  async handleGetCurrentInstructionName(request, sendResponse) {
+    try {
+      const instructionName = await storageAdapter.getCurrentInstructionName();
+      sendResponse({
+        success: true,
+        data: instructionName || ''
+      });
+    } catch (error) {
+      console.error('Error getting current instruction name:', error);
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
+  }
+
+  async handleSaveCurrentInstructionName(request, sendResponse) {
+    try {
+      const { name } = request;
+      if (name && name.trim()) {
+        await storageAdapter.setCurrentInstructionName(name.trim());
+      } else {
+        await storageAdapter.removeCurrentInstructionName();
+      }
+      sendResponse({
+        success: true
+      });
+    } catch (error) {
+      console.error('Error saving current instruction name:', error);
       sendResponse({
         success: false,
         error: error.message

@@ -57,6 +57,9 @@ class PopupView {
       console.log('PopupView: Step 4 - updateUI');
       await this.updateUI();
       console.log('PopupView: Step 4 complete');
+      console.log('PopupView: Step 5 - loadInstructionName');
+      await this.loadInstructionName();
+      console.log('PopupView: Step 5 complete');
       console.log('PopupView: Initialization completed successfully');
     } catch (error) {
       console.error('PopupView: Error initializing popup:', error, error && error.stack);
@@ -89,6 +92,11 @@ class PopupView {
     const instructionsTextarea = document.getElementById('instructionsTextarea');
     instructionsTextarea.addEventListener('input', () => {
       this.onInstructionsChange();
+    });
+
+    const instructionNameInput = document.getElementById('instructionNameInput');
+    instructionNameInput.addEventListener('input', () => {
+      this.onInstructionNameChange();
     });
     window.addEventListener('beforeunload', () => {
       this.saveCustomInstructions();
@@ -688,6 +696,38 @@ class PopupView {
       window.instructionHistory.onInstructionsChange();
     }
   }
+
+  onInstructionNameChange() {
+    // Save instruction name whenever it changes
+    this.saveInstructionName();
+  }
+
+  async saveInstructionName() {
+    try {
+      const instructionNameInput = document.getElementById('instructionNameInput');
+      const instructionName = instructionNameInput.value.trim();
+      await browser.runtime.sendMessage({
+        action: 'saveCurrentInstructionName',
+        name: instructionName
+      });
+    } catch (error) {
+      console.error('PopupView: Error saving instruction name:', error);
+    }
+  }
+
+  async loadInstructionName() {
+    try {
+      const response = await browser.runtime.sendMessage({
+        action: 'getCurrentInstructionName'
+      });
+      const instructionName = response.success ? response.data : '';
+      const instructionNameInput = document.getElementById('instructionNameInput');
+      instructionNameInput.value = instructionName || '';
+    } catch (error) {
+      console.error('PopupView: Error loading instruction name:', error);
+    }
+  }
+
   async saveCustomInstructions() {
     try {
       const instructionsTextarea = document.getElementById('instructionsTextarea');
