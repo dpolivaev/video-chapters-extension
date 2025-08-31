@@ -42,6 +42,15 @@ class PopupView {
     this.allModels = [];
     this.init();
   }
+  async saveDraft() {
+    try {
+      await Promise.allSettled([
+        this.saveCustomInstructions(),
+        this.saveInstructionName()
+      ]);
+    } catch (e) {
+    }
+  }
   async init() {
     try {
       console.log('PopupView: Starting initialization...');
@@ -93,10 +102,15 @@ class PopupView {
     instructionsTextarea.addEventListener('input', () => {
       this.onInstructionsChange();
     });
+    // Persist textarea content when it loses focus
+    instructionsTextarea.addEventListener('blur', () => {
+      this.saveDraft();
+    });
 
     const instructionNameInput = document.getElementById('instructionNameInput');
-    instructionNameInput.addEventListener('input', () => {
-      this.onInstructionNameChange();
+    // Persist instruction name when it loses focus
+    instructionNameInput.addEventListener('blur', () => {
+      this.saveDraft();
     });
     window.addEventListener('beforeunload', () => {
       this.saveCustomInstructions();
@@ -608,6 +622,8 @@ class PopupView {
         resultId: newResultId
       });
 
+      // Ensure latest edits are persisted before closing
+      try { await this.saveDraft(); } catch (e) { /* noop */ }
       window.close();
     } catch (error) {
       console.error('PopupView: Error generating chapters:', error);
@@ -642,6 +658,8 @@ class PopupView {
   }
   async viewResults() {
     if (this.currentVideo && this.currentVideo.fromResultsPage) {
+      // Ensure latest edits are persisted before closing
+      try { await this.saveDraft(); } catch (e) { /* noop */ }
       window.close();
       return;
     }
@@ -669,6 +687,8 @@ class PopupView {
       videoUrl,
       resultId
     });
+    // Ensure latest edits are persisted before closing
+    try { await this.saveDraft(); } catch (e) { /* noop */ }
     window.close();
   }
   async clearDynamicApiKey() {

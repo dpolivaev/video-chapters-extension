@@ -188,13 +188,18 @@ class InstructionHistoryView {
     this.nameEditController.flushPendingEdit(this.historyList);
   }
   selectInstruction(entry) {
+    console.log('🔥 DEBUG: selectInstruction called with:', entry.content.substring(0, 50) + '...');
     this.instructionsTextarea.value = entry.content;
     this.onInstructionsChange();
 
     const instructionNameInput = document.getElementById('instructionNameInput');
     if (instructionNameInput) {
       instructionNameInput.value = entry.getNameFieldValue();
-      instructionNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Persist both textarea content and name immediately after selection
+    if (window.popupManager) {
+      try { window.popupManager.saveDraft(); } catch (e) {}
     }
 
     this.hideDialog();
