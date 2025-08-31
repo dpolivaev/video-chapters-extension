@@ -49,6 +49,7 @@ class PopupView {
         this.saveInstructionName()
       ]);
     } catch (e) {
+      console.debug('PopupView: saveDraft ignored', e);
     }
   }
   async init() {
@@ -623,7 +624,11 @@ class PopupView {
       });
 
       // Ensure latest edits are persisted before closing
-      try { await this.saveDraft(); } catch (e) { /* noop */ }
+      try {
+        await this.saveDraft();
+      } catch (e) {
+        console.debug('PopupView: saveDraft before close ignored', e);
+      }
       window.close();
     } catch (error) {
       console.error('PopupView: Error generating chapters:', error);
@@ -659,7 +664,11 @@ class PopupView {
   async viewResults() {
     if (this.currentVideo && this.currentVideo.fromResultsPage) {
       // Ensure latest edits are persisted before closing
-      try { await this.saveDraft(); } catch (e) { /* noop */ }
+      try {
+        await this.saveDraft();
+      } catch (e) {
+        console.debug('PopupView: saveDraft before close ignored', e);
+      }
       window.close();
       return;
     }
@@ -688,7 +697,11 @@ class PopupView {
       resultId
     });
     // Ensure latest edits are persisted before closing
-    try { await this.saveDraft(); } catch (e) { /* noop */ }
+    try {
+      await this.saveDraft();
+    } catch (e) {
+      console.debug('PopupView: saveDraft before close ignored', e);
+    }
     window.close();
   }
   async clearDynamicApiKey() {

@@ -199,7 +199,11 @@ class InstructionHistoryView {
 
     // Persist both textarea content and name immediately after selection
     if (window.popupManager) {
-      try { window.popupManager.saveDraft(); } catch (e) {}
+      try {
+        window.popupManager.saveDraft();
+      } catch (e) {
+        console.debug('InstructionHistoryView: saveDraft after selection ignored', e);
+      }
     }
 
     this.hideDialog();
