@@ -20,6 +20,11 @@ describe('VideoUrl', () => {
       expect(url.value).toBe('https://www.youtube.com/shorts/abc123');
     });
 
+    test('should create VideoUrl with valid YouTube live URL', () => {
+      const url = new VideoUrl('https://www.youtube.com/live/p1zcWV-SBJ8');
+      expect(url.value).toBe('https://www.youtube.com/live/p1zcWV-SBJ8');
+    });
+
     test('should clean URL by removing extra parameters', () => {
       const dirtyUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLrAXtmRdnEQy6nuLMHjMjFNjSWQ6hClLy&index=1&t=30s';
       const url = new VideoUrl(dirtyUrl);
@@ -30,6 +35,12 @@ describe('VideoUrl', () => {
       const dirtyUrl = 'https://www.youtube.com/shorts/abc123?feature=share';
       const url = new VideoUrl(dirtyUrl);
       expect(url.value).toBe('https://www.youtube.com/shorts/abc123');
+    });
+
+    test('should clean live URL by removing parameters', () => {
+      const dirtyUrl = 'https://www.youtube.com/live/p1zcWV-SBJ8?feature=share&t=30s';
+      const url = new VideoUrl(dirtyUrl);
+      expect(url.value).toBe('https://www.youtube.com/live/p1zcWV-SBJ8');
     });
 
     test('should reject null or undefined URLs', () => {
@@ -45,17 +56,17 @@ describe('VideoUrl', () => {
 
     test('should reject empty string URLs', () => {
       expect(() => new VideoUrl('')).toThrow('URL must be a non-empty string');
-      expect(() => new VideoUrl('   ')).toThrow('Invalid YouTube URL - must be a watch or shorts URL');
+      expect(() => new VideoUrl('   ')).toThrow('Invalid YouTube URL - must be a watch, shorts, or live URL');
     });
 
     test('should reject non-YouTube URLs', () => {
-      expect(() => new VideoUrl('https://vimeo.com/123456')).toThrow('Invalid YouTube URL - must be a watch or shorts URL');
-      expect(() => new VideoUrl('https://example.com')).toThrow('Invalid YouTube URL - must be a watch or shorts URL');
+      expect(() => new VideoUrl('https://vimeo.com/123456')).toThrow('Invalid YouTube URL - must be a watch, shorts, or live URL');
+      expect(() => new VideoUrl('https://example.com')).toThrow('Invalid YouTube URL - must be a watch, shorts, or live URL');
     });
 
-    test('should reject YouTube URLs that are not watch or shorts', () => {
-      expect(() => new VideoUrl('https://www.youtube.com/channel/UC123')).toThrow('Invalid YouTube URL - must be a watch or shorts URL');
-      expect(() => new VideoUrl('https://www.youtube.com/playlist?list=123')).toThrow('Invalid YouTube URL - must be a watch or shorts URL');
+    test('should reject YouTube URLs that are not watch, shorts, or live', () => {
+      expect(() => new VideoUrl('https://www.youtube.com/channel/UC123')).toThrow('Invalid YouTube URL - must be a watch, shorts, or live URL');
+      expect(() => new VideoUrl('https://www.youtube.com/playlist?list=123')).toThrow('Invalid YouTube URL - must be a watch, shorts, or live URL');
     });
   });
 
@@ -64,12 +75,21 @@ describe('VideoUrl', () => {
       const url = new VideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
       expect(url.isWatchUrl()).toBe(true);
       expect(url.isShortsUrl()).toBe(false);
+      expect(url.isLiveUrl()).toBe(false);
     });
 
     test('should detect shorts URLs correctly', () => {
       const url = new VideoUrl('https://www.youtube.com/shorts/abc123');
       expect(url.isWatchUrl()).toBe(false);
       expect(url.isShortsUrl()).toBe(true);
+      expect(url.isLiveUrl()).toBe(false);
+    });
+
+    test('should detect live URLs correctly', () => {
+      const url = new VideoUrl('https://www.youtube.com/live/p1zcWV-SBJ8');
+      expect(url.isWatchUrl()).toBe(false);
+      expect(url.isShortsUrl()).toBe(false);
+      expect(url.isLiveUrl()).toBe(true);
     });
   });
 
@@ -82,6 +102,11 @@ describe('VideoUrl', () => {
     test('should extract video ID from shorts URL', () => {
       const url = new VideoUrl('https://www.youtube.com/shorts/abc123def');
       expect(url.getVideoId()).toBe('abc123def');
+    });
+
+    test('should extract video ID from live URL', () => {
+      const url = new VideoUrl('https://www.youtube.com/live/p1zcWV-SBJ8');
+      expect(url.getVideoId()).toBe('p1zcWV-SBJ8');
     });
 
     test('should return null for malformed URLs', () => {
@@ -130,6 +155,13 @@ describe('VideoUrl', () => {
       const url = new VideoUrl(shortsUrl);
       expect(url.value).toBe('https://www.youtube.com/shorts/abc123');
       expect(url.getVideoId()).toBe('abc123');
+    });
+
+    test('should handle live URL with complex paths', () => {
+      const liveUrl = 'https://www.youtube.com/live/p1zcWV-SBJ8?si=xyz&feature=share&t=30s';
+      const url = new VideoUrl(liveUrl);
+      expect(url.value).toBe('https://www.youtube.com/live/p1zcWV-SBJ8');
+      expect(url.getVideoId()).toBe('p1zcWV-SBJ8');
     });
   });
 });

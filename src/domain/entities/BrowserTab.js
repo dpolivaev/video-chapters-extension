@@ -19,7 +19,7 @@ class BrowserTab {
       return null;
     }
 
-    if (url.includes('youtube.com/watch') || url.includes('youtube.com/shorts')) {
+    if (url.includes('youtube.com/watch') || url.includes('youtube.com/shorts') || url.includes('youtube.com/live')) {
       return new VideoUrl(url);
     }
 
@@ -74,7 +74,7 @@ class BrowserTab {
     let type = 'unknown';
 
     if (tab.url) {
-      if ((tab.url.includes('youtube.com/watch') || tab.url.includes('youtube.com/shorts'))) {
+      if ((tab.url.includes('youtube.com/watch') || tab.url.includes('youtube.com/shorts') || tab.url.includes('youtube.com/live'))) {
         type = 'video';
       } else if (tab.url.includes('results/results.html')) {
         type = 'results';

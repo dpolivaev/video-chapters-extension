@@ -17,8 +17,8 @@ class VideoUrl {
       throw new Error('URL must be a non-empty string');
     }
 
-    if (!url.includes('youtube.com/watch') && !url.includes('youtube.com/shorts')) {
-      throw new Error('Invalid YouTube URL - must be a watch or shorts URL');
+    if (!url.includes('youtube.com/watch') && !url.includes('youtube.com/shorts') && !url.includes('youtube.com/live')) {
+      throw new Error('Invalid YouTube URL - must be a watch, shorts, or live URL');
     }
 
     return this.clean(url);
@@ -41,11 +41,20 @@ class VideoUrl {
       return `https://www.youtube.com/shorts/${shortsId}`;
     }
 
+    if (url.includes('youtube.com/live/')) {
+      const liveId = this.extractLiveId(url);
+      return `https://www.youtube.com/live/${liveId}`;
+    }
+
     return this.fallbackCleanUrl(url);
   }
 
   extractShortsId(url) {
     return url.split('/shorts/')[1].split('?')[0];
+  }
+
+  extractLiveId(url) {
+    return url.split('/live/')[1].split('?')[0];
   }
 
   fallbackCleanUrl(url) {
@@ -65,6 +74,10 @@ class VideoUrl {
     return this.value.includes('/shorts/');
   }
 
+  isLiveUrl() {
+    return this.value.includes('/live/');
+  }
+
   getVideoId() {
     if (this.isWatchUrl()) {
       const url = new URL(this.value);
@@ -73,6 +86,10 @@ class VideoUrl {
 
     if (this.isShortsUrl()) {
       return this.value.split('/shorts/')[1];
+    }
+
+    if (this.isLiveUrl()) {
+      return this.value.split('/live/')[1];
     }
 
     return null;

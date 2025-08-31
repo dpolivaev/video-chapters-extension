@@ -22,6 +22,7 @@ describe('BrowserTab', () => {
   const validId = 123;
   const validVideoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
   const validShortsUrl = 'https://www.youtube.com/shorts/abc123';
+  const validLiveUrl = 'https://www.youtube.com/live/p1zcWV-SBJ8';
 
   describe('constructor and validation', () => {
     test('should create tab with all parameters', () => {
@@ -109,9 +110,11 @@ describe('BrowserTab', () => {
     test('should extract video ID from YouTube URLs', () => {
       const videoTab = new BrowserTab(validId, validVideoUrl, 'video');
       const shortsTab = new BrowserTab(validId, validShortsUrl, 'video');
+      const liveTab = new BrowserTab(validId, validLiveUrl, 'video');
 
       expect(videoTab.getVideoId()).toBe('dQw4w9WgXcQ');
       expect(shortsTab.getVideoId()).toBe('abc123');
+      expect(liveTab.getVideoId()).toBe('p1zcWV-SBJ8');
     });
 
     test('should return null video ID when no URL', () => {
@@ -198,6 +201,19 @@ describe('BrowserTab', () => {
       const tab = BrowserTab.fromBrowserTab(browserTab);
 
       expect(tab.id).toBe(validId);
+      expect(tab.type).toBe('video');
+    });
+
+    test('should create from browser tab object with YouTube live URL', () => {
+      const browserTab = {
+        id: validId,
+        url: validLiveUrl
+      };
+
+      const tab = BrowserTab.fromBrowserTab(browserTab);
+
+      expect(tab.id).toBe(validId);
+      expect(tab.url.toString()).toBe(validLiveUrl);
       expect(tab.type).toBe('video');
     });
 

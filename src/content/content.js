@@ -134,7 +134,16 @@ if (window.hasYouTubeIntegration) {
         console.log('YouTubeIntegration: extractTranscriptData called - returning raw data for domain layer');
         const videoUrl = window.location.href;
         const isShorts = /youtube\.com\/shorts\//.test(videoUrl);
-        const videoId = isShorts ? videoUrl.split('/shorts/')[1].split(/[/?#&]/)[0] : new URLSearchParams(window.location.search).get('v');
+        const isLive = /youtube\.com\/live\//.test(videoUrl);
+
+        let videoId;
+        if (isShorts) {
+          videoId = videoUrl.split('/shorts/')[1].split(/[/?#&]/)[0];
+        } else if (isLive) {
+          videoId = videoUrl.split('/live/')[1].split(/[/?#&]/)[0];
+        } else {
+          videoId = new URLSearchParams(window.location.search).get('v');
+        }
 
         if (!videoId) {
           return {
@@ -145,6 +154,7 @@ if (window.hasYouTubeIntegration) {
 
         console.log('YouTubeIntegration: Video ID detected:', videoId);
         console.log('YouTubeIntegration: Is Shorts:', isShorts);
+        console.log('YouTubeIntegration: Is Live:', isLive);
 
         const transcriptObj = await this.getTranscriptDict(videoUrl);
         if (!transcriptObj.transcript || transcriptObj.transcript.length === 0) {
