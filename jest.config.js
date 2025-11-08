@@ -1,5 +1,5 @@
 /**
- * Jest Configuration for Video Chapters Generator
+ * Jest Configuration for Chaptotek
  * Pure domain logic testing without browser dependencies
  *
  * Copyright (C) 2025 Dimitry Polivaev

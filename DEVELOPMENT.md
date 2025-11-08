@@ -1,6 +1,6 @@
-# Video Chapters Generator - Development Guide
+# Chaptotek - Development Guide
 
-This document contains development-related information for the Video Chapters Generator browser extension.
+This document contains development-related information for the Chaptotek browser extension.
 
 ## Manual Installation for Development
 

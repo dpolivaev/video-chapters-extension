@@ -1,23 +1,23 @@
 /**
- * Background Service Worker for Video Chapters Generator
+ * Background Service Worker for Chaptotek
  * Handles AI API calls, storage management, and communication between components
  *
  * Copyright (C) 2025 Dimitry Polivaev
  *
- * This file is part of Video Chapters Generator.
+ * This file is part of Chaptotek.
  *
- * Video Chapters Generator is free software: you can redistribute it and/or modify
+ * Chaptotek is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Video Chapters Generator is distributed in the hope that it will be useful,
+ * Chaptotek is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
+ * along with Chaptotek. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -483,7 +483,7 @@ class BackgroundService {
       const response = await fetch('https://openrouter.ai/api/v1/models', {
         headers: {
           'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
-          'X-Title': 'Video Chapters Generator'
+          'X-Title': 'Chaptotek'
         }
       });
 

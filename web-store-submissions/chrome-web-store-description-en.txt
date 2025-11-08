@@ -1,4 +1,4 @@
-Video Chapters Generator automatically creates chapter timecodes for YouTube videos using advanced AI models. Choose from multiple AI providers including free options, add custom instructions, and get perfectly formatted chapters ready to use.
+Chaptotek automatically creates chapter timecodes for YouTube videos using advanced AI models. Choose from multiple AI providers including free options, add custom instructions, and get perfectly formatted chapters ready to use.
 
 🎯 MAIN FEATURES:
 • One-click chapter generation from YouTube videos

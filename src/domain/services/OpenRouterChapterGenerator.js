@@ -17,7 +17,7 @@ class OpenRouterChapterGenerator {
     this.MAX_RESPONSE_TOKENS = 8192;
     this.TOP_P_SAMPLING = 0.95;
     this.GITHUB_REFERER = 'https://github.com/dimitry-polivaev/timecodes-browser-extension';
-    this.APPLICATION_TITLE = 'Video Chapters Generator';
+    this.APPLICATION_TITLE = 'Chaptotek';
   }
 
   validateApiKey(apiKey) {

@@ -183,7 +183,7 @@ describe('OpenRouterChapterGenerator', () => {
       expect(headers).toEqual({
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
-        'X-Title': 'Video Chapters Generator'
+        'X-Title': 'Chaptotek'
       });
     });
 
@@ -195,7 +195,7 @@ describe('OpenRouterChapterGenerator', () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
-        'X-Title': 'Video Chapters Generator'
+        'X-Title': 'Chaptotek'
       });
     });
 
@@ -203,7 +203,7 @@ describe('OpenRouterChapterGenerator', () => {
       const headers = openRouterGenerator.buildOpenRouterHeaders('');
 
       expect(headers['HTTP-Referer']).toBe('https://github.com/dimitry-polivaev/timecodes-browser-extension');
-      expect(headers['X-Title']).toBe('Video Chapters Generator');
+      expect(headers['X-Title']).toBe('Chaptotek');
     });
   });
 
@@ -343,7 +343,7 @@ describe('OpenRouterChapterGenerator', () => {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer test-api-key',
           'HTTP-Referer': 'https://github.com/dimitry-polivaev/timecodes-browser-extension',
-          'X-Title': 'Video Chapters Generator'
+          'X-Title': 'Chaptotek'
         },
         {
           model,

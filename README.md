@@ -1,5 +1,5 @@
-# Video Chapters Generator
-*Free • Non-commercial • Open Source*
+# Chaptotek
+*Free • Non-commercial • Open Source  • Video Chapters Generator*
 
 [![Test](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml/badge.svg)](https://github.com/dpolivaev/video-chapters-extension/actions/workflows/test.yml)
 

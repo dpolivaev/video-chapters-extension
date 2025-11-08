@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 /**
- * Build Script for Video Chapters Generator Extension
+ * Build Script for Chaptotek Extension
  * Handles compilation, minification, and preparation of extension files
  *
  * Copyright (C) 2025 Dimitry Polivaev
  *
- * This file is part of Video Chapters Generator.
+ * This file is part of Chaptotek.
  *
- * Video Chapters Generator is free software: you can redistribute it and/or modify
+ * Chaptotek is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Video Chapters Generator is distributed in the hope that it will be useful,
+ * Chaptotek is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Video Chapters Generator. If not, see <https://www.gnu.org/licenses/>.
+ * along with Chaptotek. If not, see <https://www.gnu.org/licenses/>.
  */
 const fs = require('fs-extra');
 const path = require('path');
@@ -120,7 +120,7 @@ class ExtensionBuilder {
 
   async build() {
     try {
-      this.log(chalk.blue('🔨 Building Video Chapters Generator Extension\n'));
+      this.log(chalk.blue('🔨 Building Chaptotek Extension\n'));
       await this.setup();
       await this.validateSource();
       await this.createDistDirectory();
