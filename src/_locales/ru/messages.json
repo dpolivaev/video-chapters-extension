@@ -64,6 +64,8 @@
   "please_try_again": { "message": "Пожалуйста, попробуйте снова." },
   "generation_failed": { "message": "Генерация не удалась" },
   "error_loading_results": { "message": "Ошибка при загрузке результатов" },
+  "no_session_available": { "message": "Для этой страницы нет данных сессии." },
+  "no_session_description": { "message": "В этой вкладке результатов нет активной сессии. Старые данные восстановить невозможно." },
   "no_results_found": { "message": "В этой сессии не найдено результатов. Пожалуйста, сначала сгенерируйте главы." },
   "unknown_title": { "message": "Неизвестный заголовок" },
   "unknown_author": { "message": "Неизвестный автор" },

@@ -64,6 +64,8 @@
   "please_try_again": { "message": "Por favor, tente novamente." },
   "generation_failed": { "message": "Falha na geração" },
   "error_loading_results": { "message": "Erro ao carregar resultados" },
+  "no_session_available": { "message": "Não há dados de sessão disponíveis para esta página." },
+  "no_session_description": { "message": "Esta aba de resultados não tem uma sessão ativa. Conteúdos antigos não podem ser restaurados." },
   "no_results_found": { "message": "Nenhum resultado encontrado nesta sessão. Por favor, gere capítulos primeiro." },
   "unknown_title": { "message": "Título Desconhecido" },
   "unknown_author": { "message": "Autor Desconhecido" },

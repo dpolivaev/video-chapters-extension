@@ -64,6 +64,8 @@
   "please_try_again": { "message": "Veuillez réessayer." },
   "generation_failed": { "message": "Échec de la génération" },
   "error_loading_results": { "message": "Erreur lors du chargement des résultats" },
+  "no_session_available": { "message": "Aucune donnée de session disponible pour cette page." },
+  "no_session_description": { "message": "Cet onglet de résultats n’a pas de session active. Les anciens contenus ne peuvent pas être restaurés." },
   "no_results_found": { "message": "Aucun résultat trouvé dans cette session. Veuillez d'abord générer des chapitres." },
   "unknown_title": { "message": "Titre inconnu" },
   "unknown_author": { "message": "Auteur inconnu" },

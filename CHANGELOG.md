@@ -5,6 +5,12 @@ All notable changes to the Chaptotek extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5]
+
+### Fixed
+- Eliminated intermittent “Session not found” chat error after background restart. Results tabs now re‑register automatically and chat requests fail gracefully instead of throwing.
+- Results pages opened from history show a clear "No session data available" state (no errors), with chat and copy actions disabled until a new session exists.
+
 ## [1.4.4]
 
 ### Changed

@@ -64,6 +64,8 @@
   "please_try_again": { "message": "Будь ласка, спробуйте ще раз." },
   "generation_failed": { "message": "Генерація не вдалася" },
   "error_loading_results": { "message": "Помилка при завантаженні результатів" },
+  "no_session_available": { "message": "Для цієї сторінки немає даних сеансу." },
+  "no_session_description": { "message": "У цій вкладці результатів немає активного сеансу. Старий вміст неможливо відновити." },
   "no_results_found": { "message": "У цій сесії не знайдено результатів. Будь ласка, спочатку згенеруйте розділи." },
   "unknown_title": { "message": "Невідомий заголовок" },
   "unknown_author": { "message": "Невідомий автор" },

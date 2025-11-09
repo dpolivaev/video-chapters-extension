@@ -68,6 +68,28 @@ class BackgroundService {
 
     this.setupMessageListeners();
     this.setupTabListeners();
+
+    this.requestResultsTabRehydration();
+  }
+  async requestResultsTabRehydration() {
+    try {
+      if (!browser.tabs || !browser.tabs.query) {
+        return;
+      }
+      const extensionUrl = browser.runtime.getURL('results/results.html');
+      const tabs = await browser.tabs.query({});
+      for (const t of tabs) {
+        try {
+          if (t.url && t.url.startsWith(extensionUrl)) {
+            await browser.tabs.sendMessage(t.id, { action: 'rehydrateRequest' });
+          }
+        } catch (_e) {
+          void _e;
+        }
+      }
+    } catch (_err) {
+      void _err;
+    }
   }
   setupTabListeners() {
     if (browser.tabs && browser.tabs.onRemoved) {
@@ -893,14 +915,8 @@ class BackgroundService {
       // Get the original session to get model and settings
       const session = sessionRepository.findById(resultId);
       if (!session) {
-        // Try to find by active session as fallback
-        const activeSession = sessionRepository.getActiveSession();
-        if (activeSession && activeSession.id.toString() === resultId.toString()) {
-          const sessionResults = activeSession.toSessionResults();
-          await this.processChatMessage(message, chatHistory, sessionResults, sendResponse);
-          return;
-        }
-        throw new Error(`Session ${resultId} not found. Available sessions: ${Array.from(sessionRepository.sessions.keys()).join(', ')}`);
+        sendResponse({ success: false, error: 'no_session' });
+        return;
       }
 
       const sessionResults = session.toSessionResults();

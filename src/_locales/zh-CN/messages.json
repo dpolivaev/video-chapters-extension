@@ -64,6 +64,8 @@
   "please_try_again": { "message": "请重试。" },
   "generation_failed": { "message": "生成失败" },
   "error_loading_results": { "message": "加载结果时出错" },
+  "no_session_available": { "message": "此页面没有可用的会话数据。" },
+  "no_session_description": { "message": "此结果标签页没有活动会话。无法恢复旧内容。" },
   "no_results_found": { "message": "本次会话未找到结果。请先生成章节。" },
   "unknown_title": { "message": "未知标题" },
   "unknown_author": { "message": "未知作者" },

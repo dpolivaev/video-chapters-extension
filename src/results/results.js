@@ -34,6 +34,7 @@ class ResultsView {
     this.results = null;
     this.userSwitchedTab = false;
     this.status = 'pending';
+    this.isDead = false;
     this.progress = 0;
     this.progressTimeout = null;
     this.chatHistory = [];
@@ -46,7 +47,7 @@ class ResultsView {
       await this.checkStatusAndInit();
     } catch (error) {
       console.error('Error initializing results:', error);
-      this.showError(getLocalizedMessage('error_loading_results') + ': ' + error.message);
+      this.enterDeadState(getLocalizedMessage('error_loading_results') + ': ' + error.message);
       this.hideProgress();
     }
   }
@@ -65,6 +66,8 @@ class ResultsView {
       this.setupTabSwitching();
       await this.loadResults();
       this.handleGenerationError();
+    } else if (this.status === 'not_found') {
+      this.enterDeadState(getLocalizedMessage('no_session_available'));
     } else {
       await this.loadResults();
 
@@ -307,11 +310,12 @@ class ResultsView {
         this.updatePageTitle();
         return;
       } else {
-        throw new Error(getLocalizedMessage('no_results_found_in_this_session_please_generate_chapters_first'));
+        this.enterDeadState(getLocalizedMessage('no_session_available'));
+        return;
       }
     } catch (error) {
       console.error('Error loading results:', error);
-      throw error;
+      this.enterDeadState(getLocalizedMessage('no_session_available'));
     }
   }
   updateDisplay() {
@@ -806,6 +810,13 @@ class ResultsView {
   }
 
   async sendChatMessage() {
+    if (this.isDead || !this.results || this.status !== 'done') {
+      const sendBtn = document.getElementById('sendChatBtn');
+      if (sendBtn) {
+        sendBtn.disabled = true;
+      }
+      return;
+    }
     const chatInput = document.getElementById('chatInput');
     const message = chatInput.value.trim();
 
@@ -862,6 +873,36 @@ class ResultsView {
     }
   }
 
+  enterDeadState(message) {
+    this.isDead = true;
+    this.hideProgress();
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+      const base = getLocalizedMessage('results_page_title') || 'Results';
+      pageTitle.textContent = base;
+    }
+    const statusText = document.getElementById('statusText');
+    if (statusText) {
+      statusText.textContent = message || getLocalizedMessage('error_loading_results');
+    }
+    const chatSection = document.getElementById('chatSection');
+    if (chatSection) {
+      chatSection.style.display = 'none';
+    }
+    const sendBtn = document.getElementById('sendChatBtn');
+    if (sendBtn) {
+      sendBtn.disabled = true;
+    }
+    const copyChaptersBtn = document.getElementById('copyChaptersBtn');
+    const copySubtitlesBtn = document.getElementById('copySubtitlesBtn');
+    if (copyChaptersBtn) {
+      copyChaptersBtn.disabled = true;
+    }
+    if (copySubtitlesBtn) {
+      copySubtitlesBtn.disabled = true;
+    }
+  }
+
   showChatLoading(show) {
     const chatLoading = document.getElementById('chatLoading');
     const sendBtn = document.getElementById('sendChatBtn');
@@ -876,40 +917,63 @@ class ResultsView {
 
 }
 
+if (browser && browser.runtime && browser.runtime.onMessage) {
+  try {
+    browser.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
+      if (request && request.action === 'rehydrateRequest') {
+        const resultId = getResultIdFromUrl();
+        (async () => {
+          try {
+            const tab = await (browser.tabs && browser.tabs.getCurrent ? browser.tabs.getCurrent() : null);
+            if (tab && tab.id) {
+              await browser.runtime.sendMessage({ action: 'setResultsTabId', tabId: tab.id });
+            }
+          } catch (e) {
+            void e;
+          }
+          try {
+            if (typeof window !== 'undefined' && window._resultsViewInstance && window._resultsViewInstance.results) {
+              await browser.runtime.sendMessage({
+                action: 'setSessionResults',
+                resultId,
+                results: window._resultsViewInstance.results
+              });
+            }
+          } catch (e) {
+            void e;
+          }
+        })();
+      }
+      return false;
+    });
+  } catch (e) {
+    void e;
+  }
+}
+
+async function bootstrapResultsView() {
+  const resultId = getResultIdFromUrl();
+  if (browser && browser.runtime && browser.tabs) {
+    try {
+      const tab = await browser.tabs.getCurrent && await browser.tabs.getCurrent();
+      if (tab && tab.id) {
+        await browser.runtime.sendMessage({
+          action: 'setResultsTabId',
+          tabId: tab.id
+        });
+      }
+    } catch (e) {
+      void e;
+    }
+  }
+  const instance = new ResultsView(resultId);
+  if (typeof window !== 'undefined') {
+    window._resultsViewInstance = instance;
+  }
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', async () => {
-    const resultId = getResultIdFromUrl();
-    if (browser && browser.runtime && browser.tabs) {
-      try {
-        const tab = await browser.tabs.getCurrent && await browser.tabs.getCurrent();
-        if (tab && tab.id) {
-          await browser.runtime.sendMessage({
-            action: 'setResultsTabId',
-            tabId: tab.id
-          });
-        }
-      } catch (e) {
-        // Ignore errors in status check
-      }
-    }
-    new ResultsView(resultId);
-  });
+  document.addEventListener('DOMContentLoaded', bootstrapResultsView);
 } else {
-  (async () => {
-    const resultId = getResultIdFromUrl();
-    if (browser && browser.runtime && browser.tabs) {
-      try {
-        const tab = await browser.tabs.getCurrent && await browser.tabs.getCurrent();
-        if (tab && tab.id) {
-          await browser.runtime.sendMessage({
-            action: 'setResultsTabId',
-            tabId: tab.id
-          });
-        }
-      } catch (e) {
-        // Ignore errors in status check
-      }
-    }
-    new ResultsView(resultId);
-  })();
+  bootstrapResultsView();
 }

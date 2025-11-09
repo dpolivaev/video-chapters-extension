@@ -64,6 +64,8 @@
   "please_try_again": { "message": "אנא נסה שוב." },
   "generation_failed": { "message": "היצירה נכשלה" },
   "error_loading_results": { "message": "שגיאה בטעינת תוצאות" },
+  "no_session_available": { "message": "אין נתוני סשן זמינים לדף זה." },
+  "no_session_description": { "message": "לכרטיסיית תוצאות זו אין סשן פעיל. לא ניתן לשחזר תוכן ישן." },
   "no_results_found": { "message": "לא נמצאו תוצאות בסשן זה. אנא צור פרקים תחילה." },
   "unknown_title": { "message": "כותרת לא ידועה" },
   "unknown_author": { "message": "יוצר לא ידוע" },

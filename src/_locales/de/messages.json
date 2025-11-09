@@ -64,6 +64,8 @@
   "please_try_again": { "message": "Bitte versuchen Sie es erneut." },
   "generation_failed": { "message": "Generierung fehlgeschlagen" },
   "error_loading_results": { "message": "Fehler beim Laden der Kapitelmarken" },
+  "no_session_available": { "message": "Für diese Seite sind keine Sitzungsdaten verfügbar." },
+  "no_session_description": { "message": "Dieser Ergebnistab hat keine aktive Sitzung. Alte Inhalte können nicht wiederhergestellt werden." },
   "no_results_found": { "message": "Keine Kapitelmarken in dieser Sitzung gefunden. Bitte generieren Sie zuerst Kapitelmarken." },
   "unknown_title": { "message": "Unbekannter Titel" },
   "unknown_author": { "message": "Unbekannter Autor" },

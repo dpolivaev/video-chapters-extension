@@ -64,6 +64,8 @@
   "please_try_again": { "message": "يرجى المحاولة مرة أخرى." },
   "generation_failed": { "message": "فشل في الإنشاء" },
   "error_loading_results": { "message": "خطأ في تحميل النتائج" },
+  "no_session_available": { "message": "لا توجد بيانات جلسة متاحة لهذه الصفحة." },
+  "no_session_description": { "message": "لا تحتوي علامة تبويب النتائج هذه على جلسة نشطة. لا يمكن استعادة المحتوى القديم." },
   "no_results_found": { "message": "لم يتم العثور على نتائج في هذه الجلسة. يرجى إنشاء الفصول أولاً." },
   "unknown_title": { "message": "عنوان غير معروف" },
   "unknown_author": { "message": "مؤلف غير معروف" },
