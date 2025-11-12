@@ -68,28 +68,6 @@ class BackgroundService {
 
     this.setupMessageListeners();
     this.setupTabListeners();
-
-    this.requestResultsTabRehydration();
-  }
-  async requestResultsTabRehydration() {
-    try {
-      if (!browser.tabs || !browser.tabs.query) {
-        return;
-      }
-      const extensionUrl = browser.runtime.getURL('results/results.html');
-      const tabs = await browser.tabs.query({});
-      for (const t of tabs) {
-        try {
-          if (t.url && t.url.startsWith(extensionUrl)) {
-            await browser.tabs.sendMessage(t.id, { action: 'rehydrateRequest' });
-          }
-        } catch (_e) {
-          void _e;
-        }
-      }
-    } catch (_err) {
-      void _err;
-    }
   }
   setupTabListeners() {
     if (browser.tabs && browser.tabs.onRemoved) {
@@ -912,14 +890,15 @@ class BackgroundService {
         throw new Error('ResultId and message are required for chat');
       }
 
-      // Get the original session to get model and settings
       const session = sessionRepository.findById(resultId);
-      if (!session) {
+      let sessionResults = session ? session.toSessionResults() : null;
+      if (!sessionResults && request.sessionResults) {
+        sessionResults = request.sessionResults;
+      }
+      if (!sessionResults) {
         sendResponse({ success: false, error: 'no_session' });
         return;
       }
-
-      const sessionResults = session.toSessionResults();
       await this.processChatMessage(message, chatHistory, sessionResults, sendResponse);
 
     } catch (error) {

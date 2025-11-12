@@ -843,7 +843,8 @@ class ResultsView {
         action: 'sendChatMessage',
         resultId: this.resultId,
         message,
-        chatHistory: this.chatHistory
+        chatHistory: this.chatHistory,
+        sessionResults: this.results || null
       });
 
       if (response && response.success) {
@@ -917,41 +918,7 @@ class ResultsView {
 
 }
 
-if (browser && browser.runtime && browser.runtime.onMessage) {
-  try {
-    browser.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
-      if (request && request.action === 'rehydrateRequest') {
-        const resultId = getResultIdFromUrl();
-        (async () => {
-          try {
-            const tab = await (browser.tabs && browser.tabs.getCurrent ? browser.tabs.getCurrent() : null);
-            if (tab && tab.id) {
-              await browser.runtime.sendMessage({ action: 'setResultsTabId', tabId: tab.id });
-            }
-          } catch (e) {
-            void e;
-          }
-          try {
-            if (typeof window !== 'undefined' && window._resultsViewInstance && window._resultsViewInstance.results) {
-              await browser.runtime.sendMessage({
-                action: 'setSessionResults',
-                resultId,
-                results: window._resultsViewInstance.results
-              });
-            }
-          } catch (e) {
-            void e;
-          }
-        })();
-      }
-      return false;
-    });
-  } catch (e) {
-    void e;
-  }
-}
-
-async function bootstrapResultsView() {
+async function initializeResultsView() {
   const resultId = getResultIdFromUrl();
   if (browser && browser.runtime && browser.tabs) {
     try {
@@ -966,14 +933,11 @@ async function bootstrapResultsView() {
       void e;
     }
   }
-  const instance = new ResultsView(resultId);
-  if (typeof window !== 'undefined') {
-    window._resultsViewInstance = instance;
-  }
+  new ResultsView(resultId);
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrapResultsView);
+  document.addEventListener('DOMContentLoaded', initializeResultsView);
 } else {
-  bootstrapResultsView();
+  initializeResultsView();
 }
