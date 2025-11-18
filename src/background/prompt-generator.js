@@ -21,16 +21,20 @@
  */
 class PromptGenerator {
   constructor() {
-    this.defaultPrompt = `Break down this video content into chapters 
-and generate timecodes in mm:ss format (e.g., 00:10, 05:30, 59:59, 1:01:03). 
-Each chapter should be plain text like timecode - chapter title. 
-Use no markdown notation for formatting.
-Generate the chapter titles in the same language as the content.
+    this.defaultPrompt = `Break down the video into chapters.
+Generate timecodes in mm:ss or h:mm:ss format.
+The first chapter MUST ALWAYS start with the timecode 00:00.
+Output plain text only. No markdown, no bullets, no numbering, no extra symbols.
+Each line must follow the exact structure shown in the example.
+Use only lines of the form: timecode - title.
+Write titles in the same language as the video content.
 
-Example:
+Example (this format is mandatory):
 
-00:10 - headline 1
-03:20 - headline 2
+00:00 - title A
+01:30 - title B
+03:20 - title C
+2:03:20 - title Z
 
 `;
   }
