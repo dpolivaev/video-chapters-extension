@@ -26,75 +26,6 @@ if (typeof browser === 'undefined') {
 
 console.log('🚀 YouTubeIntegration content script loaded - CLEAN MODERN APPROACH');
 
-/**
- * Simple retry utility for content scripts
- * Handles 5xx server errors with exponential backoff
- */
-class SimpleRetryHandler {
-  constructor() {
-    this.maxRetries = 3;
-  }
-
-  isRetryableError(response) {
-    return response && response.status >= 500 && response.status < 600;
-  }
-
-  async delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  async fetchWithRetry(url, options = {}) {
-    console.log(`🚀 CONTENT_RETRY_START: Initiating request with up to ${this.maxRetries} retries for ${url}`);
-    let lastError;
-    let attempt = 0;
-
-    while (attempt <= this.maxRetries) {
-      try {
-        const response = await fetch(url, options);
-
-        if (!this.isRetryableError(response)) {
-          if (attempt > 0) {
-            console.log(`✅ CONTENT_RETRY_SUCCESS: Request succeeded after ${attempt} retries for ${url}`);
-          } else {
-            console.log(`✅ CONTENT_REQUEST_SUCCESS: Request succeeded on first attempt for ${url}`);
-          }
-          return response;
-        }
-
-        lastError = new Error(`Server error: ${response.status} ${response.statusText}`);
-
-        if (attempt >= this.maxRetries) {
-          break;
-        }
-
-        const delay = (attempt + 1) * 5000;
-        console.log(`🔄 CONTENT_RETRY: Server error ${response.status} ${response.statusText} - Retry attempt ${attempt + 1}/${this.maxRetries} after ${delay}ms for ${url}`);
-
-        await this.delay(delay);
-        attempt++;
-
-      } catch (error) {
-        lastError = error;
-
-        if (attempt >= this.maxRetries) {
-          break;
-        }
-
-        const delay = (attempt + 1) * 5000;
-        console.log(`🔄 CONTENT_RETRY: Network/fetch error "${error.message}" - Retry attempt ${attempt + 1}/${this.maxRetries} after ${delay}ms for ${url}`);
-
-        await this.delay(delay);
-        attempt++;
-      }
-    }
-
-    console.log(`❌ CONTENT_RETRY_FAILED: All ${this.maxRetries} retries exhausted for ${url}. Final error: ${lastError?.message || 'Unknown error'}`);
-    throw lastError || new Error('All retries exhausted');
-  }
-}
-
-const simpleRetryHandler = new SimpleRetryHandler();
-
 if (window.hasYouTubeIntegration) {
   console.log('YouTubeIntegration: Script already loaded, skipping...');
 } else {
@@ -156,7 +87,7 @@ if (window.hasYouTubeIntegration) {
         console.log('YouTubeIntegration: Is Shorts:', isShorts);
         console.log('YouTubeIntegration: Is Live:', isLive);
 
-        const transcriptObj = await this.getTranscriptDict(videoUrl);
+        const transcriptObj = await this.getTranscriptDict();
         if (!transcriptObj.transcript || transcriptObj.transcript.length === 0) {
           return {
             status: 'error',
@@ -182,198 +113,218 @@ if (window.hasYouTubeIntegration) {
       }
     }
 
-    async getTranscriptDict(videoUrl) {
-      const { title, author, ytData, dataKey, resolvedType } = await this.resolveYouTubeData(videoUrl);
-      const segments = await this.getTranscriptItems(ytData, dataKey);
-
-      if (!segments.length) {
-        return { title, author, transcript: [] };
+    async getTranscriptDict() {
+      const metadata = this.getVideoMetadata();
+      const transcript = await this.scrapeTranscriptFromDom();
+      if (!transcript.length) {
+        return { title: metadata.title, author: metadata.author, transcript: [] };
       }
-
-      const transcript = this.createTranscriptArray(segments, resolvedType);
-      return { title, author, transcript };
+      return {
+        title: metadata.title,
+        author: metadata.author,
+        transcript
+      };
     }
 
-    async resolveYouTubeData(videoUrl) {
-      const dataKey = 'ytInitialData';
-
-      console.log('YouTubeIntegration: Fetching page HTML for:', videoUrl);
-      const html = await simpleRetryHandler.fetchWithRetry(videoUrl).then(res => res.text());
-      const ytData = this.extractJsonFromHtml(html, dataKey);
-
-      const title = ytData?.videoDetails?.title ||
-        ytData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[0]?.videoPrimaryInfoRenderer?.title?.runs?.[0]?.text ||
-        ytData?.playerOverlays?.playerOverlayRenderer?.videoDetails?.playerOverlayVideoDetailsRenderer?.title?.simpleText ||
-        document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent ||
+    getVideoMetadata() {
+      const title =
+        document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim() ||
         document.querySelector('meta[property="og:title"]')?.content ||
         document.title.replace(' - YouTube', '') ||
         'Untitled';
 
-      const author = ytData?.videoDetails?.author ||
-        ytData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[1]?.videoSecondaryInfoRenderer?.owner?.videoOwnerRenderer?.title?.runs?.[0]?.text ||
-        document.querySelector('#owner #channel-name a')?.textContent ||
-        document.querySelector('ytd-channel-name a')?.textContent ||
-        document.querySelector('meta[name="author"]')?.content ||
+      const author =
+        document.querySelector('#owner #channel-name a')?.textContent?.trim() ||
+        document.querySelector('ytd-channel-name a')?.textContent?.trim() ||
+        document.querySelector('meta[itemprop="author"]')?.content ||
         'Unknown Channel';
 
-      console.log('YouTubeIntegration: Extracted title:', title);
-      console.log('YouTubeIntegration: Extracted author:', author);
-
-      const panels = ytData?.engagementPanels || [];
-      const hasTranscriptPanel = panels.some(p =>
-        p.engagementPanelSectionListRenderer?.content?.continuationItemRenderer?.continuationEndpoint?.getTranscriptEndpoint
-      );
-
-      console.log('YouTubeIntegration: Has transcript panel:', hasTranscriptPanel);
-      console.log('YouTubeIntegration: Engagement panels found:', panels.length);
-
-      if (!hasTranscriptPanel) {
-        console.log('YouTubeIntegration: No transcript panel, trying fallback to ytInitialPlayerResponse');
-        const fallbackData = this.extractJsonFromHtml(html, 'ytInitialPlayerResponse');
-        const fallbackTitle = fallbackData?.videoDetails?.title || title;
-        const fallbackAuthor = fallbackData?.videoDetails?.author || author;
-
-        return {
-          title: fallbackTitle,
-          author: fallbackAuthor,
-          ytData: fallbackData,
-          dataKey: 'ytInitialPlayerResponse',
-          resolvedType: 'shorts'
-        };
-      }
-
-      return {
-        title,
-        author,
-        ytData,
-        dataKey,
-        resolvedType: 'regular'
-      };
+      return { title, author };
     }
 
-    async getTranscriptItems(ytData, dataKey) {
-      if (dataKey === 'ytInitialPlayerResponse') {
-        console.log('YouTubeIntegration: Using ytInitialPlayerResponse approach');
-        const baseUrl = ytData?.captions?.playerCaptionsTracklistRenderer?.captionTracks?.[0]?.baseUrl;
-        if (!baseUrl) {
-          throw new Error('Transcript not available for this video.');
+    async scrapeTranscriptFromDom() {
+      const { panel, openedByScript } = await this.ensureTranscriptPanelOpen();
+      const segments = await this.waitForTranscriptSegments(panel, 8000);
+      if (!segments.length) {
+        if (openedByScript) {
+          this.closeTranscriptPanel(panel);
         }
+        throw new Error('Transcript panel loaded but no segments were found');
+      }
 
-        const captionUrl = baseUrl + '&fmt=json3';
-        console.log('YouTubeIntegration: Fetching captions from:', captionUrl);
+      const transcript = segments.map(segment => {
+        const timestamp =
+          segment.querySelector('.segment-time')?.textContent?.trim() ||
+          segment.querySelector('#segment-time')?.textContent?.trim() ||
+          '';
+        const text =
+          segment.querySelector('.segment-text')?.textContent?.trim() ||
+          segment.querySelector('#segment-text')?.textContent?.trim() ||
+          '';
+        return [timestamp, text];
+      }).filter(([, text]) => text.length > 0);
 
-        try {
-          const json = await simpleRetryHandler.fetchWithRetry(captionUrl).then(res => {
-            if (!res.ok) {
-              throw new Error(`Fetch failed with status: ${res.status}`);
-            }
-            return res.json();
-          });
-          return json.events || [];
-        } catch (e) {
-          console.error('YouTubeIntegration: Error fetching captions:', e);
-          throw new Error('Transcript not available for this video.');
+      if (openedByScript) {
+        this.closeTranscriptPanel(panel);
+      }
+
+      return transcript;
+    }
+
+    async ensureTranscriptPanelOpen() {
+      const existingPanel = document.querySelector('ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-searchable-transcript"]');
+      if (existingPanel && this.isTranscriptPanelExpanded(existingPanel)) {
+        const existingSegments = existingPanel.querySelectorAll('ytd-transcript-segment-renderer');
+        if (existingSegments.length) {
+          return { panel: existingPanel, openedByScript: false };
         }
       }
 
-      console.log('YouTubeIntegration: Using ytInitialData approach with internal API');
-
-      const continuationParams = ytData.engagementPanels?.find(p =>
-        p.engagementPanelSectionListRenderer?.content?.continuationItemRenderer?.continuationEndpoint?.getTranscriptEndpoint
-      )?.engagementPanelSectionListRenderer?.content?.continuationItemRenderer?.continuationEndpoint?.getTranscriptEndpoint?.params;
-
-      if (!continuationParams) {
-        throw new Error('Transcript not available for this video');
-      }
-
-      const hl = ytData.topbar?.desktopTopbarRenderer?.searchbox?.fusionSearchboxRenderer?.config?.webSearchboxConfig?.requestLanguage || 'en';
-      const clientData = ytData.responseContext?.serviceTrackingParams?.[0]?.params;
-      const visitorData = ytData.responseContext?.webResponseContextExtensionData?.ytConfigData?.visitorData;
-
-      const body = {
-        context: {
-          client: {
-            hl,
-            visitorData,
-            clientName: clientData?.[0]?.value,
-            clientVersion: clientData?.[1]?.value
-          },
-          request: {
-            useSsl: true
-          }
-        },
-        params: continuationParams
-      };
-
-      console.log('YouTubeIntegration: Calling YouTube internal transcript API');
-      const res = await simpleRetryHandler.fetchWithRetry('https://www.youtube.com/youtubei/v1/get_transcript?prettyPrint=false', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (!res.ok) {
-        throw new Error(`YouTube API request failed with status: ${res.status}`);
-      }
-
-      const json = await res.json();
-      const segments = json.actions?.[0]?.updateEngagementPanelAction?.content?.transcriptRenderer?.content?.transcriptSearchPanelRenderer?.body?.transcriptSegmentListRenderer?.initialSegments || [];
-
-      console.log('YouTubeIntegration: Retrieved transcript segments:', segments.length);
-      return segments;
-    }
-
-    createTranscriptArray(items, type) {
-      return type === 'regular'
-        ? items.map(item => this.getSegmentData(item))
-        : items.filter(e => e.segs).map(e => this.getShortsSegmentData(e));
-    }
-
-    getSegmentData(item) {
-      const seg = item?.transcriptSegmentRenderer;
-      if (!seg) {
-        return ['', ''];
-      }
-
-      const timestamp = seg.startTimeText?.simpleText || '';
-      const text = seg.snippet?.runs?.map(r => r.text).join(' ') || '';
-      return [timestamp, text];
-    }
-
-    getShortsSegmentData(event) {
-      const timestamp = this.msToTimestamp(event.tStartMs);
-      const text = (event.segs || []).map(seg => seg.utf8).join(' ').replace(/\n/g, ' ');
-      return [timestamp, text];
-    }
-
-    msToTimestamp(ms) {
-      const totalSec = Math.floor(ms / 1000);
-      const min = Math.floor(totalSec / 60);
-      const sec = totalSec % 60;
-      return `${min}:${sec.toString().padStart(2, '0')}`;
-    }
-
-    extractJsonFromHtml(html, key) {
-      const regexes = [
-        new RegExp(`window\\["${key}"\\]\\s*=\\s*({[\\s\\S]+?})\\s*;`),
-        new RegExp(`var ${key}\\s*=\\s*({[\\s\\S]+?})\\s*;`),
-        new RegExp(`${key}\\s*=\\s*({[\\s\\S]+?})\\s*;`)
-      ];
-
-      for (const regex of regexes) {
-        const match = html.match(regex);
-        if (match && match[1]) {
-          try {
-            return JSON.parse(match[1]);
-          } catch (err) {
-            console.warn(`⚠️ Failed to parse ${key}:`, err.message);
-          }
+      if (await this.clickTranscriptToggleButton()) {
+        const panel = await this.waitForTranscriptPanel(8000);
+        if (panel) {
+          return { panel, openedByScript: true };
         }
       }
 
-      throw new Error(`${key} not found`);
+      if (await this.openTranscriptViaMenu()) {
+        const panel = await this.waitForTranscriptPanel(8000);
+        if (panel) {
+          return { panel, openedByScript: true };
+        }
+      }
+
+      const fallbackPanel = await this.waitForTranscriptPanel(8000);
+      if (fallbackPanel) {
+        return { panel: fallbackPanel, openedByScript: true };
+      }
+
+      throw new Error('Unable to open transcript panel automatically');
+    }
+
+    isTranscriptPanelExpanded(panel) {
+      if (!panel) {
+        return false;
+      }
+      const visibility = panel.getAttribute('visibility');
+      return visibility === 'ENGAGEMENT_PANEL_VISIBILITY_EXPANDED' || visibility === 'VISIBLE';
+    }
+
+    async clickTranscriptToggleButton() {
+      const button = document.querySelector('button[aria-controls="engagement-panel-searchable-transcript"]');
+      if (!button) {
+        return false;
+      }
+      button.click();
+      await this.delay(300);
+      return true;
+    }
+
+    async openTranscriptViaMenu() {
+      const menuButton = document.querySelector('ytd-watch-metadata ytd-menu-renderer yt-icon-button#button, ytd-watch-metadata ytd-menu-renderer button[aria-label][id="button"]');
+      if (!menuButton) {
+        return false;
+      }
+
+      menuButton.click();
+      const menuItem = await this.waitForTranscriptMenuItem(5000);
+      if (!menuItem) {
+        return false;
+      }
+
+      menuItem.click();
+      return true;
+    }
+
+    async waitForTranscriptMenuItem(timeout = 5000) {
+      const start = performance.now();
+      while (performance.now() - start < timeout) {
+        const items = Array.from(document.querySelectorAll('ytd-menu-service-item-renderer'));
+        const transcriptItem = items.find(item => this.isTranscriptMenuItem(item));
+        if (transcriptItem) {
+          return transcriptItem;
+        }
+        await this.delay(100);
+      }
+      return null;
+    }
+
+    isTranscriptMenuItem(item) {
+      if (!item) {
+        return false;
+      }
+
+      const text = item.textContent?.trim().toLowerCase() || '';
+      if (text.includes('transcript')) {
+        return true;
+      }
+
+      const endpoint = item.data?.endpoint ||
+        item.__data?.data?.endpoint ||
+        item.__data?.endpoint;
+
+      if (endpoint?.getTranscriptEndpoint) {
+        return true;
+      }
+
+      const panelIdentifier = endpoint?.showEngagementPanelEndpoint?.panelIdentifier;
+      return typeof panelIdentifier === 'string' && panelIdentifier.includes('transcript');
+    }
+
+    async waitForTranscriptPanel(timeout = 5000) {
+      const panel = await this.waitForElement('ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-searchable-transcript"]', timeout);
+      if (panel) {
+        panel.setAttribute('visibility', 'ENGAGEMENT_PANEL_VISIBILITY_EXPANDED');
+      }
+      return panel;
+    }
+
+    async waitForTranscriptSegments(panel, timeout = 8000) {
+      const start = performance.now();
+      while (performance.now() - start < timeout) {
+        const segments = panel.querySelectorAll('ytd-transcript-segment-renderer');
+        if (segments.length) {
+          return Array.from(segments);
+        }
+        await this.delay(150);
+      }
+      return [];
+    }
+
+    async waitForElement(selector, timeout = 5000) {
+      const start = performance.now();
+      while (performance.now() - start < timeout) {
+        const element = document.querySelector(selector);
+        if (element) {
+          return element;
+        }
+        await this.delay(100);
+      }
+      return null;
+    }
+
+    async delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    closeTranscriptPanel(panel) {
+      if (!panel) {
+        return;
+      }
+
+      const closeButton = panel.querySelector('#close-button, button[aria-label][id="close-button"]');
+      if (closeButton) {
+        closeButton.click();
+        return;
+      }
+
+      const toggleButton = document.querySelector('button[aria-controls="engagement-panel-searchable-transcript"]');
+      if (toggleButton) {
+        toggleButton.click();
+        return;
+      }
+
+      panel.setAttribute('visibility', 'ENGAGEMENT_PANEL_VISIBILITY_HIDDEN');
     }
   }
 

@@ -5,6 +5,11 @@ All notable changes to the Chaptotek extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0]
+
+### Changed
+- Transcript extraction now mirrors the native YouTube workflow: the extension briefly opens the transcript panel, reads the rendered text, and closes it again, so Chrome and Firefox always pull transcripts without relying on private YouTube APIs.
+
 ## [1.4.7]
 
 ### Changed
