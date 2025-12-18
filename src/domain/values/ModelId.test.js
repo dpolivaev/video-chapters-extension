@@ -47,7 +47,7 @@ describe('ModelId Value Object', () => {
   describe('provider detection', () => {
     test('should correctly identify Gemini models', () => {
       const geminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
-      const geminiFlash = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      const geminiFlash = new ModelId('gemini-3-flash-preview', 'Gemini', false);
 
       expect(geminiPro.isGemini()).toBe(true);
       expect(geminiPro.isOpenRouter()).toBe(false);

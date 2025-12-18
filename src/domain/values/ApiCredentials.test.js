@@ -81,7 +81,7 @@ describe('ApiCredentials', () => {
     test('should allow Gemini models with Gemini key', () => {
       const credentials = new ApiCredentials('gemini-key', '');
       const geminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
-      const geminiFlash = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      const geminiFlash = new ModelId('gemini-3-flash-preview', 'Gemini', false);
       expect(credentials.canUseModel(geminiPro)).toBe(true);
       expect(credentials.canUseModel(geminiFlash)).toBe(true);
     });

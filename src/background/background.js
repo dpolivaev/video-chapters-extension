@@ -535,7 +535,7 @@ class BackgroundService {
       'openai/gpt-4o-mini',
       'meta-llama/llama-3.3-70b-instruct',
       'google/gemini-2.5-pro',
-      'google/gemini-2.5-flash'
+      'google/gemini-3-flash-preview'
     ];
   }
 
@@ -553,7 +553,7 @@ class BackgroundService {
   getGeminiModels() {
     return [
       new ModelId('gemini-2.5-pro', 'Gemini'),
-      new ModelId('gemini-2.5-flash', 'Gemini')
+      new ModelId('gemini-3-flash-preview', 'Gemini')
     ];
   }
 

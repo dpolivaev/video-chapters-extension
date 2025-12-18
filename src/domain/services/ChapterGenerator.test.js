@@ -131,7 +131,7 @@ describe('ChapterGenerator', () => {
     });
 
     test('should handle Gemini processing without tabId', async () => {
-      const modelId = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      const modelId = new ModelId('gemini-3-flash-preview', 'Gemini', false);
       const chapterGeneration = new ChapterGeneration(videoTranscript, modelId, 'Generate chapters');
 
       mockGeminiAPI.processSubtitles.mockResolvedValue({
@@ -145,7 +145,7 @@ describe('ChapterGenerator', () => {
         expect.any(String),
         'Generate chapters',
         'test-gemini-key',
-        'gemini-2.5-flash',
+        'gemini-3-flash-preview',
         null
       );
     });

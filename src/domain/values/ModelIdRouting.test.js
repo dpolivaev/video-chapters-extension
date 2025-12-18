@@ -29,9 +29,9 @@ describe('ModelId Routing Bug Fix', () => {
 
     test('should handle both Gemini variants correctly', () => {
       const directGeminiPro = new ModelId('gemini-2.5-pro', 'Gemini', false);
-      const directGeminiFlash = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      const directGeminiFlash = new ModelId('gemini-3-flash-preview', 'Gemini', false);
       const openRouterGeminiPro = new ModelId('google/gemini-2.5-pro', 'OpenRouter', false);
-      const openRouterGeminiFlash = new ModelId('google/gemini-2.5-flash', 'OpenRouter', false);
+      const openRouterGeminiFlash = new ModelId('google/gemini-3-flash-preview', 'OpenRouter', false);
 
       // Direct Gemini models
       expect(directGeminiPro.isGemini()).toBe(true);

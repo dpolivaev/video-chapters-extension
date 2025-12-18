@@ -153,9 +153,9 @@ describe('SettingsRepository', () => {
       const storedSettings = {
         apiKey: 'stored-gemini-key',
         openRouterApiKey: 'stored-openrouter-key',
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         selectedModel: {
-          value: 'gemini-2.5-flash',
+          value: 'gemini-3-flash-preview',
           provider: 'Gemini',
           isFree: false
         },
@@ -170,7 +170,7 @@ describe('SettingsRepository', () => {
 
       expect(result.credentials.geminiKey).toBe('stored-gemini-key');
       expect(result.credentials.openRouterKey).toBe('stored-openrouter-key');
-      expect(result.selectedModel.toString()).toBe('gemini-2.5-flash');
+      expect(result.selectedModel.toString()).toBe('gemini-3-flash-preview');
       expect(result.additionalSettings).toEqual({
         historyLimit: 25,
         autoSaveInstructions: false,

@@ -39,7 +39,7 @@ describe('GeminiChapterGenerator', () => {
       const models = geminiGenerator.getAvailableModels();
       expect(models).toHaveLength(2);
       expect(models.find(m => m.id === 'gemini-2.5-pro')).toBeDefined();
-      expect(models.find(m => m.id === 'gemini-2.5-flash')).toBeDefined();
+      expect(models.find(m => m.id === 'gemini-3-flash-preview')).toBeDefined();
     });
 
     test('should return immutable copy of models', () => {
@@ -92,7 +92,7 @@ describe('GeminiChapterGenerator', () => {
   describe('model validation', () => {
     test('should accept valid models', () => {
       expect(geminiGenerator.validateModel('gemini-2.5-pro')).toBe(true);
-      expect(geminiGenerator.validateModel('gemini-2.5-flash')).toBe(true);
+      expect(geminiGenerator.validateModel('gemini-3-flash-preview')).toBe(true);
     });
 
     test('should reject invalid models', () => {
@@ -128,10 +128,10 @@ describe('GeminiChapterGenerator', () => {
       const apiKey = 'test-key';
 
       const proUrl = geminiGenerator.buildRequestUrl('gemini-2.5-pro', apiKey);
-      const flashUrl = geminiGenerator.buildRequestUrl('gemini-2.5-flash', apiKey);
+      const flashUrl = geminiGenerator.buildRequestUrl('gemini-3-flash-preview', apiKey);
 
       expect(proUrl).toContain('gemini-2.5-pro');
-      expect(flashUrl).toContain('gemini-2.5-flash');
+      expect(flashUrl).toContain('gemini-3-flash-preview');
     });
   });
 

@@ -1,6 +1,6 @@
 {
   "name": "video-chapters-generator-extension",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Browser extension for generating AI-powered YouTube chapter timecodes",
   "author": "Dimitry Polivaev",
   "license": "GPL-3.0-or-later",

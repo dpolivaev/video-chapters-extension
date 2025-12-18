@@ -133,9 +133,9 @@ ${content}`;
           input: 1e6,
           output: 8192
         },
-        'gemini-2.5-flash': {
-          input: 1e6,
-          output: 8192
+        'gemini-3-flash-preview': {
+          input: 2e5,
+          output: 16184
         }
       },
       openrouter: {

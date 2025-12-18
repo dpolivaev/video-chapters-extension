@@ -44,7 +44,7 @@ const getModelDisplayName = (id) => {
   if (id.includes('gemini-2.5-pro')) {
     return 'Gemini 2.5 Pro';
   }
-  if (id.includes('gemini-2.5-flash')) {
+  if (id.includes('gemini-3-flash-preview')) {
     return 'Gemini 2.5 Flash';
   }
   if (id.includes('deepseek-r1-0528:free')) {

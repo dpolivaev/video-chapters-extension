@@ -21,7 +21,7 @@ class GeminiChapterGenerator {
         capabilities: ['reasoning', 'coding', 'analysis']
       },
       {
-        id: 'gemini-2.5-flash',
+        id: 'gemini-3-flash-preview',
         displayName: 'Gemini 2.5 Flash',
         description: 'Faster model optimized for speed while maintaining quality',
         isFree: false,

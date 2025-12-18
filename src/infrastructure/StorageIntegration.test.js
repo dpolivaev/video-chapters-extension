@@ -301,7 +301,7 @@ describe('Storage Layer Integration', () => {
   describe('cross-component data flow', () => {
     test('should complete full workflow: save settings, add instructions, verify limits', async () => {
       const credentials = new ApiCredentials('workflow-key', '');
-      const model = new ModelId('gemini-2.5-flash', 'Gemini', false);
+      const model = new ModelId('gemini-3-flash-preview', 'Gemini', false);
       const settings = { historyLimit: 3, autoSaveInstructions: true };
 
       // Track instruction history as it grows
@@ -313,7 +313,7 @@ describe('Storage Layer Integration', () => {
         userSettings: {
           apiKey: 'workflow-key',
           openRouterApiKey: '',
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3-flash-preview',
           selectedModel: model.toJSON(),
           autoSaveInstructions: true,
           theme: 'auto',
