@@ -43,6 +43,16 @@ function runScript(script, args, cwd) {
   });
 }
 
+function prepareIconGeneration(fixture) {
+  for (const name of ['scripts/generate-icons.js', 'resources/icon_highres.png']) {
+    const output = path.join(fixture, name);
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.copyFileSync(path.join(projectRoot, name), output);
+  }
+  fs.symlinkSync(path.join(projectRoot, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
+  return path.join(fixture, 'scripts/generate-icons.js');
+}
+
 describe('Build tooling', () => {
   let fixture;
 
@@ -55,10 +65,12 @@ describe('Build tooling', () => {
     fs.rmSync(fixture, { recursive: true, force: true });
   });
 
-  test('builds browser extensions with the configured version', () => {
-    for (const name of ['src', 'vendor', 'icons', 'LICENSE', 'README.md', 'NOTICE', 'package.json', 'manifest.chrome.json', 'manifest.firefox.json']) {
+  test('builds browser extensions with the configured version', async () => {
+    for (const name of ['src', 'vendor', 'LICENSE', 'README.md', 'NOTICE', 'package.json', 'manifest.chrome.json', 'manifest.firefox.json']) {
       copySync(path.join(projectRoot, name), path.join(fixture, name));
     }
+    const script = prepareIconGeneration(fixture);
+    runScript(script, [], fixture);
     const builds = [
       { browser: 'chrome', args: ['--dev'] },
       { browser: 'firefox', args: ['--firefox', '--dev'], firefoxId: '{b6e7e2e2-7e2a-4b7e-8e2e-2e2e2e2e2e3e}' },
@@ -84,6 +96,12 @@ describe('Build tooling', () => {
         expect(fs.statSync(path.join(output, name)).isFile()).toBe(true);
       }
       expect(fs.existsSync(path.join(output, 'popup/PopupView.test.js'))).toBe(false);
+      for (const size of [16, 48, 128]) {
+        const metadata = await sharp(path.join(output, 'icons', `icon${size}.png`)).metadata();
+        expect(metadata.format).toBe('png');
+        expect(metadata.width).toBe(size);
+        expect(metadata.height).toBe(size);
+      }
     }
   }, 30000);
 
@@ -136,13 +154,9 @@ describe('Build tooling', () => {
   });
 
   test('generates PNG icons at the required sizes', async () => {
-    fs.mkdirSync(path.join(fixture, 'scripts'));
-    fs.mkdirSync(path.join(fixture, 'resources'));
-    fs.copyFileSync(path.join(projectRoot, 'scripts/generate-icons.js'), path.join(fixture, 'scripts/generate-icons.js'));
-    fs.copyFileSync(path.join(projectRoot, 'resources/icon_highres.png'), path.join(fixture, 'resources/icon_highres.png'));
-    fs.symlinkSync(path.join(projectRoot, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
+    const script = prepareIconGeneration(fixture);
 
-    runScript(path.join(fixture, 'scripts/generate-icons.js'), [], fixture);
+    runScript(script, [], fixture);
 
     for (const size of [16, 48, 128]) {
       const metadata = await sharp(path.join(fixture, 'icons', `icon${size}.png`)).metadata();
