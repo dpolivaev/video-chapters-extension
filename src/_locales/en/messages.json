@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "No API key required for this model" },
   "model_label": { "message": "Model:" },
   "generate_chapters_button": { "message": "Generate Chapters" },
+  "subtitles_only_label": { "message": "Subtitles only" },
+  "show_subtitles_button": { "message": "Show Subtitles" },
   "view_results_button": { "message": "View Results" },
   "history_modal_title": { "message": "Previous Instructions" },
   "history_limit_label": { "message": "Keep up to" },

@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "Nenhuma chave da API necessária para este modelo" },
   "model_label": { "message": "Modelo:" },
   "generate_chapters_button": { "message": "Gerar Capítulos" },
+  "subtitles_only_label": { "message": "Somente legendas" },
+  "show_subtitles_button": { "message": "Mostrar legendas" },
   "view_results_button": { "message": "Ver Resultados" },
   "history_modal_title": { "message": "Instruções Anteriores" },
   "history_limit_label": { "message": "Manter até" },

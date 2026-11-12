@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "Для этой модели API-ключ не требуется" },
   "model_label": { "message": "Модель:" },
   "generate_chapters_button": { "message": "Сгенерировать главы" },
+  "subtitles_only_label": { "message": "Только субтитры" },
+  "show_subtitles_button": { "message": "Показать субтитры" },
   "view_results_button": { "message": "Посмотреть результаты" },
   "history_modal_title": { "message": "Предыдущие инструкции" },
   "history_limit_label": { "message": "Хранить до" },

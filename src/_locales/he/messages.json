@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "אין צורך במפתח API עבור דגם זה" },
   "model_label": { "message": "דגם:" },
   "generate_chapters_button": { "message": "צור פרקים" },
+  "subtitles_only_label": { "message": "כתוביות בלבד" },
+  "show_subtitles_button": { "message": "הצג כתוביות" },
   "view_results_button": { "message": "הצג תוצאות" },
   "history_modal_title": { "message": "הוראות קודמות" },
   "history_limit_label": { "message": "שמור עד" },

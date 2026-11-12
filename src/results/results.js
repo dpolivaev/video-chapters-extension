@@ -53,24 +53,26 @@ class ResultsView {
   }
   async checkStatusAndInit() {
     this.status = await this.getGenerationStatus();
-
-    if (this.status === 'done') {
+    if (this.status !== 'not_found') {
       await this.loadResults();
+      if (this.results?.status === 'subtitles_only') {
+        this.status = 'subtitles_only';
+      }
+    }
+
+    if (this.status === 'subtitles_only' || this.status === 'done') {
       this.setupEventListeners();
       this.setupTabSwitching();
-      this.switchTab('chapters');
+      this.switchTab(this.status === 'subtitles_only' ? 'subtitles' : 'chapters');
       this.updateDisplay();
       this.hideProgress();
     } else if (this.status === 'error') {
       this.setupEventListeners();
       this.setupTabSwitching();
-      await this.loadResults();
       this.handleGenerationError();
     } else if (this.status === 'not_found') {
       this.enterDeadState(getLocalizedMessage('no_session_available'));
     } else {
-      await this.loadResults();
-
       if (this.isGenerationComplete()) {
         this.status = 'done';
         this.setupEventListeners();
@@ -338,7 +340,9 @@ class ResultsView {
     if (this.results.timestamp) {
       const date = new Date(this.results.timestamp);
       const timeStr = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
-      document.getElementById('generationTime').textContent = getLocalizedMessage('generated_on') + ' ' + timeStr;
+      document.getElementById('generationTime').textContent = this.results.status === 'subtitles_only'
+        ? timeStr
+        : getLocalizedMessage('generated_on') + ' ' + timeStr;
     }
   }
   updatePageTitle() {
@@ -347,7 +351,7 @@ class ResultsView {
     if (!pageTitle) {
       return;
     }
-    let title = getLocalizedMessage('results_page_title');
+    let title = getLocalizedMessage(this.results?.status === 'subtitles_only' ? 'tab_subtitles' : 'results_page_title');
     if (this.results && this.results.model) {
       const modelName = this.getModelDisplayName(this.results.model);
       title += ` (${modelName})`;

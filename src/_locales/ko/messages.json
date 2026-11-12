@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "이 모델은 API 키가 필요하지 않습니다" },
   "model_label": { "message": "모델:" },
   "generate_chapters_button": { "message": "챕터 생성" },
+  "subtitles_only_label": { "message": "자막만" },
+  "show_subtitles_button": { "message": "자막 표시" },
   "view_results_button": { "message": "결과 보기" },
   "history_modal_title": { "message": "이전 지시사항" },
   "history_limit_label": { "message": "최대" },

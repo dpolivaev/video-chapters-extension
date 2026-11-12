@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "Für dieses Modell ist kein API-Schlüssel erforderlich" },
   "model_label": { "message": "Modell:" },
   "generate_chapters_button": { "message": "Kapitelmarken generieren" },
+  "subtitles_only_label": { "message": "Nur Untertitel" },
+  "show_subtitles_button": { "message": "Untertitel anzeigen" },
   "view_results_button": { "message": "Kapitelmarken anzeigen" },
   "history_modal_title": { "message": "Vorherige Anweisungen" },
   "history_limit_label": { "message": "Bis zu" },

@@ -144,6 +144,32 @@ describe('ChapterGeneration Entity', () => {
   });
 
   describe('serialization', () => {
+    test('preserves subtitles-only results without a model or chapters', () => {
+      const generation = new ChapterGeneration(mockVideoTranscript, null, '', true);
+      const results = generation.toSessionResults();
+      const restored = ChapterGeneration.fromSessionResults(results);
+
+      expect(results).toMatchObject({
+        status: 'subtitles_only', model: null, chapters: '',
+        customInstructions: '', inputTokens: 0, outputTokens: 0, error: null
+      });
+      expect(restored.toSessionResults()).toMatchObject({
+        resultId: results.resultId,
+        timestamp: results.timestamp,
+        status: 'subtitles_only',
+        model: null,
+        chapters: '',
+        processedContent: results.processedContent,
+        videoMetadata: { title: mockVideoTranscript.title, author: mockVideoTranscript.author, url: mockVideoTranscript.videoUrl.toString() }
+      });
+      expect(restored.isSubtitlesOnly()).toBe(true);
+      expect(restored.isPending()).toBe(false);
+      expect(restored.isCompleted()).toBe(false);
+      expect(restored.isFailed()).toBe(false);
+      expect(() => restored.markCompleted('Generated chapters')).toThrow('Cannot complete generation with status: subtitles_only');
+      expect(() => restored.markFailed('Error')).toThrow('Cannot fail generation with status: subtitles_only');
+    });
+
     test('should convert to session results format', () => {
       const geminiModel = new ModelId('gemini-2.5-pro', 'Gemini');
       const generation = new ChapterGeneration(

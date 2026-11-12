@@ -11,6 +11,8 @@
   "no_api_key_required": { "message": "Nessuna chiave API richiesta per questo modello" },
   "model_label": { "message": "Modello:" },
   "generate_chapters_button": { "message": "Genera capitoli" },
+  "subtitles_only_label": { "message": "Solo sottotitoli" },
+  "show_subtitles_button": { "message": "Mostra sottotitoli" },
   "view_results_button": { "message": "Visualizza risultati" },
   "history_modal_title": { "message": "Istruzioni precedenti" },
   "history_limit_label": { "message": "Conserva fino a" },

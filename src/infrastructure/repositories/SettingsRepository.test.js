@@ -26,6 +26,31 @@ describe('SettingsRepository', () => {
     repository = new SettingsRepository(mockStorageAdapter);
   });
 
+  describe('subtitles-only setting', () => {
+    test('defaults to unchecked and survives settings updates', async () => {
+      let storedSettings = {};
+      mockStorageAdapter.getUserSettings.mockImplementation(async () => storedSettings);
+      mockStorageAdapter.setUserSettings.mockImplementation(async settings => {
+        storedSettings = settings;
+      });
+      expect((await repository.loadSettings()).subtitlesOnly).toBe(false);
+
+      const selectedModel = new ModelId('gemini-2.5-pro', 'Gemini');
+      await repository.saveSettings({ subtitlesOnly: true, selectedModel: selectedModel.toJSON() });
+      expect((await repository.loadSettings()).subtitlesOnly).toBe(true);
+      expect(storedSettings.selectedModel).toEqual(selectedModel.toJSON());
+
+      await repository.saveSettings({ uiLanguage: 'de' });
+      expect((await repository.loadSettings()).subtitlesOnly).toBe(true);
+      await repository.updateCredentials(new ApiCredentials('gemini-key', ''));
+      expect((await repository.loadSettings()).subtitlesOnly).toBe(true);
+
+      await repository.saveSettings({ subtitlesOnly: false });
+      expect((await repository.loadSettings()).subtitlesOnly).toBe(false);
+      expect(storedSettings.selectedModel).toEqual(selectedModel.toJSON());
+    });
+  });
+
   describe('constructor and initialization', () => {
     test('should require storageAdapter parameter', () => {
       expect(() => new SettingsRepository()).toThrow('storageAdapter is required');
@@ -41,7 +66,8 @@ describe('SettingsRepository', () => {
         historyLimit: 10,
         autoSaveInstructions: true,
         theme: 'auto',
-        uiLanguage: ''
+        uiLanguage: '',
+        subtitlesOnly: false
       });
     });
 
@@ -67,7 +93,8 @@ describe('SettingsRepository', () => {
         selectedModel: sampleModel.toJSON(),
         autoSaveInstructions: true,
         theme: 'dark',
-        uiLanguage: ''
+        uiLanguage: '',
+        subtitlesOnly: false
       });
       expect(mockStorageAdapter.setHistoryLimit).toHaveBeenCalledWith(15);
       expect(result).toEqual(expect.objectContaining({
@@ -175,7 +202,8 @@ describe('SettingsRepository', () => {
         historyLimit: 25,
         autoSaveInstructions: false,
         theme: 'light',
-        uiLanguage: 'es'
+        uiLanguage: 'es',
+        subtitlesOnly: false
       });
     });
 
@@ -208,7 +236,8 @@ describe('SettingsRepository', () => {
         historyLimit: 10,
         autoSaveInstructions: true,
         theme: 'auto',
-        uiLanguage: ''
+        uiLanguage: '',
+        subtitlesOnly: false
       });
     });
 
@@ -461,7 +490,8 @@ describe('SettingsRepository', () => {
         historyLimit: 8,
         autoSaveInstructions: true, // default
         theme: 'custom',
-        uiLanguage: '' // default
+        uiLanguage: '', // default
+        subtitlesOnly: false
       });
     });
   });
@@ -566,7 +596,8 @@ describe('SettingsRepository', () => {
         selectedModel: model.toJSON(),
         autoSaveInstructions: true,
         theme: 'auto',
-        uiLanguage: 'es'
+        uiLanguage: 'es',
+        subtitlesOnly: false
       });
 
       // Verify local storage gets only historyLimit

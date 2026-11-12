@@ -19,7 +19,8 @@ class SettingsRepository {
       historyLimit: 10,
       autoSaveInstructions: true,
       theme: 'auto',
-      uiLanguage: ''
+      uiLanguage: '',
+      subtitlesOnly: false
     };
   }
 
@@ -77,7 +78,8 @@ class SettingsRepository {
           historyLimit: settings.historyLimit,
           autoSaveInstructions: settings.autoSaveInstructions,
           theme: settings.theme,
-          uiLanguage: settings.uiLanguage
+          uiLanguage: settings.uiLanguage,
+          subtitlesOnly: settings.subtitlesOnly === true
         }
       };
     } catch (error) {
@@ -88,7 +90,8 @@ class SettingsRepository {
           historyLimit: this.defaultSettings.historyLimit,
           autoSaveInstructions: this.defaultSettings.autoSaveInstructions,
           theme: this.defaultSettings.theme,
-          uiLanguage: this.defaultSettings.uiLanguage
+          uiLanguage: this.defaultSettings.uiLanguage,
+          subtitlesOnly: this.defaultSettings.subtitlesOnly
         }
       };
     }
@@ -146,7 +149,8 @@ class SettingsRepository {
           ? legacySettings.autoSaveInstructions
           : currentSettings.additionalSettings.autoSaveInstructions,
         theme: legacySettings.theme !== undefined ? legacySettings.theme : currentSettings.additionalSettings.theme,
-        uiLanguage: legacySettings.uiLanguage !== undefined ? legacySettings.uiLanguage : currentSettings.additionalSettings.uiLanguage
+        uiLanguage: legacySettings.uiLanguage !== undefined ? legacySettings.uiLanguage : currentSettings.additionalSettings.uiLanguage,
+        subtitlesOnly: legacySettings.subtitlesOnly !== undefined ? legacySettings.subtitlesOnly === true : currentSettings.additionalSettings.subtitlesOnly
       };
 
       return this.save(credentials, selectedModel, additionalSettings);

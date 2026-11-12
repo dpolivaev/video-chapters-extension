@@ -101,6 +101,14 @@ The extension supports multiple AI providers with different models:
 6. **Click "Generate Chapters"**
 7. **Copy formatted chapters** from the results page
 
+### Viewing Subtitles Without Chapter Generation
+
+1. **Open a YouTube video** with captions and click the extension icon.
+2. **Select “Subtitles only”** in the popup.
+3. **Click “Show Subtitles”** to open the results page on Subtitles.
+
+This mode needs no API key and sends no subtitles to an AI provider. It stops once the subtitles are displayed, without starting chapter generation. The checkbox state is remembered; it is initially unchecked. Uncheck it to generate chapters with the previously selected AI model.
+
 ### Example Custom Instructions
 
 You can also try running without any custom instructions to see the default AI behavior. Use the extension button on the results page to easily modify instructions or change models for the same video.

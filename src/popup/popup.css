@@ -359,6 +359,14 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
+.subtitles-only-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
 .secondary-actions {
   display: flex;
   gap: 12px;

@@ -113,6 +113,9 @@ class SessionRepository {
       return 'not_found';
     }
 
+    if (session.isSubtitlesOnly()) {
+      return 'subtitles_only';
+    }
     if (session.isPending()) {
       return 'pending';
     }
