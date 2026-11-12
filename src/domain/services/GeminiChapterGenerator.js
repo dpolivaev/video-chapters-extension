@@ -243,7 +243,7 @@ class GeminiChapterGenerator {
       if (error.isHttpError) {
         throw this.categorizeHttpError(error.status, error.responseData);
       }
-      throw new Error(`AI processing failed: ${error.message}`);
+      throw new Error(`AI processing failed: ${error.message}`, { cause: error });
     }
   }
 }

@@ -90,7 +90,7 @@ class ChapterGenerator {
         throw new Error('modelId must be a ModelId instance');
       }
       return credentials.canUseModel(modelId);
-    } catch (error) {
+    } catch {
       return false;
     }
   }

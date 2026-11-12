@@ -41,7 +41,7 @@ class NetworkCommunicator {
       if (error.isHttpError) {
         throw error;
       }
-      throw new Error(`Network error: ${error.message}`);
+      throw new Error(`Network error: ${error.message}`, { cause: error });
     }
   }
 

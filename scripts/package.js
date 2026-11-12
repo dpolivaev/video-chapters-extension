@@ -24,11 +24,11 @@ const fs = require('fs-extra');
 
 const path = require('path');
 
-const archiver = require('archiver');
+const { ZipArchive } = require('archiver');
 
-const chalk = require('chalk');
+const chalk = require('chalk').default;
 
-const ora = require('ora');
+const ora = require('ora').default;
 
 const {execSync} = require('child_process');
 
@@ -122,7 +122,7 @@ class ExtensionPackager {
   async createZip(sourceDir, outputPath) {
     return new Promise((resolve, reject) => {
       const output = fs.createWriteStream(outputPath);
-      const archive = archiver('zip', {
+      const archive = new ZipArchive({
         zlib: {
           level: 9
         }
@@ -146,7 +146,7 @@ class ExtensionPackager {
       try {
         const gitFiles = execSync('git ls-files', { encoding: 'utf8', cwd: process.cwd() }).trim().split('\n').filter(file => file.length > 0);
         const output = fs.createWriteStream(outputPath);
-        const archive = archiver('zip', {
+        const archive = new ZipArchive({
           zlib: {
             level: 9
           }

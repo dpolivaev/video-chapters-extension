@@ -33,7 +33,7 @@ function cleanVideoURL(url) {
     const urlObj = new URL(url);
     urlObj.searchParams.delete('t');
     return urlObj.toString();
-  } catch (e) {
+  } catch {
     return url;
   }
 }

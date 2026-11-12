@@ -23,7 +23,7 @@ class BrowserStorageAdapter {
       const result = await this.browser.storage.sync.get(key);
       return result[key];
     } catch (error) {
-      throw new Error(`Failed to get sync storage key '${key}': ${error.message}`);
+      throw new Error(`Failed to get sync storage key '${key}': ${error.message}`, { cause: error });
     }
   }
 
@@ -31,7 +31,7 @@ class BrowserStorageAdapter {
     try {
       await this.browser.storage.sync.set({ [key]: value });
     } catch (error) {
-      throw new Error(`Failed to set sync storage key '${key}': ${error.message}`);
+      throw new Error(`Failed to set sync storage key '${key}': ${error.message}`, { cause: error });
     }
   }
 
@@ -39,7 +39,7 @@ class BrowserStorageAdapter {
     try {
       await this.browser.storage.sync.remove(key);
     } catch (error) {
-      throw new Error(`Failed to remove sync storage key '${key}': ${error.message}`);
+      throw new Error(`Failed to remove sync storage key '${key}': ${error.message}`, { cause: error });
     }
   }
 
@@ -48,7 +48,7 @@ class BrowserStorageAdapter {
       const result = await this.browser.storage.local.get(key);
       return result[key];
     } catch (error) {
-      throw new Error(`Failed to get local storage key '${key}': ${error.message}`);
+      throw new Error(`Failed to get local storage key '${key}': ${error.message}`, { cause: error });
     }
   }
 
@@ -56,7 +56,7 @@ class BrowserStorageAdapter {
     try {
       await this.browser.storage.local.set({ [key]: value });
     } catch (error) {
-      throw new Error(`Failed to set local storage key '${key}': ${error.message}`);
+      throw new Error(`Failed to set local storage key '${key}': ${error.message}`, { cause: error });
     }
   }
 
@@ -64,7 +64,7 @@ class BrowserStorageAdapter {
     try {
       await this.browser.storage.local.remove(key);
     } catch (error) {
-      throw new Error(`Failed to remove local storage key '${key}': ${error.message}`);
+      throw new Error(`Failed to remove local storage key '${key}': ${error.message}`, { cause: error });
     }
   }
 

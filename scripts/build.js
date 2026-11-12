@@ -22,8 +22,8 @@
  */
 const fs = require('fs-extra');
 const path = require('path');
-const chalk = require('chalk');
-const ora = require('ora');
+const chalk = require('chalk').default;
+const ora = require('ora').default;
 const {program: program} = require('commander');
 const Jimp = require('jimp');
 const {minify: minify} = require('terser');

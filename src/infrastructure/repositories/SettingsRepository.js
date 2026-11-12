@@ -48,7 +48,7 @@ class SettingsRepository {
       await this._saveLocalSettings(allSettings);
       return allSettings;
     } catch (error) {
-      throw new Error(`Failed to save settings: ${error.message}`);
+      throw new Error(`Failed to save settings: ${error.message}`, { cause: error });
     }
   }
 
@@ -82,7 +82,7 @@ class SettingsRepository {
           subtitlesOnly: settings.subtitlesOnly === true
         }
       };
-    } catch (error) {
+    } catch {
       return {
         credentials: new ApiCredentials(),
         selectedModel: new ModelId('deepseek/deepseek-r1-0528:free', 'OpenRouter', true),
@@ -155,7 +155,7 @@ class SettingsRepository {
 
       return this.save(credentials, selectedModel, additionalSettings);
     } catch (error) {
-      throw new Error(`Failed to save legacy settings: ${error.message}`);
+      throw new Error(`Failed to save legacy settings: ${error.message}`, { cause: error });
     }
   }
 
@@ -176,7 +176,7 @@ class SettingsRepository {
       await this.storageAdapter.removeHistoryLimit();
       return this.defaultSettings;
     } catch (error) {
-      throw new Error(`Failed to reset settings: ${error.message}`);
+      throw new Error(`Failed to reset settings: ${error.message}`, { cause: error });
     }
   }
 

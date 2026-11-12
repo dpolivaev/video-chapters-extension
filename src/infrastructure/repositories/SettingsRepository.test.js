@@ -157,7 +157,10 @@ describe('SettingsRepository', () => {
       const storageError = new Error('Storage quota exceeded');
       mockStorageAdapter.setUserSettings.mockRejectedValue(storageError);
 
-      await expect(repository.save(sampleCredentials, sampleModel)).rejects.toThrow('Failed to save settings: Storage quota exceeded');
+      const operation = repository.save(sampleCredentials, sampleModel);
+
+      await expect(operation).rejects.toThrow('Failed to save settings: Storage quota exceeded');
+      await expect(operation).rejects.toHaveProperty('cause', storageError);
     });
 
     test('should include both model string and JSON representation', async () => {
@@ -466,9 +469,13 @@ describe('SettingsRepository', () => {
     });
 
     test('should propagate errors from legacy settings save', async () => {
-      jest.spyOn(repository, 'load').mockRejectedValue(new Error('Load failed'));
+      const loadError = new Error('Load failed');
+      jest.spyOn(repository, 'load').mockRejectedValue(loadError);
 
-      await expect(repository.saveSettings({})).rejects.toThrow('Failed to save legacy settings: Load failed');
+      const operation = repository.saveSettings({});
+
+      await expect(operation).rejects.toThrow('Failed to save legacy settings: Load failed');
+      await expect(operation).rejects.toHaveProperty('cause', loadError);
     });
 
     test('should load settings in legacy format', async () => {
@@ -510,7 +517,10 @@ describe('SettingsRepository', () => {
       const resetError = new Error('Cannot remove settings');
       mockStorageAdapter.removeUserSettings.mockRejectedValue(resetError);
 
-      await expect(repository.reset()).rejects.toThrow('Failed to reset settings: Cannot remove settings');
+      const operation = repository.reset();
+
+      await expect(operation).rejects.toThrow('Failed to reset settings: Cannot remove settings');
+      await expect(operation).rejects.toHaveProperty('cause', resetError);
     });
   });
 

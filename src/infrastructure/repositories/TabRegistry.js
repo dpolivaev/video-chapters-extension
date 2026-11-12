@@ -175,7 +175,7 @@ class TabRegistry {
       const urlObj = new URL(url);
       urlObj.searchParams.delete('t');
       return urlObj.toString();
-    } catch (e) {
+    } catch {
       return url;
     }
   }
@@ -241,7 +241,7 @@ class TabRegistry {
           return this.createDirectTabResult(videoTabInfo);
         }
       }
-    } catch (error) {
+    } catch {
       // Tab no longer exists
     }
     return null;
@@ -275,7 +275,7 @@ class TabRegistry {
           return this.createDiscoveredTabResult(matchingTab);
         }
       }
-    } catch (error) {
+    } catch {
       // Tab search failed
     }
 

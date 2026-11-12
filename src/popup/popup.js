@@ -637,7 +637,7 @@ class PopupView {
         try {
           const validatedUrl = new VideoUrl(tab.url);
           videoUrl = validatedUrl.toString();
-        } catch (error) {
+        } catch {
           console.warn('Invalid video URL:', tab.url);
           videoUrl = tab.url;
         }
@@ -711,7 +711,7 @@ class PopupView {
       try {
         const validatedUrl = new VideoUrl(tab.url);
         videoUrl = validatedUrl.toString();
-      } catch (error) {
+      } catch {
         console.warn('Invalid video URL:', tab.url);
         videoUrl = tab.url;
       }
@@ -825,7 +825,7 @@ class PopupView {
     console.log('PopupView: Dynamic API key present:', !!dynamicApiKey);
     console.log('PopupView: isProcessing:', this.isProcessing);
     console.log('PopupView: currentVideo present:', !!this.currentVideo);
-    let canUseModel = false;
+    let canUseModel;
     let reasonDisabled = '';
     if (subtitlesOnly) {
       canUseModel = true;
@@ -902,7 +902,7 @@ class PopupView {
       } else {
         document.getElementById('viewResultsBtn').style.display = 'none';
       }
-    } catch (e) {
+    } catch {
       document.getElementById('viewResultsBtn').style.display = 'none';
     }
   }

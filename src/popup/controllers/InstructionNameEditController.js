@@ -122,7 +122,7 @@ class InstructionNameEditController {
       if (inputElement) {
         inputElement.blur();
       }
-    } catch (error) {
+    } catch {
       this.clearActiveEdit();
     }
   }

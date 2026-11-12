@@ -343,9 +343,10 @@ describe('GeminiChapterGenerator', () => {
       mockPromptGenerator.buildPrompt.mockReturnValue('test prompt');
       mockNetworkCommunicator.post.mockRejectedValue(networkError);
 
-      await expect(
-        geminiGenerator.processSubtitles('content', 'instructions', 'valid-api-key-123', 'gemini-2.5-pro')
-      ).rejects.toThrow('AI processing failed: Network timeout');
+      const operation = geminiGenerator.processSubtitles('content', 'instructions', 'valid-api-key-123', 'gemini-2.5-pro');
+
+      await expect(operation).rejects.toThrow('AI processing failed: Network timeout');
+      await expect(operation).rejects.toHaveProperty('cause', networkError);
     });
 
     test('should handle API errors during processing', async () => {

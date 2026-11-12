@@ -651,7 +651,7 @@ class BackgroundService {
       } else {
         sendResponse({ open: false });
       }
-    } catch (error) {
+    } catch {
       sendResponse({ open: false });
     }
   }
@@ -681,7 +681,7 @@ class BackgroundService {
         await browser.tabs.get(tabId);
         const resultId = tabRegistry.getResultIdForTab(tabId);
         return { tabId, resultId };
-      } catch (error) {
+      } catch {
         tabRegistry.cleanupResultsTab(tabId);
       }
     }
@@ -692,7 +692,7 @@ class BackgroundService {
     try {
       const tab = await browser.tabs.get(tabId);
       return tab;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -722,7 +722,7 @@ class BackgroundService {
       } else {
         return this.findOrCreateVideoTab(videoUrl, sendResponse);
       }
-    } catch (error) {
+    } catch {
       return this.findOrCreateVideoTab(videoUrl, sendResponse);
     }
     return true;

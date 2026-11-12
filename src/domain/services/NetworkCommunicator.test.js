@@ -194,8 +194,10 @@ describe('NetworkCommunicator', () => {
       const networkError = new Error('Request timeout');
       mockRetryHandler.fetchWithRetry.mockRejectedValue(networkError);
 
-      await expect(networkCommunicator.post('https://api.test.com', {}, {}))
-        .rejects.toThrow('Network error: Request timeout');
+      const operation = networkCommunicator.post('https://api.test.com', {}, {});
+
+      await expect(operation).rejects.toThrow('Network error: Request timeout');
+      await expect(operation).rejects.toHaveProperty('cause', networkError);
     });
 
     test('should handle connection error', async () => {

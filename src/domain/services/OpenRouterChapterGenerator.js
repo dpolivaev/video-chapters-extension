@@ -43,7 +43,7 @@ class OpenRouterChapterGenerator {
     try {
       const models = await this.fetchLiveModels();
       return models.some(m => m.id === model);
-    } catch (error) {
+    } catch {
       return this.allowModelWhenApiUnavailable(model);
     }
   }
@@ -311,7 +311,7 @@ class OpenRouterChapterGenerator {
       if (error.isHttpError) {
         throw await this.categorizeHttpError(error.status, error.responseData, model);
       }
-      throw new Error(`AI processing failed: ${error.message}`);
+      throw new Error(`AI processing failed: ${error.message}`, { cause: error });
     }
   }
 }

@@ -392,9 +392,10 @@ describe('OpenRouterChapterGenerator', () => {
       mockPromptGenerator.buildPrompt.mockReturnValue('test prompt');
       mockNetworkCommunicator.post.mockRejectedValue(networkError);
 
-      await expect(
-        openRouterGenerator.processSubtitles('content', 'instructions', 'test-api-key', 'deepseek/deepseek-r1-0528:free')
-      ).rejects.toThrow('AI processing failed: Network timeout');
+      const operation = openRouterGenerator.processSubtitles('content', 'instructions', 'test-api-key', 'deepseek/deepseek-r1-0528:free');
+
+      await expect(operation).rejects.toThrow('AI processing failed: Network timeout');
+      await expect(operation).rejects.toHaveProperty('cause', networkError);
     });
 
     test('should handle API errors during processing', async () => {

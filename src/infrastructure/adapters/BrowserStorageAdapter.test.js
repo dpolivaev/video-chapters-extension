@@ -90,27 +90,36 @@ describe('BrowserStorageAdapter', () => {
       const originalError = new Error('Storage quota exceeded');
       mockBrowser.storage.sync.get.mockRejectedValue(originalError);
 
-      await expect(adapter.getSyncStorage('testKey')).rejects.toThrow(
+      const operation = adapter.getSyncStorage('testKey');
+
+      await expect(operation).rejects.toThrow(
         "Failed to get sync storage key 'testKey': Storage quota exceeded"
       );
+      await expect(operation).rejects.toHaveProperty('cause', originalError);
     });
 
     test('should throw descriptive error when sync set fails', async () => {
       const originalError = new Error('Network error');
       mockBrowser.storage.sync.set.mockRejectedValue(originalError);
 
-      await expect(adapter.setSyncStorage('testKey', 'value')).rejects.toThrow(
+      const operation = adapter.setSyncStorage('testKey', 'value');
+
+      await expect(operation).rejects.toThrow(
         "Failed to set sync storage key 'testKey': Network error"
       );
+      await expect(operation).rejects.toHaveProperty('cause', originalError);
     });
 
     test('should throw descriptive error when sync remove fails', async () => {
       const originalError = new Error('Permission denied');
       mockBrowser.storage.sync.remove.mockRejectedValue(originalError);
 
-      await expect(adapter.removeSyncStorage('testKey')).rejects.toThrow(
+      const operation = adapter.removeSyncStorage('testKey');
+
+      await expect(operation).rejects.toThrow(
         "Failed to remove sync storage key 'testKey': Permission denied"
       );
+      await expect(operation).rejects.toHaveProperty('cause', originalError);
     });
   });
 
@@ -155,27 +164,36 @@ describe('BrowserStorageAdapter', () => {
       const originalError = new Error('Database locked');
       mockBrowser.storage.local.get.mockRejectedValue(originalError);
 
-      await expect(adapter.getLocalStorage('testKey')).rejects.toThrow(
+      const operation = adapter.getLocalStorage('testKey');
+
+      await expect(operation).rejects.toThrow(
         "Failed to get local storage key 'testKey': Database locked"
       );
+      await expect(operation).rejects.toHaveProperty('cause', originalError);
     });
 
     test('should throw descriptive error when local set fails', async () => {
       const originalError = new Error('Disk full');
       mockBrowser.storage.local.set.mockRejectedValue(originalError);
 
-      await expect(adapter.setLocalStorage('testKey', 'value')).rejects.toThrow(
+      const operation = adapter.setLocalStorage('testKey', 'value');
+
+      await expect(operation).rejects.toThrow(
         "Failed to set local storage key 'testKey': Disk full"
       );
+      await expect(operation).rejects.toHaveProperty('cause', originalError);
     });
 
     test('should throw descriptive error when local remove fails', async () => {
       const originalError = new Error('Access denied');
       mockBrowser.storage.local.remove.mockRejectedValue(originalError);
 
-      await expect(adapter.removeLocalStorage('testKey')).rejects.toThrow(
+      const operation = adapter.removeLocalStorage('testKey');
+
+      await expect(operation).rejects.toThrow(
         "Failed to remove local storage key 'testKey': Access denied"
       );
+      await expect(operation).rejects.toHaveProperty('cause', originalError);
     });
   });
 

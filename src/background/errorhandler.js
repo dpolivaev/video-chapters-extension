@@ -136,7 +136,7 @@ class RetryHandler {
         } catch (error) {
           if (error.name === 'AbortError' || error.message === 'Request cancelled') {
             console.log(`🚫 RETRY_CANCELLED: Request cancelled after ${attempt} attempts for ${url}`);
-            throw new Error('Request cancelled');
+            throw new Error('Request cancelled', { cause: error });
           }
 
           lastError = error;
@@ -152,7 +152,7 @@ class RetryHandler {
             await this.delay(delay, controller.signal);
             attempt++;
           } catch (delayError) {
-            throw new Error('Request cancelled');
+            throw new Error('Request cancelled', { cause: delayError });
           }
         }
       }

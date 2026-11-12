@@ -6,7 +6,7 @@ This document contains development-related information for the Chaptotek browser
 
 ### Prerequisites
 
-- Node.js 16+ and npm
+- Node.js 22.22+ within Node.js 22, or Node.js 24+, and npm
 - Chrome or Firefox browser
 - Git
 
