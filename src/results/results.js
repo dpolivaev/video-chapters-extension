@@ -219,11 +219,6 @@ class ResultsView {
     }
   }
   setupEventListeners() {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        this.switchTab(e.target.dataset.tab);
-      });
-    });
     document.getElementById('copyChaptersBtn').addEventListener('click', () => {
       this.copyToClipboard('chapters');
     });
@@ -281,16 +276,12 @@ class ResultsView {
   }
   setupTabSwitching() {
     const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
     tabBtns.forEach(btn => {
+      btn.style.display = this.status === 'subtitles_only' && btn.dataset.tab === 'chapters' ? 'none' : '';
       btn.addEventListener('click', () => {
         const targetTab = btn.dataset.tab;
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabPanes.forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        const targetPane = document.getElementById(targetTab + 'Tab');
-        if (targetPane) {
-          targetPane.classList.add('active');
+        if (!this.switchTab(targetTab)) {
+          return;
         }
         if (this.status !== 'done' && targetTab !== 'subtitles') {
           this.userSwitchedTab = true;
@@ -469,6 +460,9 @@ class ResultsView {
     subtitleInfo.textContent = info.join(' • ');
   }
   switchTab(tabName) {
+    if (this.status === 'subtitles_only' && tabName === 'chapters') {
+      return false;
+    }
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
     tabBtns.forEach(btn => {
@@ -477,6 +471,7 @@ class ResultsView {
     tabPanes.forEach(pane => {
       pane.classList.toggle('active', pane.id === tabName + 'Tab');
     });
+    return true;
   }
   async copyToClipboard(contentType) {
     try {
